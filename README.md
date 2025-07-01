@@ -119,7 +119,7 @@ npm start
 
 ### Accesso all'Applicazione
 - **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:3001
+- **Backend API**: http://localhost:4000
 - **Hardhat Node**: http://localhost:8545
 
 ## 📱 Funzionalità dell'Interfaccia
