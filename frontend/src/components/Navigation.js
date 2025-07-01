@@ -1,16 +1,60 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import './Navigation.css';
 
 const Navigation = ({ account, connectWallet, loading }) => {
+  const { user, logout, isAuthenticated } = useAuth();
   const location = useLocation();
 
   const formatAddress = (address) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
+  // Public navigation for non-authenticated users
+  if (!isAuthenticated) {
+    return (
+      <nav className="navigation public-nav">
+        <div className="nav-container">
+          <Link to="/" className="nav-logo">
+            <span className="logo-icon">🎰</span>
+            <span className="logo-text">BetZilla</span>
+          </Link>
+          
+          <div className="nav-menu">
+            <Link 
+              to="/" 
+              className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+            >
+              🏠 Home
+            </Link>
+            <Link 
+              to="/about" 
+              className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}
+            >
+              👥 Who We Are
+            </Link>
+            <Link 
+              to="/faq" 
+              className={`nav-link ${location.pathname === '/faq' ? 'active' : ''}`}
+            >
+              ❓ FAQ
+            </Link>
+          </div>
+
+          <div className="auth-section">
+            <Link to="/login" className="login-btn">
+              🚀 Login / Register
+            </Link>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  // Authenticated navigation
   return (
-    <nav className="navigation">
+    <nav className="navigation auth-nav">
       <div className="nav-container">
         <Link to="/" className="nav-logo">
           <span className="logo-icon">🎰</span>
@@ -37,14 +81,27 @@ const Navigation = ({ account, connectWallet, loading }) => {
             📊 Portfolio
           </Link>
           <Link 
-            to="/settings" 
-            className={`nav-link ${location.pathname === '/settings' ? 'active' : ''}`}
+            to="/profile" 
+            className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}
           >
-            ⚙️ Settings
+            👤 Profile
           </Link>
         </div>
 
         <div className="wallet-section">
+          {isAuthenticated && (
+            <div className="user-info">
+              <span className="username">👤 {user?.username}</span>
+              <button 
+                className="logout-btn"
+                onClick={logout}
+                title="Logout"
+              >
+                🚪 Logout
+              </button>
+            </div>
+          )}
+          
           {account ? (
             <div className="wallet-connected">
               <div className="metamask-icon">🦊</div>
