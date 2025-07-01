@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/home/matteo/Scrivania/new/contracts/contracts/BetZilla.sol": {
-      "lastModificationDate": 1751119480120,
-      "contentHash": "74f54a51823d77b90159bbcc6161b4bd",
+      "lastModificationDate": 1751327886729,
+      "contentHash": "5bec2749bc4c2b88ede901f11f23839d",
       "sourceName": "contracts/BetZilla.sol",
       "solcConfig": {
         "version": "0.8.20",

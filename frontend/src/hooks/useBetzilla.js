@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import BetZillaABI from '../abi/BetZilla.json';
+import BetZillaArtifact from '../abi/BetZilla.json';
+const BetZillaABI = BetZillaArtifact.abi;
 
 // Contract address from latest deployment
-const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const CONTRACT_ADDRESS = '0x5fbdb2315678afecb367f032d93f642f64180aa3';
 
 export const useBetzilla = () => {
   const [contract, setContract] = useState(null);
@@ -25,7 +26,10 @@ export const useBetzilla = () => {
       });
 
       if (accounts.length > 0) {
+        // Usa direttamente window.ethereum senza "any"
         const provider = new ethers.BrowserProvider(window.ethereum);
+        const network = await provider.getNetwork();
+        console.log('Connected network:', network.chainId);
         const signer = await provider.getSigner();
         
         setAccount(accounts[0]);
@@ -139,13 +143,19 @@ export const useBetzilla = () => {
       setLoading(true);
       setError(null);
 
+      console.log(`🎯 Placing bet: Market ${marketId}, Outcome ${outcome}, Amount ${amount} ETH`);
+
       const tx = await contract.placeBet(marketId, outcome, {
         value: ethers.parseEther(amount.toString())
       });
 
+      console.log(`📝 Transaction hash: ${tx.hash}`);
       const receipt = await tx.wait();
+      console.log(`✅ Bet placed successfully! Block: ${receipt.blockNumber}`);
+      
       return receipt;
     } catch (err) {
+      console.error('❌ Error placing bet:', err);
       setError(err.message);
       throw err;
     } finally {
@@ -246,63 +256,6 @@ export const useBetzilla = () => {
     }
   };
 
-  // Get odds for a market
-  const getOdds = async (marketId) => {
-    if (!contract) {
-      throw new Error('Contract not connected');
-    }
-
-    try {
-      const odds = await contract.getOdds(marketId);
-      return odds;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
-  };
-
-  // Calculate odds for a specific outcome
-  const calculateOdds = async (marketId, outcome) => {
-    if (!contract) {
-      throw new Error('Contract not connected');
-    }
-
-    try {
-      const odds = await contract.calculateOdds(marketId, outcome);
-      return odds;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
-  };
-
-  // Check if user is early bettor
-  const isEarlyBettor = async (marketId) => {
-    if (!contract || !account) {
-      return false;
-    }
-
-    try {
-      const market = await contract.markets(marketId);
-      const earlyBettors = market.earlyBettors;
-      return earlyBettors.includes(account);
-    } catch (err) {
-      return false;
-    }
-  };
-
-  // Get max bet for a market
-  const getMaxBet = async (marketId, outcome = 0) => {
-    if (!contract) throw new Error('Contract not connected');
-    try {
-      const maxBet = await contract.getMaxBet(marketId, outcome);
-      return ethers.formatEther(maxBet);
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
-  };
-
   // Get match details from backend
   const getMatchDetails = async (marketId) => {
     try {
@@ -333,10 +286,6 @@ export const useBetzilla = () => {
     getUserBet,
     getAllUserBets,
     claimWinnings,
-    getOdds,
-    calculateOdds,
-    isEarlyBettor,
-    getMaxBet,
     getMatchDetails,
   };
-}; 
+};

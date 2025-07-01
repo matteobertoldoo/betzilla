@@ -1,3 +1,21 @@
+const BetZilla = await ethers.getContractAt("BetZilla", "0x5fbdb2315678afecb367f032d93f642f64180aa3")
+await BetZilla.marketCount()
+const BetZilla = await ethers.getContractAt("BetZilla", "0x5fbdb2315678afecb367f032d93f642f64180aa3")
+q
+npx hardhat run scripts/deploy.js --network localhost
+q
+cd contracts && npx hardhat run scripts/deploy.js --network localhost
+q
+pkill -f "hardhat node" && pkill -f "npm start" && pkill -f "node index.js"
+q
+npx hardhat compile
+q
+cd contracts && npx hardhat compile
+q
+cd contracts && npx hardhat compile
+q
+cd contracts && npx hardhat console --network localhost
+q
 EOF
 console.log('Bet for account:', await BetZilla.bets(2, "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"));
 console.log('Market 2:', await BetZilla.markets(2));

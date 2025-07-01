@@ -14,7 +14,6 @@ function App() {
     getUserBet,
     getAllUserBets,
     claimWinnings,
-    getOdds,
     getMatchDetails
   } = useBetzilla();
 
@@ -29,10 +28,10 @@ function App() {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const response = await fetch('/api/matches');
+        const response = await fetch('/api/markets');
         const data = await response.json();
         if (data.success) {
-          setMatches(data.matches);
+          setMatches(data.markets);
         }
       } catch (error) {
         console.error('Error fetching matches:', error);
@@ -88,6 +87,7 @@ function App() {
       setBetAmount('');
       fetchUserBets();
     } catch (error) {
+      console.error('Smart contract error:', error); // <-- Add this line
       alert(`Error placing bet: ${error.message}`);
     }
   };
@@ -111,13 +111,7 @@ function App() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  // Aggiungi questa funzione per determinare il max bet
-  const getMaxBetValue = (market) => {
-    if (!market || market.totalAmount === '0' || market.totalAmount === 0) {
-      return null; // Nessun limite per la prima scommessa
-    }
-    return parseFloat(market.totalAmount) / 1e18 / 10;
-  };
+
 
   return (
     <div className="App">
@@ -171,19 +165,22 @@ function App() {
                 
                 <div className="odds">
                   <div className="odds-item">
-                    <div className="odds-value">{match.odds.home}</div>
+                    <div className="odds-value">???</div>
                     <div className="odds-label">{match.homeTeam}</div>
                   </div>
                   {match.odds.draw > 0 && (
                     <div className="odds-item">
-                      <div className="odds-value">{match.odds.draw}</div>
+                      <div className="odds-value">???</div>
                       <div className="odds-label">Draw</div>
                     </div>
                   )}
                   <div className="odds-item">
-                    <div className="odds-value">{match.odds.away}</div>
+                    <div className="odds-value">???</div>
                     <div className="odds-label">{match.awayTeam}</div>
                   </div>
+                </div>
+                <div style={{textAlign: 'center', color: '#888', fontSize: '0.9em', marginTop: '10px'}}>
+                  🔒 Blind Betting - Odds revealed at match start
                 </div>
 
                 {account && (
@@ -210,19 +207,14 @@ function App() {
                       onChange={(e) => setBetAmount(e.target.value)}
                       step="0.01"
                       min="0.001"
-                      // max solo se > 0
-                      {...(getMaxBetValue(match) ? { max: getMaxBetValue(match) } : {})}
                     />
-                    {getMaxBetValue(match) === null && (
-                      <div style={{color: '#888', fontSize: '0.9em', marginBottom: '8px'}}>Nessuna scommessa ancora piazzata: puoi essere il primo!</div>
-                    )}
-                    {getMaxBetValue(match) && betAmount > getMaxBetValue(match) && (
-                      <div style={{color: 'red', fontSize: '0.9em', marginBottom: '8px'}}>Importo troppo alto. Il limite massimo per questa scommessa è {getMaxBetValue(match)} ETH</div>
-                    )}
+                    <div style={{color: '#888', fontSize: '0.9em', marginBottom: '8px'}}>
+                      💡 Blind betting: place your bet before odds are revealed!
+                    </div>
                     <button 
                       className="button success"
                       onClick={() => handlePlaceBet(match.id)}
-                      disabled={loading || !betAmount || (getMaxBetValue(match) && betAmount > getMaxBetValue(match))}
+                      disabled={loading || !betAmount || betAmount <= 0}
                     >
                       {loading ? <span className="loading"></span> : 'Place Bet'}
                     </button>
@@ -234,41 +226,84 @@ function App() {
         </div>
 
         {/* User Bets */}
-        {account && userBets.length > 0 && (
+        {account && (
           <div className="card">
-            <h2>Your Bets</h2>
-            <div className="grid">
-              {userBets.map((betData) => (
-                <div key={betData.marketId} className="card">
-                  <div className="flex-between mb-20">
-                    <h3>Market #{betData.marketId}</h3>
-                    <span className="badge">
-                      {betData.market.isResolved ? 'Resolved' : 'Active'}
-                    </span>
-                  </div>
-                  
-                  <p><strong>Outcome:</strong> {betData.bet.outcome}</p>
-                  <p><strong>Amount:</strong> {formatEther(betData.bet.amount)} ETH</p>
-                  
-                  {betData.market.isResolved && (
-                    <div>
-                      <p><strong>Winning Outcome:</strong> {betData.market.winningOutcome}</p>
-                      {betData.bet.outcome === betData.market.winningOutcome && !betData.bet.claimed && (
-                        <button 
-                          className="button success"
-                          onClick={() => handleClaimWinnings(betData.marketId)}
-                          disabled={loading}
-                        >
-                          {loading ? <span className="loading"></span> : 'Claim Winnings'}
-                        </button>
-                      )}
-                      {betData.bet.claimed && (
-                        <span className="badge success">Winnings Claimed</span>
-                      )}
+            <h2>🎯 Your Betting Portfolio</h2>
+            {userBets.length > 0 ? (
+              <div className="grid">
+                {userBets.map((betData) => (
+                  <div key={betData.marketId} className="card">
+                    <div className="flex-between mb-20">
+                      <h3>Market #{betData.marketId}</h3>
+                      <span className={`badge ${betData.market.isResolved ? 'resolved' : 'active'}`}>
+                        {betData.market.isResolved ? '✅ Resolved' : '⏳ Active'}
+                      </span>
                     </div>
-                  )}
+                    
+                    <div className="bet-details">
+                      <p><strong>🎲 Outcome:</strong> {betData.bet.outcome}</p>
+                      <p><strong>💰 Amount:</strong> {formatEther(betData.bet.amount)} ETH</p>
+                      <p><strong>📅 Placed:</strong> {new Date().toLocaleDateString()}</p>
+                    </div>
+                    
+                    {betData.market.isResolved && (
+                      <div className="resolution-details">
+                        <p><strong>🏆 Winning Outcome:</strong> {betData.market.winningOutcome}</p>
+                        {betData.bet.outcome === betData.market.winningOutcome && !betData.bet.claimed && (
+                          <button 
+                            className="button success"
+                            onClick={() => handleClaimWinnings(betData.marketId)}
+                            disabled={loading}
+                          >
+                            {loading ? <span className="loading"></span> : '🎉 Claim Winnings'}
+                          </button>
+                        )}
+                        {betData.bet.claimed && (
+                          <span className="badge success">✅ Winnings Claimed</span>
+                        )}
+                        {betData.bet.outcome !== betData.market.winningOutcome && (
+                          <span className="badge error">❌ Lost</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <p>📝 No bets placed yet. Start betting on available matches above!</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Betting Statistics */}
+        {account && (
+          <div className="card">
+            <h2>📊 Betting Statistics</h2>
+            <div className="stats-grid">
+              <div className="stat-item">
+                <div className="stat-value">{userBets.length}</div>
+                <div className="stat-label">Total Bets</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-value">
+                  {userBets.reduce((total, bet) => total + parseFloat(formatEther(bet.bet.amount)), 0).toFixed(4)}
                 </div>
-              ))}
+                <div className="stat-label">Total Wagered (ETH)</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-value">
+                  {userBets.filter(bet => bet.market.isResolved && bet.bet.outcome === bet.market.winningOutcome).length}
+                </div>
+                <div className="stat-label">Wins</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-value">
+                  {userBets.filter(bet => bet.market.isResolved && bet.bet.outcome !== bet.market.winningOutcome).length}
+                </div>
+                <div className="stat-label">Losses</div>
+              </div>
             </div>
           </div>
         )}
@@ -287,4 +322,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;
