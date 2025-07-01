@@ -47,7 +47,7 @@ BetZilla/
 - **MetaMask** (estensione browser)
 - **Git**
 
-### 1. Clona la Repository
+### 1. Clona il Repository
 ```bash
 git clone <repository-url>
 cd betzilla

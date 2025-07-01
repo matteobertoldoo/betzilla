@@ -10,8 +10,6 @@ async function main() {
 
   const address = await betzilla.getAddress();
   console.log("✅ BetZilla deployed to:", address);
-  // Stampa anche contract.target per chiarezza
-  console.log("Contract target:", betzilla.target);
 
   // Create some sample markets
   console.log("📊 Creating sample markets...");
@@ -33,8 +31,6 @@ async function main() {
 
   console.log("🎉 Deployment complete!");
   console.log("Contract address:", address);
-
-  // Stai usando la rete localhost: non serve preoccuparsi di ENS o nomi di dominio.
 }
 
 main()
@@ -42,4 +38,4 @@ main()
   .catch((error) => {
     console.error(error);
     process.exit(1);
-  });
+  }); 
