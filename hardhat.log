@@ -69,6 +69,7 @@ Private Key: 0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e
 WARNING: These accounts, and their private keys, are publicly known.
 Any funds sent to them on Mainnet or any other live network WILL BE LOST.
 
+[32mhardhat_addCompilationResult[0m
 [32meth_chainId[0m
 [32meth_accounts[0m
 [32mhardhat_metadata[0m
@@ -98,11 +99,11 @@ Any funds sent to them on Mainnet or any other live network WILL BE LOST.
 [32meth_sendTransaction[0m
   Contract deployment: BetZilla
   Contract address:    0x5fbdb2315678afecb367f032d93f642f64180aa3
-  Transaction:         0xf9915dc3e6cc02b3835255cc83069b1c7e85585cdbac7726a03b57e36c14dce0
+  Transaction:         0x20afb0e479b227aaa6b3fcb023c4578b06035a1bf74f9849e23b6f5e51287ad9
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
   Value:               0 ETH
-  Gas used:            3002629 of 30000000
-  Block #1:            0xefee283546700989920f6be7761ab6c9bf1d9fc45c440409801233b9f711b4b0
+  Gas used:            2969986 of 30000000
+  Block #1:            0xccae630fa68dc4a81d82c5452feefbefacda8225cd4ad9f430fb261341f1503c
 
 [32meth_getTransactionByHash[0m
 [32meth_getTransactionReceipt[0m
@@ -110,52 +111,66 @@ Any funds sent to them on Mainnet or any other live network WILL BE LOST.
 [32meth_feeHistory[0m
 [32meth_sendTransaction[0m
   Contract call:       BetZilla#createMarket
-  Transaction:         0x1ab34b66de20a5510a83e055b069d5a134919584c98275c8b94b2d38a7a58751
+  Transaction:         0x031d00f917a7e65ceaa6d8a1970692269557818f74105a229f0261ee29e6bcec
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
   To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
   Value:               0 ETH
   Gas used:            159956 of 30000000
-  Block #2:            0xb4137603070a118a1ec3c7bc7dfa37d90f138b3468f140857bbd05da32f427f5
+  Block #2:            0x81e2dad97df4ec41545c589373157417dfdc4a23a1212dc411d2be4cd389dba0
 
 [32meth_getTransactionByHash[0m
 [32meth_blockNumber[0m
 [32meth_feeHistory[0m
 [32meth_sendTransaction[0m
   Contract call:       BetZilla#createMarket
-  Transaction:         0x13b9befd3422d782965b00d2ceaf55bc5f4f2a9851a0b76912ef0b50d135d846
+  Transaction:         0xd03db1c42568750026146d3674c4f404f7fc8384b35a4d01b32977eddd4bc014
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
   To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
   Value:               0 ETH
   Gas used:            120123 of 30000000
-  Block #3:            0x0a2d55ea90cc3ab5dc264029b2665211c5c0bcff78e3fe98876692aedf31aeb1
+  Block #3:            0x83e16ff27802da11b84df81792e9d64c6f187b41de302ecce206c37a8b147971
 
 [32meth_getTransactionByHash[0m
 [32meth_blockNumber[0m
 [32meth_feeHistory[0m
 [32meth_sendTransaction[0m
   Contract call:       BetZilla#createMarket
-  Transaction:         0x8694753010ac7d015a006b0fca83f701ed97116f621da19b70d2554e6c1f7a0d
+  Transaction:         0x874a93f167ca226226eb1c3ad3546947785b95d71f84c83c7e8f25f05fca8d69
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
   To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
   Value:               0 ETH
   Gas used:            143000 of 30000000
-  Block #4:            0x5561feb6a03bff9a7c2ed7d269c53515e3e37ddf73510cc4b0866b9e0cbe5c5d
+  Block #4:            0x1b52ec00e009502b7092feaccf90ffe443ada10b8bfd492d0f654053d822935d
 
 [32meth_getTransactionByHash[0m
 [32meth_blockNumber[0m
 [32meth_blockNumber (2)[0m
-[32meth_blockNumber (3)[0m
+[32meth_call[0m
+  Contract call:       BetZilla#marketCount
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
 [32meth_call[0m
   Contract call:       BetZilla#bets
-  From:                0x7c0676e1e9fb88881738607957322353d866e7e1
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_call[0m
+  Contract call:       BetZilla#bets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_call[0m
+  Contract call:       BetZilla#bets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
   To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
 
 [32meth_blockNumber[0m
-[32meth_blockNumber (2)[0m
 [32meth_estimateGas[0m
 [32meth_getCode[0m
 [32meth_getCode (2)[0m
 [32meth_gasPrice[0m
+[32meth_getBalance[0m
 [32meth_accounts[0m
 [31meth_call[0m
   Contract call:       BetZilla#<unrecognized-selector>
@@ -186,6 +201,7 @@ Any funds sent to them on Mainnet or any other live network WILL BE LOST.
   Error: Transaction reverted without a reason
 
 [32meth_blockNumber[0m
+[32meth_getBalance[0m
 [31meth_call[0m
   Contract call:       BetZilla#<unrecognized-selector>
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
@@ -200,240 +216,8 @@ Any funds sent to them on Mainnet or any other live network WILL BE LOST.
 
   Error: Transaction reverted without a reason
 
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[32meth_call[0m
-  WARNING: Calling an account which is not a contract
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x7c0676e1e9fb88881738607957322353d866e7e1
-
-[32meth_call[0m
-  WARNING: Calling an account which is not a contract
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x7c0676e1e9fb88881738607957322353d866e7e1
-
-[32meth_call[0m
-  WARNING: Calling an account which is not a contract
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x7c0676e1e9fb88881738607957322353d866e7e1
-
-[32meth_call[0m
-  WARNING: Calling an account which is not a contract
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x7c0676e1e9fb88881738607957322353d866e7e1
-
-[32meth_getTransactionCount[0m
 [32meth_getStorageAt[0m
 [32meth_getStorageAt (2)[0m
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[32meth_blockNumber[0m
-[32meth_estimateGas[0m
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[32meth_blockNumber[0m
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[32meth_blockNumber[0m
-[32meth_blockNumber (2)[0m
-[32meth_blockNumber (3)[0m
-[32meth_blockNumber (4)[0m
-[32meth_blockNumber (5)[0m
-[32meth_blockNumber (6)[0m
-[32meth_call[0m
-  Contract call:       BetZilla#bets
-  From:                0x7c0676e1e9fb88881738607957322353d866e7e1
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-[32meth_call[0m
-  Contract call:       BetZilla#bets
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-[32meth_estimateGas[0m
-[32meth_getCode[0m
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[32meth_blockNumber[0m
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
 [32meth_getTransactionCount[0m
 [31meth_call[0m
   Contract call:       BetZilla#<unrecognized-selector>
@@ -458,12 +242,12 @@ Any funds sent to them on Mainnet or any other live network WILL BE LOST.
 
 [32meth_sendRawTransaction[0m
   Contract call:       BetZilla#placeBet
-  Transaction:         0xf0c47508fbf43a27838383f56abc124731d08163618a7835c7b2b697101bc18a
+  Transaction:         0x348aacb6aeaf7d15bbffbd2a14fa3ef388c654fb4c57d9e36a26716abbbe9419
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
   To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-  Value:               0.981 ETH
-  Gas used:            123148 of 123148
-  Block #5:            0xa7d2ed7b86c50c9df0895343bf1ff75c06368effaf2704a8cca5d02116258e29
+  Value:               1. ETH
+  Gas used:            123147 of 123147
+  Block #5:            0x24f532b5141fd88a86bac3533283b4938d2f377f603ee1e4565c7c0a7a3827fb
 
 [31meth_call[0m
   Contract call:       BetZilla#<unrecognized-selector>
@@ -496,15 +280,34 @@ Any funds sent to them on Mainnet or any other live network WILL BE LOST.
 
 [32meth_blockNumber[0m
 [32meth_getBlockByNumber[0m
+[32meth_gasPrice[0m
 [32meth_getBalance[0m
 [32meth_getBalance (2)[0m
+[32meth_call[0m
+  Contract call:       BetZilla#marketCount
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
 [32meth_call[0m
   Contract call:       BetZilla#bets
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
   To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
 
-[32meth_getTransactionReceipt[0m
-[32meth_getBlockByHash[0m
+[32meth_call[0m
+  Contract call:       BetZilla#markets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_call[0m
+  Contract call:       BetZilla#bets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_call[0m
+  Contract call:       BetZilla#bets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
 [31meth_call[0m
   Contract call:       BetZilla#<unrecognized-selector>
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
@@ -532,18 +335,6 @@ Any funds sent to them on Mainnet or any other live network WILL BE LOST.
   To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
 
   Error: Transaction reverted without a reason
-
-[32meth_gasPrice[0m
-[32meth_blockNumber[0m
-[32meth_blockNumber (2)[0m
-[32meth_blockNumber (3)[0m
-[31meth_estimateGas[0m
-  Contract call:       BetZilla#placeBet
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-  Value:               2. ETH
-
-  Error: reverted with reason string 'You can only add to your existing outcome'
 
 [32meth_blockNumber[0m
 [32meth_estimateGas[0m
@@ -616,15 +407,21 @@ Any funds sent to them on Mainnet or any other live network WILL BE LOST.
 
   Error: Transaction reverted without a reason
 
-[32meth_blockNumber[0m
 [32meth_sendRawTransaction[0m
   Contract call:       BetZilla#placeBet
-  Transaction:         0xef7f2411a1276d7ecab0a0216ab49fd4b9eeb8fcf73f4c07bb7ae6f910534f2c
+  Transaction:         0x39702310e24be3e842a4b665297299f08c9e1fc19fa548b5ef0084380dde2f05
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
   To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-  Value:               2. ETH
-  Gas used:            123148 of 123148
-  Block #6:            0xb6cf2474bea9d247db9feece782bc585b5075a8c07aad7dd5004d104f8d55bfd
+  Value:               1. ETH
+  Gas used:            123147 of 123147
+  Block #6:            0x05d57c460f733ad915af7a81e7b0988b89b336e33d428011af13513759907086
+
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
 
 [31meth_call[0m
   Contract call:       BetZilla#<unrecognized-selector>
@@ -634,6 +431,13 @@ Any funds sent to them on Mainnet or any other live network WILL BE LOST.
   Error: Transaction reverted without a reason
 
 [32meth_getTransactionReceipt[0m
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
 [31meth_call[0m
   Contract call:       BetZilla#<unrecognized-selector>
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
@@ -643,35 +447,40 @@ Any funds sent to them on Mainnet or any other live network WILL BE LOST.
 
 [32meth_blockNumber[0m
 [32meth_getBlockByNumber[0m
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
+[32meth_gasPrice[0m
+[32meth_getBalance[0m
+[32meth_call[0m
+  Contract call:       BetZilla#marketCount
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
   To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
-
-[31meth_call[0m
-  Contract call:       BetZilla#<unrecognized-selector>
-  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
-
-  Error: Transaction reverted without a reason
 
 [32meth_getBalance[0m
-[32meth_getBalance (2)[0m
 [32meth_call[0m
   Contract call:       BetZilla#bets
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
   To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
 
-[32meth_gasPrice[0m
 [32meth_call[0m
   Contract call:       BetZilla#markets
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
   To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
 
-[32meth_getTransactionReceipt[0m
-[32meth_getBlockByHash[0m
+[32meth_call[0m
+  Contract call:       BetZilla#bets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_call[0m
+  Contract call:       BetZilla#markets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_call[0m
+  Contract call:       BetZilla#bets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_getTransactionCount[0m
 [31meth_call[0m
   Contract call:       BetZilla#<unrecognized-selector>
   From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
@@ -701,3 +510,179 @@ Any funds sent to them on Mainnet or any other live network WILL BE LOST.
   Error: Transaction reverted without a reason
 
 [32meth_blockNumber[0m
+[32meth_estimateGas[0m
+[32meth_getCode[0m
+[32meth_getCode (2)[0m
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[32meth_blockNumber[0m
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[32meth_getStorageAt[0m
+[32meth_getStorageAt (2)[0m
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[32meth_sendRawTransaction[0m
+  Contract call:       BetZilla#placeBet
+  Transaction:         0x807cfd2c6823b15f0d3b4879e4f5d2df41c41ebe5d6c1ccca3e67c9da84b518f
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+  Value:               3. ETH
+  Gas used:            123147 of 123147
+  Block #7:            0xd9b59728ee360e0dd56ee0dc399bed691047cce61d44a0c454f009d441674904
+
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[32meth_getTransactionReceipt[0m
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[32meth_blockNumber[0m
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[32meth_getBlockByNumber[0m
+[32meth_gasPrice[0m
+[32meth_getBalance[0m
+[32meth_getBalance (2)[0m
+[32meth_call[0m
+  Contract call:       BetZilla#marketCount
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_call[0m
+  Contract call:       BetZilla#bets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_call[0m
+  Contract call:       BetZilla#markets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_call[0m
+  Contract call:       BetZilla#bets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_call[0m
+  Contract call:       BetZilla#markets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_call[0m
+  Contract call:       BetZilla#bets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_call[0m
+  Contract call:       BetZilla#markets
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+[32meth_getTransactionCount[0m
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+
+[31meth_call[0m
+  Contract call:       BetZilla#<unrecognized-selector>
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+  Error: Transaction reverted without a reason
+

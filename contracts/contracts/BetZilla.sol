@@ -85,23 +85,21 @@ contract BetZilla {
             revert("Bet amount must be greater than 0");
         }
 
-        // Se l'utente ha già una scommessa, somma l'importo
+        // Se l'utente ha già una scommessa, sovrascrive con la nuova
         Bet storage userBet = bets[marketId][msg.sender];
         if (userBet.amount > 0) {
-            require(userBet.outcome == outcome, "You can only add to your existing outcome");
-            userBet.amount += msg.value;
-        } else {
-            bets[marketId][msg.sender] = Bet({
-                outcome: outcome,
-                amount: msg.value,
-                claimed: false,
-                refunded: false
-            });
+            // Rimuovi la vecchia puntata dal pool
+            market.totalAmount -= userBet.amount;
+            market.outcomeAmounts[userBet.outcome - 1] -= userBet.amount;
         }
-
+        bets[marketId][msg.sender] = Bet({
+            outcome: outcome,
+            amount: msg.value,
+            claimed: false,
+            refunded: false
+        });
         market.totalAmount += msg.value;
         market.outcomeAmounts[outcome - 1] += msg.value;
-
         emit BetPlaced(marketId, msg.sender, outcome, msg.value);
     }
 

@@ -200,36 +200,25 @@ export const useBetzilla = () => {
     }
 
     try {
-      console.log('🔍 Fetching user bets for account:', account);
-      console.log('📋 Contract address:', CONTRACT_ADDRESS);
-      
       const userBets = [];
-      
-      // Check market #2 specifically since we just created it
-      try {
-        console.log(`🔎 Checking market 2...`);
-        const bet = await contract.bets(2, account);
-        console.log(`📊 Market 2 bet:`, bet);
-        
-        if (bet && bet.amount > 0) {
-          console.log(`✅ Found bet in market 2:`, ethers.formatEther(bet.amount), 'ETH');
-          const market = await contract.markets(2);
-          console.log(`📈 Market 2 details:`, market);
-          
-          userBets.push({
-            marketId: 2,
-            bet,
-            market
-          });
+      const marketCount = Number(await contract.marketCount());
+      for (let marketId = 1; marketId <= marketCount; marketId++) {
+        try {
+          const bet = await contract.bets(marketId, account);
+          if (bet && bet.amount > 0) {
+            const market = await contract.markets(marketId);
+            userBets.push({
+              marketId,
+              bet,
+              market
+            });
+          }
+        } catch (error) {
+          // skip
         }
-      } catch (error) {
-        console.log(`❌ Market 2 error:`, error.message);
       }
-      
-      console.log('🎯 Total user bets found:', userBets.length);
       return userBets;
     } catch (err) {
-      console.error('💥 Error in getAllUserBets:', err);
       setError(err.message);
       throw err;
     }

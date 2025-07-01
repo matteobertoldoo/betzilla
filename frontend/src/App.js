@@ -231,14 +231,17 @@ function App() {
             <h2>🎯 Your Betting Portfolio</h2>
             {userBets.length > 0 ? (
               <div className="grid">
-                {userBets.map((betData) => (
-                  <div key={betData.marketId} className="card">
-                    <div className="flex-between mb-20">
-                      <h3>Market #{betData.marketId}</h3>
-                      <span className={`badge ${betData.market.isResolved ? 'resolved' : 'active'}`}>
-                        {betData.market.isResolved ? '✅ Resolved' : '⏳ Active'}
-                      </span>
-                    </div>
+                {userBets.map((betData) => {
+                  const match = matches.find(m => m.id === betData.marketId);
+                  const matchName = match ? `${match.homeTeam} vs ${match.awayTeam}` : `Market #${betData.marketId}`;
+                  return (
+                    <div key={betData.marketId} className="card">
+                      <div className="flex-between mb-20">
+                        <h3>{matchName}</h3>
+                        <span className={`badge ${betData.market.isResolved ? 'resolved' : 'active'}`}>
+                          {betData.market.isResolved ? '✅ Resolved' : '⏳ Active'}
+                        </span>
+                      </div>
                     
                     <div className="bet-details">
                       <p><strong>🎲 Outcome:</strong> {betData.bet.outcome}</p>
@@ -267,7 +270,8 @@ function App() {
                       </div>
                     )}
                   </div>
-                ))}
+                );
+                })}
               </div>
             ) : (
               <div className="empty-state">
