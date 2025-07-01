@@ -2,9 +2,9 @@
 > betzilla-frontend@1.0.0 start
 > react-scripts start
 
-(node:367277) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(node:65748) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:367277) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(node:65748) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
 Starting the development server...
 
 Compiled successfully!
@@ -12,204 +12,226 @@ Compiled successfully!
 You can now view betzilla-frontend in the browser.
 
   Local:            http://localhost:3000
-  On Your Network:  http://192.168.1.57:3000
+  On Your Network:  http://192.168.1.146:3000
 
 Note that the development build is not optimized.
 To create a production build, use npm run build.
 
 webpack compiled successfully
+(node:65748) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+Failed to compile.
+
+Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/@pmmmwh/react-refresh-webpack-plugin/client/ReactRefreshEntry.js' in '/Users/mario/Desktop/betzilla/frontend'
+ERROR in Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/@pmmmwh/react-refresh-webpack-plugin/client/ReactRefreshEntry.js' in '/Users/mario/Desktop/betzilla/frontend'
+
+ERROR in main
+Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/babel-loader/lib/index.js' in '/Users/mario/Desktop/betzilla/frontend'
+
+ERROR in Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/webpack-dev-server/client/index.js?protocol=ws%3A&hostname=0.0.0.0&port=3000&pathname=%2Fws&logging=none&overlay=%7B%22errors%22%3Atrue%2C%22warnings%22%3Afalse%7D&reconnect=10&hot=true&live-reload=true' in '/Users/mario/Desktop/betzilla/frontend'
+
+ERROR in Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/webpack/hot/dev-server.js' in '/Users/mario/Desktop/betzilla/frontend'
+
+ERROR in Child compilation failed:
+Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/html-webpack-plugin/lib/loader.js' in '/Users/mario/Desktop/betzilla/frontend'
+ModuleNotFoundError: Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/html-webpack-plugin/lib/loader.js' in '/Users/mario/Desktop/betzilla/frontend'
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/Compilation.js:2230:28
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:933:13
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:10:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:347:22
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:9:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:530:22
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:163:10
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:756:23
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/neo-async/async.js:2830:7
+    at done (/Users/mario/Desktop/betzilla/frontend/node_modules/neo-async/async.js:2925:13)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:1202:23
+    at finishWithoutResolve (/Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:570:11)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:659:14
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:27:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/DescriptionFilePlugin.js:89:43
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:27:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/DescriptionFilePlugin.js:89:43
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/DirectoryExistsPlugin.js:43:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)
+
+1 ERROR in child compilations (Use 'stats.children: true' resp. '--stats-children' for more details)
+webpack compiled with 6 errors
 Compiling...
-Compiled successfully!
-webpack compiled successfully
+Failed to compile.
+
+Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/babel-loader/lib/index.js' in '/Users/mario/Desktop/betzilla/frontend'
+ERROR in main
+Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/babel-loader/lib/index.js' in '/Users/mario/Desktop/betzilla/frontend'
+
+ERROR in Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/babel-loader/lib/index.js' in '/Users/mario/Desktop/betzilla/frontend'
+
+ERROR in Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/webpack-dev-server/client/index.js?protocol=ws%3A&hostname=0.0.0.0&port=3000&pathname=%2Fws&logging=none&overlay=%7B%22errors%22%3Atrue%2C%22warnings%22%3Afalse%7D&reconnect=10&hot=true&live-reload=true' in '/Users/mario/Desktop/betzilla/frontend'
+
+ERROR in Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/webpack/hot/dev-server.js' in '/Users/mario/Desktop/betzilla/frontend'
+
+ERROR in Child compilation failed:
+Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/html-webpack-plugin/lib/loader.js' in '/Users/mario/Desktop/betzilla/frontend'
+ModuleNotFoundError: Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/html-webpack-plugin/lib/loader.js' in '/Users/mario/Desktop/betzilla/frontend'
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/Compilation.js:2230:28
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:933:13
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:10:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:347:22
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:9:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:530:22
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:163:10
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:756:23
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/neo-async/async.js:2830:7
+    at done (/Users/mario/Desktop/betzilla/frontend/node_modules/neo-async/async.js:2925:13)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:1202:23
+    at finishWithoutResolve (/Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:570:11)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:659:14
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:27:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/DescriptionFilePlugin.js:89:43
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:27:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/DescriptionFilePlugin.js:89:43
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/DirectoryExistsPlugin.js:43:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)
+
+webpack compiled with 5 errors
+Failed to compile.
+
+Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/@pmmmwh/react-refresh-webpack-plugin/client/ReactRefreshEntry.js' in '/Users/mario/Desktop/betzilla/frontend'
+ERROR in Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/@pmmmwh/react-refresh-webpack-plugin/client/ReactRefreshEntry.js' in '/Users/mario/Desktop/betzilla/frontend'
+
+ERROR in main
+Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/babel-loader/lib/index.js' in '/Users/mario/Desktop/betzilla/frontend'
+
+ERROR in Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/webpack-dev-server/client/index.js?protocol=ws%3A&hostname=0.0.0.0&port=3000&pathname=%2Fws&logging=none&overlay=%7B%22errors%22%3Atrue%2C%22warnings%22%3Afalse%7D&reconnect=10&hot=true&live-reload=true' in '/Users/mario/Desktop/betzilla/frontend'
+
+ERROR in Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/webpack/hot/dev-server.js' in '/Users/mario/Desktop/betzilla/frontend'
+
+ERROR in Child compilation failed:
+Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/html-webpack-plugin/lib/loader.js' in '/Users/mario/Desktop/betzilla/frontend'
+ModuleNotFoundError: Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/html-webpack-plugin/lib/loader.js' in '/Users/mario/Desktop/betzilla/frontend'
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/Compilation.js:2230:28
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:933:13
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:10:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:347:22
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:9:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:530:22
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:163:10
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:756:23
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/neo-async/async.js:2830:7
+    at done (/Users/mario/Desktop/betzilla/frontend/node_modules/neo-async/async.js:2925:13)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:1202:23
+    at finishWithoutResolve (/Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:570:11)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:659:14
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:27:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/DescriptionFilePlugin.js:89:43
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:27:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/DescriptionFilePlugin.js:89:43
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/DirectoryExistsPlugin.js:43:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)
+
+webpack compiled with 5 errors
 Compiling...
-Compiled successfully!
-webpack compiled successfully
-Compiling...
-Compiled successfully!
-webpack compiled successfully
-Compiling...
-Compiled with warnings.
+Failed to compile.
 
-[eslint] 
-src/App.js
-  Line 13:5:   'getMarket' is assigned a value but never used                                                                                             no-unused-vars
-  Line 14:5:   'getUserBet' is assigned a value but never used                                                                                            no-unused-vars
-  Line 17:5:   'getMatchDetails' is assigned a value but never used                                                                                       no-unused-vars
-  Line 24:10:  'selectedMatch' is assigned a value but never used                                                                                         no-unused-vars
-  Line 24:25:  'setSelectedMatch' is assigned a value but never used                                                                                      no-unused-vars
-  Line 27:10:  'marketData' is assigned a value but never used                                                                                            no-unused-vars
-  Line 27:22:  'setMarketData' is assigned a value but never used                                                                                         no-unused-vars
-  Line 53:6:   React Hook useEffect has a missing dependency: 'fetchUserBets'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
-  Line 79:6:   React Hook useEffect has missing dependencies: 'getCurrentFee' and 'getEstimatedOdds'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/@pmmmwh/react-refresh-webpack-plugin/client/ReactRefreshEntry.js' in '/Users/mario/Desktop/betzilla/frontend'
+ERROR in Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/@pmmmwh/react-refresh-webpack-plugin/client/ReactRefreshEntry.js' in '/Users/mario/Desktop/betzilla/frontend'
 
-Search for the keywords to learn more about each warning.
-To ignore, add // eslint-disable-next-line to the line before.
+ERROR in main
+Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/babel-loader/lib/index.js' in '/Users/mario/Desktop/betzilla/frontend'
 
-WARNING in [eslint] 
-src/App.js
-  Line 13:5:   'getMarket' is assigned a value but never used                                                                                             no-unused-vars
-  Line 14:5:   'getUserBet' is assigned a value but never used                                                                                            no-unused-vars
-  Line 17:5:   'getMatchDetails' is assigned a value but never used                                                                                       no-unused-vars
-  Line 24:10:  'selectedMatch' is assigned a value but never used                                                                                         no-unused-vars
-  Line 24:25:  'setSelectedMatch' is assigned a value but never used                                                                                      no-unused-vars
-  Line 27:10:  'marketData' is assigned a value but never used                                                                                            no-unused-vars
-  Line 27:22:  'setMarketData' is assigned a value but never used                                                                                         no-unused-vars
-  Line 53:6:   React Hook useEffect has a missing dependency: 'fetchUserBets'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
-  Line 79:6:   React Hook useEffect has missing dependencies: 'getCurrentFee' and 'getEstimatedOdds'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+ERROR in Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/webpack-dev-server/client/index.js?protocol=ws%3A&hostname=0.0.0.0&port=3000&pathname=%2Fws&logging=none&overlay=%7B%22errors%22%3Atrue%2C%22warnings%22%3Afalse%7D&reconnect=10&hot=true&live-reload=true' in '/Users/mario/Desktop/betzilla/frontend'
 
-webpack compiled with 1 warning
-Compiling...
-Compiled with warnings.
+ERROR in Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/webpack/hot/dev-server.js' in '/Users/mario/Desktop/betzilla/frontend'
 
-[eslint] 
-src/App.js
-  Line 13:5:   'getMarket' is assigned a value but never used                                                                                             no-unused-vars
-  Line 14:5:   'getUserBet' is assigned a value but never used                                                                                            no-unused-vars
-  Line 17:5:   'getMatchDetails' is assigned a value but never used                                                                                       no-unused-vars
-  Line 24:10:  'selectedMatch' is assigned a value but never used                                                                                         no-unused-vars
-  Line 24:25:  'setSelectedMatch' is assigned a value but never used                                                                                      no-unused-vars
-  Line 27:10:  'marketData' is assigned a value but never used                                                                                            no-unused-vars
-  Line 27:22:  'setMarketData' is assigned a value but never used                                                                                         no-unused-vars
-  Line 53:6:   React Hook useEffect has a missing dependency: 'fetchUserBets'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
-  Line 79:6:   React Hook useEffect has missing dependencies: 'getCurrentFee' and 'getEstimatedOdds'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+ERROR in Child compilation failed:
+Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/html-webpack-plugin/lib/loader.js' in '/Users/mario/Desktop/betzilla/frontend'
+ModuleNotFoundError: Module not found: Error: Can't resolve '/Users/mario/Desktop/betzilla/frontend/node_modules/html-webpack-plugin/lib/loader.js' in '/Users/mario/Desktop/betzilla/frontend'
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/Compilation.js:2230:28
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:933:13
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:10:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:347:22
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:9:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:530:22
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:167:10
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:756:23
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/neo-async/async.js:2830:7
+    at done (/Users/mario/Desktop/betzilla/frontend/node_modules/neo-async/async.js:2925:13)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/webpack/lib/NormalModuleFactory.js:1202:23
+    at finishWithoutResolve (/Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:570:11)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:659:14
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:27:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/DescriptionFilePlugin.js:89:43
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:27:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/DescriptionFilePlugin.js:89:43
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/Resolver.js:720:5
+    at eval (eval at create (/Users/mario/Desktop/betzilla/frontend/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)
+    at /Users/mario/Desktop/betzilla/frontend/node_modules/enhanced-resolve/lib/DirectoryExistsPlugin.js:43:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)
 
-Search for the keywords to learn more about each warning.
-To ignore, add // eslint-disable-next-line to the line before.
+1 ERROR in child compilations (Use 'stats.children: true' resp. '--stats-children' for more details)
+webpack compiled with 6 errors
+/Users/mario/Desktop/betzilla/frontend/node_modules/react-scripts/scripts/start.js:19
+  throw err;
+  ^
 
-WARNING in [eslint] 
-src/App.js
-  Line 13:5:   'getMarket' is assigned a value but never used                                                                                             no-unused-vars
-  Line 14:5:   'getUserBet' is assigned a value but never used                                                                                            no-unused-vars
-  Line 17:5:   'getMatchDetails' is assigned a value but never used                                                                                       no-unused-vars
-  Line 24:10:  'selectedMatch' is assigned a value but never used                                                                                         no-unused-vars
-  Line 24:25:  'setSelectedMatch' is assigned a value but never used                                                                                      no-unused-vars
-  Line 27:10:  'marketData' is assigned a value but never used                                                                                            no-unused-vars
-  Line 27:22:  'setMarketData' is assigned a value but never used                                                                                         no-unused-vars
-  Line 53:6:   React Hook useEffect has a missing dependency: 'fetchUserBets'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
-  Line 79:6:   React Hook useEffect has missing dependencies: 'getCurrentFee' and 'getEstimatedOdds'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+[Error: ENOENT: no such file or directory, stat '/Users/mario/Desktop/betzilla/frontend/node_modules/.cache/default-development/0.pack'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/Users/mario/Desktop/betzilla/frontend/node_modules/.cache/default-development/0.pack'
+}
 
-webpack compiled with 1 warning
-Compiling...
-Compiled with warnings.
-
-[eslint] 
-src/App.js
-  Line 13:5:   'getMarket' is assigned a value but never used                                                                                             no-unused-vars
-  Line 14:5:   'getUserBet' is assigned a value but never used                                                                                            no-unused-vars
-  Line 17:5:   'getMatchDetails' is assigned a value but never used                                                                                       no-unused-vars
-  Line 24:10:  'selectedMatch' is assigned a value but never used                                                                                         no-unused-vars
-  Line 24:25:  'setSelectedMatch' is assigned a value but never used                                                                                      no-unused-vars
-  Line 27:10:  'marketData' is assigned a value but never used                                                                                            no-unused-vars
-  Line 27:22:  'setMarketData' is assigned a value but never used                                                                                         no-unused-vars
-  Line 53:6:   React Hook useEffect has a missing dependency: 'fetchUserBets'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
-  Line 79:6:   React Hook useEffect has missing dependencies: 'getCurrentFee' and 'getEstimatedOdds'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
-
-Search for the keywords to learn more about each warning.
-To ignore, add // eslint-disable-next-line to the line before.
-
-WARNING in [eslint] 
-src/App.js
-  Line 13:5:   'getMarket' is assigned a value but never used                                                                                             no-unused-vars
-  Line 14:5:   'getUserBet' is assigned a value but never used                                                                                            no-unused-vars
-  Line 17:5:   'getMatchDetails' is assigned a value but never used                                                                                       no-unused-vars
-  Line 24:10:  'selectedMatch' is assigned a value but never used                                                                                         no-unused-vars
-  Line 24:25:  'setSelectedMatch' is assigned a value but never used                                                                                      no-unused-vars
-  Line 27:10:  'marketData' is assigned a value but never used                                                                                            no-unused-vars
-  Line 27:22:  'setMarketData' is assigned a value but never used                                                                                         no-unused-vars
-  Line 53:6:   React Hook useEffect has a missing dependency: 'fetchUserBets'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
-  Line 79:6:   React Hook useEffect has missing dependencies: 'getCurrentFee' and 'getEstimatedOdds'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
-
-webpack compiled with 1 warning
-Compiling...
-Compiled with warnings.
-
-[eslint] 
-src/App.js
-  Line 13:5:   'getMarket' is assigned a value but never used                                                                                             no-unused-vars
-  Line 14:5:   'getUserBet' is assigned a value but never used                                                                                            no-unused-vars
-  Line 17:5:   'getMatchDetails' is assigned a value but never used                                                                                       no-unused-vars
-  Line 24:10:  'selectedMatch' is assigned a value but never used                                                                                         no-unused-vars
-  Line 24:25:  'setSelectedMatch' is assigned a value but never used                                                                                      no-unused-vars
-  Line 27:10:  'marketData' is assigned a value but never used                                                                                            no-unused-vars
-  Line 27:22:  'setMarketData' is assigned a value but never used                                                                                         no-unused-vars
-  Line 53:6:   React Hook useEffect has a missing dependency: 'fetchUserBets'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
-  Line 79:6:   React Hook useEffect has missing dependencies: 'getCurrentFee' and 'getEstimatedOdds'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
-
-Search for the keywords to learn more about each warning.
-To ignore, add // eslint-disable-next-line to the line before.
-
-WARNING in [eslint] 
-src/App.js
-  Line 13:5:   'getMarket' is assigned a value but never used                                                                                             no-unused-vars
-  Line 14:5:   'getUserBet' is assigned a value but never used                                                                                            no-unused-vars
-  Line 17:5:   'getMatchDetails' is assigned a value but never used                                                                                       no-unused-vars
-  Line 24:10:  'selectedMatch' is assigned a value but never used                                                                                         no-unused-vars
-  Line 24:25:  'setSelectedMatch' is assigned a value but never used                                                                                      no-unused-vars
-  Line 27:10:  'marketData' is assigned a value but never used                                                                                            no-unused-vars
-  Line 27:22:  'setMarketData' is assigned a value but never used                                                                                         no-unused-vars
-  Line 53:6:   React Hook useEffect has a missing dependency: 'fetchUserBets'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
-  Line 79:6:   React Hook useEffect has missing dependencies: 'getCurrentFee' and 'getEstimatedOdds'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
-
-webpack compiled with 1 warning
-Compiling...
-Compiled with warnings.
-
-[eslint] 
-src/App.js
-  Line 13:5:   'getMarket' is assigned a value but never used                                                                                             no-unused-vars
-  Line 14:5:   'getUserBet' is assigned a value but never used                                                                                            no-unused-vars
-  Line 17:5:   'getMatchDetails' is assigned a value but never used                                                                                       no-unused-vars
-  Line 24:10:  'selectedMatch' is assigned a value but never used                                                                                         no-unused-vars
-  Line 24:25:  'setSelectedMatch' is assigned a value but never used                                                                                      no-unused-vars
-  Line 27:10:  'marketData' is assigned a value but never used                                                                                            no-unused-vars
-  Line 27:22:  'setMarketData' is assigned a value but never used                                                                                         no-unused-vars
-  Line 53:6:   React Hook useEffect has a missing dependency: 'fetchUserBets'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
-  Line 79:6:   React Hook useEffect has missing dependencies: 'getCurrentFee' and 'getEstimatedOdds'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
-
-Search for the keywords to learn more about each warning.
-To ignore, add // eslint-disable-next-line to the line before.
-
-WARNING in [eslint] 
-src/App.js
-  Line 13:5:   'getMarket' is assigned a value but never used                                                                                             no-unused-vars
-  Line 14:5:   'getUserBet' is assigned a value but never used                                                                                            no-unused-vars
-  Line 17:5:   'getMatchDetails' is assigned a value but never used                                                                                       no-unused-vars
-  Line 24:10:  'selectedMatch' is assigned a value but never used                                                                                         no-unused-vars
-  Line 24:25:  'setSelectedMatch' is assigned a value but never used                                                                                      no-unused-vars
-  Line 27:10:  'marketData' is assigned a value but never used                                                                                            no-unused-vars
-  Line 27:22:  'setMarketData' is assigned a value but never used                                                                                         no-unused-vars
-  Line 53:6:   React Hook useEffect has a missing dependency: 'fetchUserBets'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
-  Line 79:6:   React Hook useEffect has missing dependencies: 'getCurrentFee' and 'getEstimatedOdds'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
-
-webpack compiled with 1 warning
-Compiling...
-Compiled with warnings.
-
-[eslint] 
-src/App.js
-  Line 13:5:   'getMarket' is assigned a value but never used                                                                                             no-unused-vars
-  Line 14:5:   'getUserBet' is assigned a value but never used                                                                                            no-unused-vars
-  Line 17:5:   'getMatchDetails' is assigned a value but never used                                                                                       no-unused-vars
-  Line 24:10:  'selectedMatch' is assigned a value but never used                                                                                         no-unused-vars
-  Line 24:25:  'setSelectedMatch' is assigned a value but never used                                                                                      no-unused-vars
-  Line 27:10:  'marketData' is assigned a value but never used                                                                                            no-unused-vars
-  Line 27:22:  'setMarketData' is assigned a value but never used                                                                                         no-unused-vars
-  Line 53:6:   React Hook useEffect has a missing dependency: 'fetchUserBets'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
-  Line 79:6:   React Hook useEffect has missing dependencies: 'getCurrentFee' and 'getEstimatedOdds'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
-
-Search for the keywords to learn more about each warning.
-To ignore, add // eslint-disable-next-line to the line before.
-
-WARNING in [eslint] 
-src/App.js
-  Line 13:5:   'getMarket' is assigned a value but never used                                                                                             no-unused-vars
-  Line 14:5:   'getUserBet' is assigned a value but never used                                                                                            no-unused-vars
-  Line 17:5:   'getMatchDetails' is assigned a value but never used                                                                                       no-unused-vars
-  Line 24:10:  'selectedMatch' is assigned a value but never used                                                                                         no-unused-vars
-  Line 24:25:  'setSelectedMatch' is assigned a value but never used                                                                                      no-unused-vars
-  Line 27:10:  'marketData' is assigned a value but never used                                                                                            no-unused-vars
-  Line 27:22:  'setMarketData' is assigned a value but never used                                                                                         no-unused-vars
-  Line 53:6:   React Hook useEffect has a missing dependency: 'fetchUserBets'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
-  Line 79:6:   React Hook useEffect has missing dependencies: 'getCurrentFee' and 'getEstimatedOdds'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
-
-webpack compiled with 1 warning
+Node.js v22.9.0
