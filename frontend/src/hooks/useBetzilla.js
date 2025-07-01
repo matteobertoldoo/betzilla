@@ -4,7 +4,7 @@ import BetZillaArtifact from '../abi/BetZilla.json';
 const BetZillaABI = BetZillaArtifact.abi;
 
 // Contract address from latest deployment
-const CONTRACT_ADDRESS = '0x5fbdb2315678afecb367f032d93f642f64180aa3';
+const CONTRACT_ADDRESS = '0x3Aa5ebB10DC797CAC828524e59A333d0A371443c';
 
 export const useBetzilla = () => {
   const [contract, setContract] = useState(null);
@@ -263,6 +263,28 @@ export const useBetzilla = () => {
     }
   };
 
+  // Get estimated odds (live odds)
+  const getEstimatedOdds = async (marketId) => {
+    if (!contract) throw new Error('Contract not connected');
+    try {
+      return await contract.getEstimatedOdds(marketId);
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  };
+
+  // Get current fee (2% or 3%)
+  const getCurrentFee = async (marketId) => {
+    if (!contract) throw new Error('Contract not connected');
+    try {
+      return await contract.getCurrentFee(marketId);
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  };
+
   return {
     contract,
     signer,
@@ -276,5 +298,7 @@ export const useBetzilla = () => {
     getAllUserBets,
     claimWinnings,
     getMatchDetails,
+    getEstimatedOdds,
+    getCurrentFee,
   };
 };

@@ -18,6 +18,8 @@ contract BetZilla {
         uint256 amount;
         bool claimed;
         bool refunded; // nuovo campo per tracciare i rimborsi
+        uint256 placedAt; // timestamp della scommessa
+        uint8 feePercent; // fee fissata al momento della scommessa
     }
 
     address public owner;
@@ -92,11 +94,14 @@ contract BetZilla {
             market.totalAmount -= userBet.amount;
             market.outcomeAmounts[userBet.outcome - 1] -= userBet.amount;
         }
+        uint8 feePercent = (market.startTime > block.timestamp + 1 days) ? 2 : 3;
         bets[marketId][msg.sender] = Bet({
             outcome: outcome,
             amount: msg.value,
             claimed: false,
-            refunded: false
+            refunded: false,
+            placedAt: block.timestamp,
+            feePercent: feePercent
         });
         market.totalAmount += msg.value;
         market.outcomeAmounts[outcome - 1] += msg.value;
@@ -131,6 +136,24 @@ contract BetZilla {
         emit MarketResolved(marketId, outcome);
     }
 
+    /**
+     * Calcola le quote live sulla base delle attuali scommesse.
+     * Disponibile solo nelle 24 ore precedenti all'inizio dell'evento.
+     * Ritorna odds x100 per ogni esito (1=Home, 2=Draw, 3=Away).
+     */
+    function getEstimatedOdds(uint256 marketId) external view marketExists(marketId) returns (uint256[3] memory) {
+        Market storage market = markets[marketId];
+        require(!market.isClosed, "Betting is closed for this market");
+        require(block.timestamp >= market.startTime - 1 days, "Odds disponibili solo nelle 24h precedenti all'inizio");
+        uint256 total = market.totalAmount;
+        uint256[3] memory odds;
+        for (uint8 i = 0; i < 3; i++) {
+            uint256 pool = market.outcomeAmounts[i];
+            odds[i] = pool == 0 ? 0 : (total * 100) / pool;
+        }
+        return odds;
+    }
+
     function claimWinnings(uint256 marketId) external marketExists(marketId) {
         Market storage market = markets[marketId];
         Bet storage bet = bets[marketId][msg.sender];
@@ -141,7 +164,8 @@ contract BetZilla {
 
         uint256 odds = market.finalOdds[bet.outcome - 1];
         uint256 gross = (bet.amount * odds) / 100;
-        uint256 fee = (gross * FEE_PERCENT) / 100;
+        // Fee fissata al momento della scommessa
+        uint256 fee = (gross * bet.feePercent) / 100;
         uint256 payout = bet.amount + (gross - fee);
 
         bet.claimed = true;
@@ -215,6 +239,19 @@ contract BetZilla {
         
         (bool success, ) = payable(owner).call{value: balance}("");
         require(success, "Transfer failed");
+    }
+
+    /**
+     * Restituisce la fee attuale (2 o 3) in base al tempo mancante all'inizio dell'evento.
+     * 2% se mancano più di 24h, 3% se meno di 24h.
+     */
+    function getCurrentFee(uint256 marketId) external view marketExists(marketId) returns (uint256) {
+        Market storage market = markets[marketId];
+        if (market.startTime > block.timestamp + 1 days) {
+            return 2;
+        } else {
+            return 3;
+        }
     }
 
     receive() external payable {}

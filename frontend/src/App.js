@@ -14,7 +14,9 @@ function App() {
     getUserBet,
     getAllUserBets,
     claimWinnings,
-    getMatchDetails
+    getMatchDetails,
+    getEstimatedOdds,
+    getCurrentFee,
   } = useBetzilla();
 
   const [matches, setMatches] = useState([]);
@@ -23,6 +25,8 @@ function App() {
   const [betAmount, setBetAmount] = useState('');
   const [selectedOutcome, setSelectedOutcome] = useState(1);
   const [marketData, setMarketData] = useState({});
+  const [liveOdds, setLiveOdds] = useState({});
+  const [fee, setFee] = useState({});
 
   // Fetch matches from backend
   useEffect(() => {
@@ -47,6 +51,32 @@ function App() {
       fetchUserBets();
     }
   }, [account, contract]);
+
+  // Carica odds live e fee per ogni match
+  useEffect(() => {
+    const fetchLiveOddsAndFee = async () => {
+      if (!contract) return;
+      const oddsObj = {};
+      const feeObj = {};
+      for (const match of matches) {
+        try {
+          const odds = await getEstimatedOdds(match.id);
+          oddsObj[match.id] = odds;
+        } catch (e) {
+          oddsObj[match.id] = null;
+        }
+        try {
+          const f = await getCurrentFee(match.id);
+          feeObj[match.id] = f;
+        } catch (e) {
+          feeObj[match.id] = null;
+        }
+      }
+      setLiveOdds(oddsObj);
+      setFee(feeObj);
+    };
+    fetchLiveOddsAndFee();
+  }, [contract, matches]);
 
   const fetchUserBets = async () => {
     try {
@@ -165,22 +195,36 @@ function App() {
                 
                 <div className="odds">
                   <div className="odds-item">
-                    <div className="odds-value">???</div>
+                    <div className="odds-value">
+                      {liveOdds[match.id] && liveOdds[match.id][0] > 0
+                        ? (liveOdds[match.id][0] / 100).toFixed(2)
+                        : '???'}
+                    </div>
                     <div className="odds-label">{match.homeTeam}</div>
                   </div>
                   {match.odds.draw > 0 && (
                     <div className="odds-item">
-                      <div className="odds-value">???</div>
+                      <div className="odds-value">
+                        {liveOdds[match.id] && liveOdds[match.id][1] > 0
+                          ? (liveOdds[match.id][1] / 100).toFixed(2)
+                          : '???'}
+                      </div>
                       <div className="odds-label">Draw</div>
                     </div>
                   )}
                   <div className="odds-item">
-                    <div className="odds-value">???</div>
+                    <div className="odds-value">
+                      {liveOdds[match.id] && (match.odds.draw > 0 ? liveOdds[match.id][2] : liveOdds[match.id][1]) > 0
+                        ? ((match.odds.draw > 0 ? liveOdds[match.id][2] : liveOdds[match.id][1]) / 100).toFixed(2)
+                        : '???'}
+                    </div>
                     <div className="odds-label">{match.awayTeam}</div>
                   </div>
                 </div>
                 <div style={{textAlign: 'center', color: '#888', fontSize: '0.9em', marginTop: '10px'}}>
-                  🔒 Blind Betting - Odds revealed at match start
+                  {liveOdds[match.id] && liveOdds[match.id][0] > 0
+                    ? `Live Odds! Fee: ${fee[match.id] || '?'}%`
+                    : '🔒 Blind Betting - Odds revealed at match start'}
                 </div>
 
                 {account && (
@@ -246,6 +290,7 @@ function App() {
                     <div className="bet-details">
                       <p><strong>🎲 Outcome:</strong> {betData.bet.outcome}</p>
                       <p><strong>💰 Amount:</strong> {formatEther(betData.bet.amount)} ETH</p>
+                      <p><strong>🧾 Fee:</strong> {betData.bet.feePercent}%</p>
                       <p><strong>📅 Placed:</strong> {new Date().toLocaleDateString()}</p>
                     </div>
                     
