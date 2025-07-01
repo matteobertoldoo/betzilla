@@ -1,7 +1,0 @@
-
-> betzilla-backend@1.0.0 start
-> node index.js
-
-🚀 BetZilla Backend running on port 4000
-📊 API available at http://localhost:4000/api
-🏥 Health check: http://localhost:4000/api/health
