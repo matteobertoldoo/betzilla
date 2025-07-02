@@ -26,6 +26,7 @@ function AppContent() {
     claimWinnings,
     getEstimatedOdds,
     getCurrentFee,
+    getMarketDetails,
   } = useBetzilla();
 
   return (
@@ -70,6 +71,7 @@ function AppContent() {
                     placeBet={placeBet}
                     getEstimatedOdds={getEstimatedOdds}
                     getCurrentFee={getCurrentFee}
+                    getMarketDetails={getMarketDetails}
                     loading={loading}
                   />
                 } 

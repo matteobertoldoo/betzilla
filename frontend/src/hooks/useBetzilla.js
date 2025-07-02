@@ -370,6 +370,30 @@ export const useBetzilla = () => {
     }
   };
 
+  // Get market details including outcome amounts for parimutuel calculation
+  const getMarketDetails = async (marketId) => {
+    if (!contract) {
+      throw new Error('Contract not connected');
+    }
+
+    try {
+      const market = await contract.getMarket(marketId);
+      return {
+        description: market[0],
+        totalAmount: market[1],
+        outcomeAmounts: market[2], // This is what we need for parimutuel odds
+        isClosed: market[3],
+        isResolved: market[4],
+        winningOutcome: market[5],
+        startTime: market[6],
+        finalOdds: market[7]
+      };
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  };
+
   return {
     contract,
     signer,
@@ -386,5 +410,6 @@ export const useBetzilla = () => {
     getAllMatches,
     getEstimatedOdds,
     getCurrentFee,
+    getMarketDetails,
   };
 };

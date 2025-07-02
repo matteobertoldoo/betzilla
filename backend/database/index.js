@@ -66,6 +66,7 @@ class Database {
           transaction_hash VARCHAR(66),
           status VARCHAR(20) DEFAULT 'pending',
           placed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           resolved_at DATETIME,
           is_winner BOOLEAN,
           winnings_wei VARCHAR(255),

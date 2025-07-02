@@ -23,103 +23,6 @@
   color: #7f8c8d;
 }
 
-/* Search Section */
-.search-section {
-  margin-bottom: 40px;
-}
-
-.search-container {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.search-input-wrapper {
-  position: relative;
-  margin-bottom: 15px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 15px 50px 15px 50px;
-  border: 2px solid #e0e6ed;
-  border-radius: 25px;
-  font-size: 1rem;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #4ecdc4;
-  box-shadow: 0 5px 20px rgba(78, 205, 196, 0.2);
-  transform: translateY(-2px);
-}
-
-.search-input::placeholder {
-  color: #95a5a6;
-  font-style: italic;
-}
-
-.search-icon {
-  position: absolute;
-  left: 18px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1.2rem;
-  color: #95a5a6;
-  pointer-events: none;
-}
-
-.clear-search {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  transition: all 0.2s ease;
-}
-
-.clear-search:hover {
-  background: #c0392b;
-  transform: translateY(-50%) scale(1.1);
-}
-
-.search-results-info {
-  text-align: center;
-  color: #7f8c8d;
-  font-size: 0.9rem;
-  font-style: italic;
-}
-
-.clear-search-btn {
-  background: linear-gradient(45deg, #3498db, #2ecc71);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  margin-top: 15px;
-  transition: all 0.3s ease;
-}
-
-.clear-search-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-}
-
 /* Wallet Prompt */
 .wallet-prompt {
   display: flex;
@@ -326,6 +229,44 @@
   border: 1px solid rgba(255, 193, 7, 0.2);
 }
 
+/* Parimutuel Odds Styling */
+.parimutuel-info {
+  color: #8e44ad;
+  font-weight: 600;
+  background: linear-gradient(45deg, rgba(142, 68, 173, 0.1), rgba(155, 89, 182, 0.1));
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(142, 68, 173, 0.3);
+}
+
+.parimutuel-loading {
+  color: #e67e22;
+  font-weight: 600;
+  background: linear-gradient(45deg, rgba(230, 126, 34, 0.1), rgba(243, 156, 18, 0.1));
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(230, 126, 34, 0.3);
+  animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+/* Enhanced odds display for parimutuel mode */
+.odds-display .odds-item .odds-value {
+  transition: all 0.3s ease;
+}
+
+.parimutuel-mode .odds-item .odds-value {
+  background: linear-gradient(45deg, #8e44ad, #9b59b6);
+  color: white;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-weight: 700;
+}
+
 /* Betting Section */
 .betting-section {
   border-top: 1px solid rgba(0, 0, 0, 0.1);
@@ -443,6 +384,98 @@
 .btn-icon {
   font-size: 1.2rem;
 }
+
+/* Search Section */
+.search-section {
+  margin-bottom: 30px;
+}
+
+.search-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  border: 2px solid #e1e8ed;
+  transition: all 0.3s ease;
+  margin-bottom: 15px;
+}
+
+.search-input-wrapper:focus-within {
+  border-color: #4ecdc4;
+  box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+}
+
+.search-icon {
+  font-size: 1.2rem;
+  margin-left: 15px;
+  color: #7f8c8d;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  padding: 15px;
+  font-size: 1rem;
+  background: transparent;
+  outline: none;
+  color: #2c3e50;
+  border-radius: 15px;
+}
+
+.search-input::placeholder {
+  color: #bdc3c7;
+  font-style: italic;
+}
+
+.clear-search {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 1.2rem;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+}
+
+.clear-search:hover {
+  background: rgba(231, 76, 60, 0.1);
+  transform: scale(1.1);
+}
+
+.search-results-info {
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.clear-search-btn {
+  background: linear-gradient(45deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 15px;
+  box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+}
+
+.clear-search-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+}
+
+
 
 /* Responsive Design */
 @media (max-width: 768px) {
