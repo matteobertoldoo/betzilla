@@ -4,7 +4,7 @@ import BetZillaArtifact from '../abi/BetZilla.json';
 const BetZillaABI = BetZillaArtifact.abi;
 
 // Contract address from latest deployment
-const CONTRACT_ADDRESS = '0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690';
+const CONTRACT_ADDRESS = '0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6';
 
 export const useBetzilla = () => {
   const [contract, setContract] = useState(null);
@@ -175,6 +175,33 @@ export const useBetzilla = () => {
     }
   };
 
+  // Place a bet without affecting global loading state
+  const placeBetWithoutGlobalLoading = async (marketId, outcome, amount) => {
+    if (!contract || !signer) {
+      throw new Error('Wallet not connected');
+    }
+
+    try {
+      setError(null);
+
+      console.log(`🎯 Placing bet: Market ${marketId}, Outcome ${outcome}, Amount ${amount} ETH`);
+
+      const tx = await contract.placeBet(marketId, outcome, {
+        value: ethers.parseEther(amount.toString())
+      });
+
+      console.log(`📝 Transaction hash: ${tx.hash}`);
+      const receipt = await tx.wait();
+      console.log(`✅ Bet placed successfully! Block: ${receipt.blockNumber}`);
+      
+      return receipt;
+    } catch (err) {
+      console.error('❌ Error placing bet:', err);
+      setError(err.message);
+      throw err;
+    }
+  };
+
   // Get market info
   const getMarket = async (marketId) => {
     if (!contract) {
@@ -222,8 +249,9 @@ export const useBetzilla = () => {
       let userMarketIds;
       try {
         userMarketIds = await contract.getUserMarkets(account);
+        console.log('📋 User has bets on markets:', userMarketIds.map(id => Number(id)));
       } catch (getUserMarketsError) {
-        console.error('❌ Error calling getUserMarkets:', getUserMarketsError);
+        console.log('⚠️ Could not fetch user markets from blockchain:', getUserMarketsError.message);
         // If getUserMarkets fails, return empty array instead of throwing
         return [];
       }
@@ -233,13 +261,15 @@ export const useBetzilla = () => {
         return [];
       }
 
-      const userBets = await Promise.all(
-        userMarketIds.map(async (id) => {
+      const userBets = [];
+      
+      for (const id of userMarketIds) {
+        try {
           const numericId = Number(id);
           const [outcome, amount, claimed, refunded, placedAt] = await contract.getUserBet(numericId, account);
           const market = await contract.getMarket(numericId);
 
-          return {
+          userBets.push({
             marketId: numericId,
             bet: {
               outcome,
@@ -257,10 +287,13 @@ export const useBetzilla = () => {
               winningOutcome: market[5],
               startTime: market[6],
               finalOdds: market[7],
-            }
-          };
-        })
-      );
+            },
+          });
+        } catch (error) {
+          console.log(`⚠️ Could not fetch bet data for market ${id}:`, error.message);
+          // Skip this bet and continue with others
+        }
+      }
 
       // Simplified filtering - just check if amount > 0
       const filteredBets = userBets.filter(bet => {
@@ -358,15 +391,21 @@ export const useBetzilla = () => {
   // Get current fee for a market
   const getCurrentFee = async (marketId) => {
     if (!contract) {
-      return null;
+      return 3; // Default fee percentage
     }
 
     try {
-      const fee = await contract.getCurrentFee(marketId);
-      return fee;
+      // Check if the function exists before calling it
+      if (typeof contract.getCurrentFee === 'function') {
+        const fee = await contract.getCurrentFee(marketId);
+        return Number(fee);
+      } else {
+        console.log('getCurrentFee function not available, using default fee');
+        return 3; // Default 3% fee
+      }
     } catch (error) {
-      console.error('Error fetching current fee:', error);
-      return null;
+      console.log('Error fetching current fee, using default:', error.message);
+      return 3; // Default fee percentage
     }
   };
 
@@ -402,6 +441,7 @@ export const useBetzilla = () => {
     error,
     connectWallet,
     placeBet,
+    placeBetWithoutGlobalLoading,
     getMarket,
     getUserBet,
     getAllUserBets,

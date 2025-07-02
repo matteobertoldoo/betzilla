@@ -4,11 +4,11 @@ class ParimutuelService {
   
   // Calculate parimutuel odds for a match based on database bets
   calculateParimutuelOdds(bettingSummary, hasDrawOption = true) {
+    // If no bets placed, return default odds indicating no action
     if (!bettingSummary || bettingSummary.total_pool === 0) {
-      // Return default odds if no bets placed
       return hasDrawOption 
-        ? [2.0, 2.0, 2.0] // Home, Draw, Away
-        : [2.0, 2.0]; // Home, Away
+        ? [0, 0, 0] // No odds available for Home, Draw, Away
+        : [0, 0];   // No odds available for Home, Away
     }
 
     const totalPool = parseFloat(bettingSummary.total_pool);
@@ -104,12 +104,13 @@ class ParimutuelService {
           },
           parimutuel_odds: parimutuelOdds,
           odds_display: {
-            home: parimutuelOdds[0] > 0 ? parimutuelOdds[0].toFixed(2) : 'N/A',
-            draw: hasDrawOption ? (parimutuelOdds[1] > 0 ? parimutuelOdds[1].toFixed(2) : 'N/A') : null,
+            home: parimutuelOdds[0] > 0 ? parimutuelOdds[0].toFixed(2) : 'No bets',
+            draw: hasDrawOption ? (parimutuelOdds[1] > 0 ? parimutuelOdds[1].toFixed(2) : 'No bets') : null,
             away: hasDrawOption ? 
-              (parimutuelOdds[2] > 0 ? parimutuelOdds[2].toFixed(2) : 'N/A') :
-              (parimutuelOdds[1] > 0 ? parimutuelOdds[1].toFixed(2) : 'N/A')
-          }
+              (parimutuelOdds[2] > 0 ? parimutuelOdds[2].toFixed(2) : 'No bets') :
+              (parimutuelOdds[1] > 0 ? parimutuelOdds[1].toFixed(2) : 'No bets')
+          },
+          betting_available: parimutuelOdds.some(odd => odd > 0) || bettingSummary.total_pool === 0
         };
       });
 

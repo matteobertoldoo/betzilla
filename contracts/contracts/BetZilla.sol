@@ -108,10 +108,16 @@ contract BetZilla {
 
         market.isClosed = true;
 
-        uint256 total = market.totalAmount;
+        // Calculate final parimutuel odds
+        uint256 totalAfterFee = (market.totalAmount * (100 - FEE_PERCENT)) / 100;
+        
         for (uint8 i = 0; i < 3; i++) {
-            uint256 pool = market.outcomeAmounts[i];
-            market.finalOdds[i] = pool == 0 ? 0 : (total * 100) / pool; // odds x100
+            if (market.outcomeAmounts[i] > 0) {
+                // Parimutuel odds = (total pool after fee) / (amount bet on outcome)
+                market.finalOdds[i] = (totalAfterFee * 100) / market.outcomeAmounts[i];
+            } else {
+                market.finalOdds[i] = 0; // No odds if no bets on outcome
+            }
         }
 
         emit BettingClosed(marketId, market.finalOdds);
@@ -196,7 +202,7 @@ contract BetZilla {
         require(success, "Transfer failed");
     }
 
-    // Get estimated odds for a market (returns 100x multiplier)
+    // Get estimated parimutuel odds for a market (returns 100x multiplier)
     function getEstimatedOdds(uint256 marketId) external view marketExists(marketId) returns (uint256[3] memory) {
         Market storage market = markets[marketId];
         
@@ -210,18 +216,34 @@ contract BetZilla {
             return [uint256(200), 200, 200]; // 2.0x odds for all outcomes
         }
         
-        // Calculate simple estimated odds based on current pool
-        uint256[3] memory estimatedOdds;
+        // Calculate parimutuel odds based on current pool
+        uint256[3] memory parimutuelOdds;
+        uint256 totalAfterFee = (market.totalAmount * (100 - FEE_PERCENT)) / 100;
+        
         for (uint i = 0; i < 3; i++) {
             if (market.outcomeAmounts[i] > 0) {
-                // Simple odds calculation: total pool / outcome amount
-                estimatedOdds[i] = (market.totalAmount * 100) / market.outcomeAmounts[i];
+                // Parimutuel odds = (total pool after fee) / (amount bet on outcome)
+                parimutuelOdds[i] = (totalAfterFee * 100) / market.outcomeAmounts[i];
             } else {
-                estimatedOdds[i] = 500; // 5.0x default odds for outcomes with no bets
+                parimutuelOdds[i] = 0; // No odds if no bets on outcome
             }
         }
         
-        return estimatedOdds;
+        return parimutuelOdds;
+    }
+
+    // Get current betting pools for parimutuel calculation
+    function getMarketPools(uint256 marketId) external view marketExists(marketId) returns (
+        uint256 totalPool,
+        uint256[3] memory outcomePools,
+        bool isClosed
+    ) {
+        Market storage market = markets[marketId];
+        return (
+            market.totalAmount,
+            market.outcomeAmounts,
+            market.isClosed
+        );
     }
 
     // Get current fee percentage

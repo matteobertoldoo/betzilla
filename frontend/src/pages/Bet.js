@@ -20,6 +20,8 @@ const Bet = ({
   const [fee, setFee] = useState({});
   const [userBets, setUserBets] = useState({}); // Store user bets for each match
   const [payoutCalculations, setPayoutCalculations] = useState({}); // Store payout calculations
+  const [bettingLoading, setBettingLoading] = useState({}); // Individual loading state for each match
+  const [parimutuelMatches, setParimutuelMatches] = useState([]); // Store matches with parimutuel odds
 
   // Initialize bet data for a match
   const initializeMatchBetData = (matchId) => {
@@ -175,27 +177,55 @@ const Bet = ({
       }
     };
 
+    const fetchParimutuelOdds = async () => {
+      try {
+        const response = await fetch('http://localhost:4000/api/parimutuel/matches/next24hours');
+        const data = await response.json();
+        if (data.success) {
+          console.log('Parimutuel matches with odds:', data.data.matches);
+          setParimutuelMatches(data.data.matches);
+        }
+      } catch (error) {
+        console.error('Error fetching parimutuel odds:', error);
+      }
+    };
+
     fetchMatches();
+    fetchParimutuelOdds();
+    
+    // Refresh parimutuel odds every 30 seconds
+    const interval = setInterval(fetchParimutuelOdds, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   // Load live odds and fees for each match
   useEffect(() => {
     const fetchLiveOddsAndFee = async () => {
-      if (!contract) return;
+      if (!contract) {
+        console.log('Contract not available, skipping blockchain odds fetch');
+        return;
+      }
+      
       const oddsObj = {};
       const feeObj = {};
       for (const match of matches) {
         const isWithin24Hours = isMatchWithin24Hours(match.startTime);
         const marketId = match.contractMarketId || match.id; // Use contractMarketId if available, fallback to match.id
         
-        // Skip matches without contract market ID for now
+        // For matches within 24 hours, prioritize parimutuel odds from backend
+        if (isWithin24Hours) {
+          console.log(`Match ${match.id} is within 24 hours - will use parimutuel odds from backend`);
+          continue;
+        }
+        
+        // Skip matches without contract market ID for blockchain calls
         if (!match.contractMarketId) {
-          console.warn(`Skipping match ${match.id} - no contract market ID`);
+          console.log(`Skipping match ${match.id} - no contract market ID for blockchain interaction`);
           continue;
         }
         
         try {
-          if (isWithin24Hours && getMarketDetails && match.contractMarketId) {
+          if (getMarketDetails && match.contractMarketId) {
             // For matches within 24 hours, get market details for parimutuel calculation
             // Only if there's a contract market ID
             const marketDetails = await getMarketDetails(marketId);
@@ -267,7 +297,7 @@ const Bet = ({
     if (!outcomeAmounts || outcomeAmounts.length === 0) return null;
     
     // Calculate total pool
-    const totalPool = outcomeAmounts.reduce((sum, amount) => sum + Number(amount), 0);
+    const totalPool = outcomeAmounts.reduce((sum, amount) => sum + safeToNumber(amount), 0);
     if (totalPool === 0) return null;
     
     // Find the match to determine if it has a draw option
@@ -279,62 +309,183 @@ const Bet = ({
     const parimutuelOdds = [];
     
     // Home team (outcome 1)
-    if (Number(outcomeAmounts[0]) === 0) {
+    if (safeToNumber(outcomeAmounts[0]) === 0) {
       parimutuelOdds[0] = 0;
     } else {
-      parimutuelOdds[0] = totalPool / Number(outcomeAmounts[0]);
+      parimutuelOdds[0] = totalPool / safeToNumber(outcomeAmounts[0]);
     }
     
     // Draw (outcome 2) - only for matches with draw option
     if (hasDrawOption) {
-      if (Number(outcomeAmounts[1]) === 0) {
+      if (safeToNumber(outcomeAmounts[1]) === 0) {
         parimutuelOdds[1] = 0;
       } else {
-        parimutuelOdds[1] = totalPool / Number(outcomeAmounts[1]);
+        parimutuelOdds[1] = totalPool / safeToNumber(outcomeAmounts[1]);
       }
       
       // Away team (outcome 3) when draw is available
-      if (Number(outcomeAmounts[2]) === 0) {
+      if (safeToNumber(outcomeAmounts[2]) === 0) {
         parimutuelOdds[2] = 0;
       } else {
-        parimutuelOdds[2] = totalPool / Number(outcomeAmounts[2]);
+        parimutuelOdds[2] = totalPool / safeToNumber(outcomeAmounts[2]);
       }
     } else {
       // Away team (outcome 2) when no draw available
-      if (Number(outcomeAmounts[1]) === 0) {
+      if (safeToNumber(outcomeAmounts[1]) === 0) {
         parimutuelOdds[1] = 0;
       } else {
-        parimutuelOdds[1] = totalPool / Number(outcomeAmounts[1]);
+        parimutuelOdds[1] = totalPool / safeToNumber(outcomeAmounts[1]);
       }
     }
     
     return parimutuelOdds;
   };
 
+  // Get parimutuel odds for a specific match
+  const getParimutuelOddsForMatch = (matchId) => {
+    const parimutuelMatch = parimutuelMatches.find(pm => pm.id === matchId);
+    if (!parimutuelMatch) return null;
+    
+    return {
+      odds: parimutuelMatch.parimutuel_odds,
+      display: parimutuelMatch.odds_display,
+      bettingAvailable: parimutuelMatch.betting_available,
+      pool: parimutuelMatch.betting_summary
+    };
+  };
+
+  // Check if a match has parimutuel odds available
+  const hasParimutuelOdds = (matchId) => {
+    return parimutuelMatches.some(pm => pm.id === matchId);
+  };
+
   // Fetch user's current bets for each match
   const fetchUserBets = async () => {
-    if (!contract || !account) return;
-    
     const userBetsObj = {};
-    for (const match of matches) {
-      if (!match.contractMarketId) continue;
-      
+    
+    // First, try to fetch from database
+    if (user) {
       try {
-        const userBet = await contract.getUserBet(match.contractMarketId, account);
-        if (userBet && Number(userBet[1]) > 0) { // userBet[1] is the amount
-          userBetsObj[match.id] = {
-            outcome: Number(userBet[0]),
-            amount: userBet[1],
-            claimed: userBet[2],
-            refunded: userBet[3],
-            placedAt: userBet[4]
-          };
+        const token = localStorage.getItem('betzilla_token');
+        if (token) {
+          const response = await fetch('http://localhost:4000/api/betting/bets', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.bets) {
+              // Convert database bets to match the expected format
+              data.bets.forEach(bet => {
+                userBetsObj[bet.market_id] = {
+                  outcome: bet.outcome,
+                  amount: bet.amount_wei,
+                  claimed: bet.is_winner === true ? false : null, // Only set claimed for winners
+                  refunded: false,
+                  placedAt: new Date(bet.placed_at).getTime() / 1000,
+                  status: bet.status,
+                  isWinner: bet.is_winner,
+                  fromDatabase: true // Flag to indicate this is from database
+                };
+              });
+              console.log(`Loaded ${data.bets.length} bets from database`);
+            }
+          } else {
+            console.log('Failed to fetch user bets from database:', response.status);
+          }
         }
       } catch (error) {
-        console.error(`Error fetching user bet for match ${match.id}:`, error);
+        console.log('Error fetching user bets from database:', error.message);
       }
     }
+    
+    // Then, if we have a contract connection, try to fetch from blockchain
+    if (contract && account) {
+      let blockchainBetsFound = 0;
+      for (const match of matches) {
+        // Only try to fetch from blockchain if we have a valid contract market ID
+        if (!match.contractMarketId || match.contractMarketId === null || match.contractMarketId === undefined) {
+          continue;
+        }
+        
+        try {
+          const userBet = await contract.getUserBet(match.contractMarketId, account);
+          if (userBet && Number(userBet[1]) > 0) { // userBet[1] is the amount
+            // Blockchain data takes precedence over database data
+            userBetsObj[match.id] = {
+              outcome: Number(userBet[0]),
+              amount: userBet[1],
+              claimed: userBet[2],
+              refunded: userBet[3],
+              placedAt: userBet[4],
+              fromDatabase: false // Flag to indicate this is from blockchain
+            };
+            blockchainBetsFound++;
+          }
+        } catch (error) {
+          // Handle various error types gracefully
+          if (error.message.includes('could not decode result data') || 
+              error.message.includes('value="0x"') ||
+              error.message.includes('execution reverted') ||
+              error.message.includes('Invalid market')) {
+            // This is expected when no bet exists on blockchain or contract market doesn't exist
+            // Don't log this as it's normal in test mode
+          } else {
+            console.log(`Blockchain error for match ${match.id}:`, error.message);
+          }
+        }
+      }
+      if (blockchainBetsFound > 0) {
+        console.log(`Loaded ${blockchainBetsFound} bets from blockchain`);
+      }
+    }
+    
     setUserBets(userBetsObj);
+    console.log(`Total user bets loaded: ${Object.keys(userBetsObj).length}`);
+  };
+
+  // Helper function to get outcome name from number
+  const getOutcomeName = (outcomeNumber, match) => {
+    const homeTeam = match.homeTeam || match.home_team;
+    const awayTeam = match.awayTeam || match.away_team;
+    
+    switch (outcomeNumber) {
+      case 1:
+        return homeTeam;
+      case 2:
+        // Check if this sport has draw option
+        const sportsWithDraw = ['Football', 'Soccer'];
+        const sport = match.sport || '';
+        if (sportsWithDraw.includes(sport)) {
+          return 'Draw';
+        } else {
+          // For sports without draw, outcome 2 is away team
+          return awayTeam;
+        }
+      case 3:
+        return awayTeam;
+      default:
+        return `Outcome ${outcomeNumber}`;
+    }
+  };
+
+  // Helper function to safely convert BigInt to number for calculations
+  const safeToNumber = (value) => {
+    if (typeof value === 'bigint') {
+      return parseFloat(value.toString());
+    }
+    if (typeof value === 'string') {
+      return parseFloat(value);
+    }
+    return Number(value) || 0;
+  };
+
+  // Helper function to format wei amounts to ETH
+  const formatEther = (wei) => {
+    if (!wei) return '0.0000';
+    return (safeToNumber(wei) / 1e18).toFixed(4);
   };
 
   // Calculate potential payout for a user's bet
@@ -342,7 +493,7 @@ const Bet = ({
     if (!userBet || !parimutuelOdds || userBet.claimed || userBet.refunded) return null;
     
     const betOutcome = userBet.outcome;
-    const betAmount = Number(userBet.amount);
+    const betAmount = safeToNumber(userBet.amount);
     const odds = parimutuelOdds[betOutcome - 1]; // Convert to 0-based index
     
     if (!odds || odds <= 0) return null;
@@ -372,30 +523,57 @@ const Bet = ({
       return;
     }
 
-    // Use contract market ID if available, otherwise show error
-    if (!match.contractMarketId) {
-      alert('This match is not available for betting yet. Please try again later.');
-      return;
-    }
-    
-    const contractMarketId = match.contractMarketId;
-    
-    const betData = matchBetData[matchId];
-    if (!betData || !betData.betAmount || betData.betAmount <= 0) {
-      alert('Please enter a valid bet amount');
-      return;
-    }
-
-    // Validation outcome for market
-    if (match) {
-      const maxOutcome = match.hasDrawOption ? 3 : 2;
-      if (betData.selectedOutcome > maxOutcome) {
-        alert(`Invalid outcome. For ${match.homeTeam} vs ${match.awayTeam}, valid outcomes are 1-${maxOutcome}`);
-        return;
-      }
-    }
+    // Set loading state for this specific match
+    setBettingLoading(prev => ({ ...prev, [matchId]: true }));
 
     try {
+      // Use contract market ID if available, otherwise allow testing with database ID
+      const contractMarketId = match.contractMarketId;
+      
+      if (!contractMarketId) {
+        // For testing purposes, allow betting even without contract market ID
+        console.log('No contract market ID - using test mode');
+        
+        const betData = matchBetData[matchId];
+        if (!betData || !betData.betAmount || betData.betAmount <= 0) {
+          alert('Please enter a valid bet amount');
+          return;
+        }
+
+        // Test mode - just save to database without blockchain interaction
+        const amountWei = (parseFloat(betData.betAmount) * 1e18).toString();
+        
+        if (user) {
+          await saveBetToDatabase(matchId, betData.selectedOutcome, amountWei, 'test-tx-hash');
+          alert('Test bet placed successfully! (No blockchain interaction)');
+        } else {
+          alert('Test bet recorded! (Please log in for real betting)');
+        }
+        
+        // Clear bet data
+        updateBetAmount(matchId, '');
+        updateSelectedOutcome(matchId, 1);
+        
+        // Refresh data
+        await fetchUserBets();
+        return;
+      }
+      
+      const betData = matchBetData[matchId];
+      if (!betData || !betData.betAmount || betData.betAmount <= 0) {
+        alert('Please enter a valid bet amount');
+        return;
+      }
+
+      // Validation outcome for market
+      if (match) {
+        const maxOutcome = match.hasDrawOption ? 3 : 2;
+        if (betData.selectedOutcome > maxOutcome) {
+          alert(`Invalid outcome. For ${match.homeTeam} vs ${match.awayTeam}, valid outcomes are 1-${maxOutcome}`);
+          return;
+        }
+      }
+
       // Place bet on blockchain using contract market ID
       const receipt = await placeBet(contractMarketId, betData.selectedOutcome, betData.betAmount);
       
@@ -423,6 +601,9 @@ const Bet = ({
     } catch (error) {
       console.error('Smart contract error:', error);
       alert(`Error placing bet: ${error.message}`);
+    } finally {
+      // Clear loading state for this specific match
+      setBettingLoading(prev => ({ ...prev, [matchId]: false }));
     }
   };
 
@@ -474,6 +655,19 @@ const Bet = ({
   return (
     <div className="bet-page">
       <div className="container">
+        {/* Test mode indicator */}
+        {contract && matches.length > 0 && matches.every(m => !m.contractMarketId) && (
+          <div className="test-mode-banner">
+            <div className="banner-content">
+              <span className="banner-icon">🧪</span>
+              <div className="banner-text">
+                <strong>Test Mode Active</strong>
+                <p>You're betting with test data only. Bets are saved to database but not blockchain.</p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="page-header">
           <h1>🎯 Available Matches</h1>
           <p>Place your blind bets before odds are revealed</p>
@@ -492,17 +686,13 @@ const Bet = ({
                   return (
                     <div key={match.id} className="summary-card">
                       <div className="summary-match">
-                        <strong>{match.homeTeam} vs {match.awayTeam}</strong>
+                        <strong>{match.home_team} vs {match.away_team}</strong>
                         <span className="summary-time">
                           {new Date(match.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                         </span>
                       </div>
                       <div className="summary-bet">
-                        <span>Bet: {(Number(userBet.amount) / 1e18).toFixed(3)} ETH on {
-                          userBet.outcome === 1 ? match.homeTeam :
-                          userBet.outcome === 2 && match.hasDrawOption ? 'Draw' :
-                          match.awayTeam
-                        }</span>
+                        <span>Bet: {formatEther(userBet.amount)} ETH on {getOutcomeName(userBet.outcome, match)}</span>
                         {payout && (
                           <span className={`summary-payout ${payout.profit > 0 ? 'positive' : 'negative'}`}>
                             Potential: {payout.netPayout.toFixed(3)} ETH ({payout.profit > 0 ? '+' : ''}{payout.profit.toFixed(3)})
@@ -602,117 +792,116 @@ const Bet = ({
                   <h4>Current Odds</h4>
                   {(() => {
                     const isWithin24Hours = isMatchWithin24Hours(match.startTime);
-                    const parimutuelOdds = isWithin24Hours ? calculateParimutuelOdds(match.id) : null;
-                    const showParimutuel = isWithin24Hours && parimutuelOdds;
+                    const parimutuelData = hasParimutuelOdds(match.id) ? getParimutuelOddsForMatch(match.id) : null;
+                    const showParimutuel = isWithin24Hours && parimutuelData;
                     
-                    return (
-                      <>
-                        <div className={`odds-display ${isWithin24Hours ? 'parimutuel-mode' : ''}`}>
-                          <div className="odds-item">
-                            <div className="odds-value">
-                              {showParimutuel
-                                ? parimutuelOdds[0] > 0 ? parimutuelOdds[0].toFixed(2) : 'N/A'
-                                : liveOdds[match.id] && liveOdds[match.id][0] > 0
-                                  ? (liveOdds[match.id][0] / 100).toFixed(2)
-                                  : '???'}
-                            </div>
-                            <div className="odds-label">{match.homeTeam}</div>
+                    if (showParimutuel) {
+                      // Show parimutuel odds for matches within 24 hours
+                      const { display, pool } = parimutuelData;
+                      return (
+                        <>
+                          <div className="parimutuel-banner">
+                            <span className="parimutuel-label">🔥 Live Parimutuel Odds</span>
+                            <span className="pool-info">Pool: {(pool.total_pool_wei / 1e18).toFixed(4)} ETH</span>
                           </div>
-                          {match.hasDrawOption && (
+                          <div className="odds-display parimutuel-mode">
                             <div className="odds-item">
-                              <div className="odds-value">
-                                {showParimutuel
-                                  ? parimutuelOdds[1] > 0 ? parimutuelOdds[1].toFixed(2) : 'N/A'
-                                  : liveOdds[match.id] && liveOdds[match.id][1] > 0
-                                    ? (liveOdds[match.id][1] / 100).toFixed(2)
-                                    : '???'}
+                              <div className="odds-label">🏠 {match.homeTeam}</div>
+                              <div className={`odds-value ${display.home === 'No bets' ? 'no-bets' : 'live-odds'}`}>
+                                {display.home === 'No bets' ? 'No bets' : `${display.home}x`}
                               </div>
-                              <div className="odds-label">Draw</div>
+                              {display.home !== 'No bets' && (
+                                <div className="odds-pool">
+                                  {(pool.outcome_amounts_wei[0] / 1e18).toFixed(4)} ETH
+                                </div>
+                              )}
                             </div>
-                          )}
-                          <div className="odds-item">
-                            <div className="odds-value">
-                              {showParimutuel
-                                ? parimutuelOdds[match.hasDrawOption ? 2 : 1] > 0 
-                                  ? parimutuelOdds[match.hasDrawOption ? 2 : 1].toFixed(2) 
-                                  : 'N/A'
-                                : liveOdds[match.id] && (match.hasDrawOption ? liveOdds[match.id][2] : liveOdds[match.id][1]) > 0
-                                  ? ((match.hasDrawOption ? liveOdds[match.id][2] : liveOdds[match.id][1]) / 100).toFixed(2)
-                                  : '???'}
+                            
+                            {match.hasDrawOption && (
+                              <div className="odds-item">
+                                <div className="odds-label">🤝 Draw</div>
+                                <div className={`odds-value ${display.draw === 'No bets' ? 'no-bets' : 'live-odds'}`}>
+                                  {display.draw === 'No bets' ? 'No bets' : `${display.draw}x`}
+                                </div>
+                                {display.draw !== 'No bets' && (
+                                  <div className="odds-pool">
+                                    {(pool.outcome_amounts_wei[1] / 1e18).toFixed(4)} ETH
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
+                            <div className="odds-item">
+                              <div className="odds-label">✈️ {match.awayTeam}</div>
+                              <div className={`odds-value ${display.away === 'No bets' ? 'no-bets' : 'live-odds'}`}>
+                                {display.away === 'No bets' ? 'No bets' : `${display.away}x`}
+                              </div>
+                              {display.away !== 'No bets' && (
+                                <div className="odds-pool">
+                                  {(pool.outcome_amounts_wei[match.hasDrawOption ? 2 : 1] / 1e18).toFixed(4)} ETH
+                                </div>
+                              )}
                             </div>
-                            <div className="odds-label">{match.awayTeam}</div>
                           </div>
-                        </div>
-                        <div className="odds-info">
-                          {isWithin24Hours ? (
-                            showParimutuel ? (
-                              <span className="parimutuel-info">
-                                🎲 Parimutuel Odds - Based on current betting pool
-                              </span>
-                            ) : (
-                              <span className="parimutuel-loading">
-                                🎲 Parimutuel Mode Active - Loading odds...
-                              </span>
-                            )
-                          ) : liveOdds[match.id] && liveOdds[match.id][0] > 0 ? (
-                            `💰 Live Odds Available! Fee: ${fee[match.id] || '?'}%`
-                          ) : (
-                            '🔒 Blind Betting - Odds revealed at match start'
-                          )}
-                        </div>
-                      </>
-                    );
+                          <div className="odds-info">
+                            <span className="parimutuel-info">
+                              🎲 Parimutuel Odds - Based on current betting pool
+                            </span>
+                          </div>
+                        </>
+                      );
+                    } else {
+                      // Show blind betting message for other matches
+                      return (
+                        <>
+                          <div className="blind-betting-banner">
+                            <span className="blind-label">👁️‍🗨️ Blind Betting Mode</span>
+                            <span className="blind-info">Odds revealed at match start</span>
+                          </div>
+                          <div className="odds-display blind-mode">
+                            <div className="odds-item">
+                              <div className="odds-label">🏠 {match.homeTeam}</div>
+                              <div className="odds-value blind">
+                                Hidden
+                              </div>
+                            </div>
+                            
+                            {match.hasDrawOption && (
+                              <div className="odds-item">
+                                <div className="odds-label">🤝 Draw</div>
+                                <div className="odds-value blind">
+                                  Hidden
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="odds-item">
+                              <div className="odds-label">✈️ {match.awayTeam}</div>
+                              <div className="odds-value blind">
+                                Hidden
+                              </div>
+                            </div>
+                          </div>
+                          <div className="odds-info">
+                            <span className="blind-info">
+                              🔒 Blind Betting - Odds revealed at match start
+                            </span>
+                          </div>
+                        </>
+                      );
+                    }
                   })()}
                 </div>
 
-                {/* Payout Information for matches within 24 hours */}
-                {isMatchWithin24Hours(match.startTime) && userBets[match.id] && payoutCalculations[match.id] && (
-                  <div className="payout-section">
-                    <h4>🎯 Your Bet & Potential Payout</h4>
-                    <div className="payout-info">
-                      <div className="bet-summary">
-                        <div className="bet-detail">
-                          <span className="bet-label">Your Bet:</span>
-                          <span className="bet-value">
-                            {payoutCalculations[match.id].betAmount.toFixed(4)} ETH on {
-                              userBets[match.id].outcome === 1 ? match.homeTeam :
-                              userBets[match.id].outcome === 2 && match.hasDrawOption ? 'Draw' :
-                              match.awayTeam
-                            }
-                          </span>
-                        </div>
-                        <div className="bet-detail">
-                          <span className="bet-label">Current Odds:</span>
-                          <span className="bet-value">{payoutCalculations[match.id].odds.toFixed(2)}x</span>
-                        </div>
-                        <div className="bet-detail">
-                          <span className="bet-label">Gross Payout:</span>
-                          <span className="bet-value">{payoutCalculations[match.id].grossPayout.toFixed(4)} ETH</span>
-                        </div>
-                        <div className="bet-detail">
-                          <span className="bet-label">Platform Fee (3%):</span>
-                          <span className="bet-value">-{payoutCalculations[match.id].feeAmount.toFixed(4)} ETH</span>
-                        </div>
-                        <div className="bet-detail payout-highlight">
-                          <span className="bet-label">Net Payout:</span>
-                          <span className="bet-value">{payoutCalculations[match.id].netPayout.toFixed(4)} ETH</span>
-                        </div>
-                        <div className="bet-detail profit-highlight">
-                          <span className="bet-label">Potential Profit:</span>
-                          <span className={`bet-value ${payoutCalculations[match.id].profit > 0 ? 'profit-positive' : 'profit-negative'}`}>
-                            {payoutCalculations[match.id].profit > 0 ? '+' : ''}{payoutCalculations[match.id].profit.toFixed(4)} ETH
-                          </span>
-                        </div>
-                      </div>
-                      <div className="payout-note">
-                        <span className="note-icon">⚠️</span>
-                        <span>Odds update in real-time as more bets are placed. Final payout will be calculated when betting closes.</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 <div className="betting-section">
+                  {/* Test mode indicator */}
+                  {!match.contractMarketId && (
+                    <div className="test-mode-banner">
+                      <span className="test-mode-label">🧪 Test Mode</span>
+                      <span className="test-mode-info">Betting without blockchain interaction</span>
+                    </div>
+                  )}
+                  
                   <div className="bet-controls">
                     <div className="outcome-selector">
                       <label>Choose Outcome:</label>
@@ -744,101 +933,23 @@ const Bet = ({
 
                   
                   <button 
-                    className="place-bet-btn"
+                    className={`place-bet-btn ${!match.contractMarketId ? 'test-mode' : ''}`}
                     onClick={() => handlePlaceBet(match.id)}
-                    disabled={loading || !matchBetData[match.id]?.betAmount || matchBetData[match.id]?.betAmount <= 0}
+                    disabled={bettingLoading[match.id] || !matchBetData[match.id]?.betAmount || matchBetData[match.id]?.betAmount <= 0}
                   >
-                    {loading ? (
+                    {bettingLoading[match.id] ? (
                       <div className="btn-loading">
                         <span className="loading-spinner"></span>
                         Placing Bet...
                       </div>
                     ) : (
                       <>
-                        <span className="btn-icon">🎯</span>
-                        Place Bet
+                        <span className="btn-icon">{!match.contractMarketId ? '🧪' : '🎯'}</span>
+                        {!match.contractMarketId ? 'Place Test Bet' : 'Place Bet'}
                       </>
                     )}
                   </button>
                 </div>
-
-                {userBets[match.id] && (
-                  <div className="user-bet-info">
-                    <h4>Your Bet</h4>
-                    <div className="bet-details">
-                      <div className="detail-item">
-                        <span className="detail-label">Outcome:</span>
-                        <span className="detail-value">
-                          {userBets[match.id].outcome === 1 
-                            ? match.homeTeam 
-                            : userBets[match.id].outcome === 2 
-                              ? 'Draw' 
-                              : match.awayTeam}
-                        </span>
-                      </div>
-                      <div className="detail-item">
-                        <span className="detail-label">Amount:</span>
-                        <span className="detail-value">{(userBets[match.id].amount / 1e18).toFixed(4)} ETH</span>
-                      </div>
-                      <div className="detail-item">
-                        <span className="detail-label">Status:</span>
-                        <span className="detail-value">
-                          {userBets[match.id].claimed 
-                            ? 'Claimed' 
-                            : userBets[match.id].refunded 
-                              ? 'Refunded' 
-                              : 'Active'}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {userBets[match.id].claimed && (
-                      <div className="claim-info">
-                        <span className="claim-icon">✅</span>
-                        <span className="claim-text">Your payout has been claimed.</span>
-                      </div>
-                    )}
-                    
-                    {userBets[match.id].refunded && (
-                      <div className="refund-info">
-                        <span className="refund-icon">💸</span>
-                        <span className="refund-text">Your bet was refunded.</span>
-                      </div>
-                    )}
-                    
-                    {!userBets[match.id].claimed && !userBets[match.id].refunded && (
-                      <div className="payout-potential">
-                        <h5>Potential Payout</h5>
-                        <div className="payout-details">
-                          <div className="detail-item">
-                            <span className="detail-label">Odds:</span>
-                            <span className="detail-value">
-                              {payoutCalculations[match.id]?.odds.toFixed(2) || 'N/A'}
-                            </span>
-                          </div>
-                          <div className="detail-item">
-                            <span className="detail-label">Gross Payout:</span>
-                            <span className="detail-value">
-                              {payoutCalculations[match.id]?.grossPayout.toFixed(4) || 'N/A'} ETH
-                            </span>
-                          </div>
-                          <div className="detail-item">
-                            <span className="detail-label">Fee (3%):</span>
-                            <span className="detail-value">
-                              {payoutCalculations[match.id]?.feeAmount.toFixed(4) || 'N/A'} ETH
-                            </span>
-                          </div>
-                          <div className="detail-item">
-                            <span className="detail-label">Net Payout:</span>
-                            <span className="detail-value">
-                              {payoutCalculations[match.id]?.netPayout.toFixed(4) || 'N/A'} ETH
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             ))}
           </div>

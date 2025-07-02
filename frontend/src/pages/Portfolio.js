@@ -61,32 +61,17 @@ const Portfolio = ({
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const response = await fetch('http://localhost:4000/api/matches?upcoming=true&limit=30');
+        const response = await fetch('http://localhost:4000/api/matches');
         const data = await response.json();
         if (data.success) {
-          // Use the same transformation logic as Bet.js to ensure ID consistency
-          // Remove duplicates based on title and teams
-          const uniqueMatches = data.data.filter((match, index, self) => 
-            index === self.findIndex(m => 
-              m.title === match.title && 
-              m.home_team === match.home_team && 
-              m.away_team === match.away_team
-            )
-          );
-          
-          // Map to contract market IDs (0-29) to match Bet.js logic
-          const transformedMatches = uniqueMatches
-            .slice(0, 30) // Only take first 30 matches since contract has 30 markets
-            .map((match, index) => ({
-              id: index, // This is the contract market ID (0-29) - same as Bet.js
-              homeTeam: match.home_team,
-              awayTeam: match.away_team,
-              league: match.league,
-              description: match.description,
-              startTime: match.start_time,
-              sport: match.sport,
-              category: match.category
-            }));
+          // Use the same match data structure as Bet.js - keep original IDs
+          const transformedMatches = data.data.map(match => ({
+            ...match,
+            contractMarketId: match.contract_market_id,
+            homeTeam: match.home_team,
+            awayTeam: match.away_team,
+            startTime: match.start_time
+          }));
           setMatches(transformedMatches);
         }
       } catch (error) {
@@ -134,9 +119,50 @@ const Portfolio = ({
     }
   };
 
+  // Helper function to safely convert BigInt to number for calculations
+  const safeToNumber = (value) => {
+    if (typeof value === 'bigint') {
+      return parseFloat(value.toString());
+    }
+    if (typeof value === 'string') {
+      return parseFloat(value);
+    }
+    return Number(value) || 0;
+  };
+
   const formatEther = (wei) => {
     if (!wei) return '0';
-    return (parseFloat(wei) / 1e18).toFixed(4);
+    return (safeToNumber(wei) / 1e18).toFixed(4);
+  };
+
+  // Helper function to get outcome name from number
+  const getOutcomeName = (outcomeNumber, match) => {
+    // Convert to number if it's a BigInt or string
+    const outcome = safeToNumber(outcomeNumber);
+    
+    const homeTeam = match?.homeTeam || match?.home_team || 'Home Team';
+    const awayTeam = match?.awayTeam || match?.away_team || 'Away Team';
+    
+    console.log('🎯 Getting outcome name for:', outcome, 'Match:', homeTeam, 'vs', awayTeam);
+    
+    switch (outcome) {
+      case 1:
+        return homeTeam;
+      case 2:
+        // Check if this sport has draw option
+        const sportsWithDraw = ['Football', 'Soccer'];
+        const sport = match?.sport || '';
+        if (sportsWithDraw.includes(sport)) {
+          return 'Draw';
+        } else {
+          // For sports without draw, outcome 2 is away team
+          return awayTeam;
+        }
+      case 3:
+        return awayTeam;
+      default:
+        return `Outcome ${outcome}`;
+    }
   };
 
   if (!account) {
@@ -155,8 +181,43 @@ const Portfolio = ({
     );
   }
 
-  const activeBets = userBets.filter(bet => !bet.market.isResolved);
-  const resolvedBets = userBets.filter(bet => bet.market.isResolved);
+  // Helper function to deduplicate bets - prefer database bets over blockchain bets
+  const deduplicateBets = (blockchainBets, databaseBets) => {
+    // Create a set of market IDs that exist in database bets
+    const dbMarketIds = new Set();
+    databaseBets.forEach(dbBet => {
+      // Add various possible market ID formats
+      if (dbBet.marketId) dbMarketIds.add(dbBet.marketId);
+      if (dbBet.market_id) dbMarketIds.add(dbBet.market_id);
+      if (dbBet.contractMarketId) dbMarketIds.add(dbBet.contractMarketId);
+      if (dbBet.contract_market_id) dbMarketIds.add(dbBet.contract_market_id);
+    });
+
+    console.log('🔍 Deduplication process:');
+    console.log('  - Database market IDs found:', Array.from(dbMarketIds));
+    console.log('  - Blockchain bets before dedup:', blockchainBets.map(b => `Market ${b.marketId}`));
+    console.log('  - Database bets:', databaseBets.map(b => `Market ${b.marketId || b.market_id} (${b.status})`));
+
+    // Filter out blockchain bets that have corresponding database entries
+    const filteredBlockchainBets = blockchainBets.filter(blockchainBet => {
+      const hasDbEntry = dbMarketIds.has(blockchainBet.marketId);
+      if (hasDbEntry) {
+        console.log(`  ❌ Filtering out blockchain bet for market ${blockchainBet.marketId} (has database entry)`);
+      } else {
+        console.log(`  ✅ Keeping blockchain bet for market ${blockchainBet.marketId} (no database entry)`);
+      }
+      return !hasDbEntry;
+    });
+
+    console.log('  - Final result: blockchain bets after dedup:', filteredBlockchainBets.map(b => `Market ${b.marketId}`));
+    return filteredBlockchainBets;
+  };
+
+  // Apply deduplication
+  const deduplicatedUserBets = deduplicateBets(userBets, databaseBets);
+  
+  const activeBets = deduplicatedUserBets.filter(bet => !bet.market.isResolved);
+  const resolvedBets = deduplicatedUserBets.filter(bet => bet.market.isResolved);
   const winningBets = resolvedBets.filter(bet => bet.bet.outcome === bet.market.winningOutcome);
   const losingBets = resolvedBets.filter(bet => bet.bet.outcome !== bet.market.winningOutcome);
 
@@ -164,24 +225,25 @@ const Portfolio = ({
   const pendingDbBets = databaseBets.filter(bet => bet.status === 'pending' || bet.status === 'confirmed');
   const resolvedDbBets = databaseBets.filter(bet => bet.status === 'won' || bet.status === 'lost');
 
-  const totalWagered = userBets.reduce((total, bet) => total + parseFloat(formatEther(bet.bet.amount)), 0) + 
+  const totalWagered = deduplicatedUserBets.reduce((total, bet) => total + parseFloat(formatEther(bet.bet.amount)), 0) + 
                        databaseBets.reduce((total, bet) => total + parseFloat(bet.amountWei) / 1e18, 0);
   const winRate = resolvedBets.length + resolvedDbBets.length > 0 ? 
     (((winningBets.length + databaseBets.filter(bet => bet.status === 'won').length) / 
       (resolvedBets.length + resolvedDbBets.length)) * 100).toFixed(1) : 0;
 
   const renderBetCard = (betData) => {
-    const match = matches.find(m => m.id === betData.marketId);
-    const matchName = match ? `${match.homeTeam} vs ${match.awayTeam}` : `Market #${betData.marketId}`;
+    // Try multiple ways to find the match
+    const match = matches.find(m => 
+      m.id === betData.marketId || 
+      m.contractMarketId === betData.marketId ||
+      m.contract_market_id === betData.marketId
+    );
+    const matchName = match ? `${match.home_team || match.homeTeam} vs ${match.away_team || match.awayTeam}` : `Market #${betData.marketId}`;
     
-    const getOutcomeName = (outcome) => {
-      if (!match) return `Outcome ${outcome}`;
-      if (outcome === 1) return match.homeTeam;
-      if (outcome === 2 && match.odds && match.odds.draw > 0) return 'Draw';
-      if ((outcome === 2 && (!match.odds || match.odds.draw === 0)) || outcome === 3) return match.awayTeam;
-      return `Outcome ${outcome}`;
-    };
-
+    // Convert outcome number to proper format for getOutcomeName
+    const outcomeNumber = safeToNumber(betData.bet.outcome);
+    console.log('🎯 Rendering blockchain bet - Market:', betData.marketId, 'Outcome:', outcomeNumber, 'Match:', match);
+    
     return (
       <div key={betData.marketId} className="bet-card">
         <div className="bet-header">
@@ -194,7 +256,7 @@ const Portfolio = ({
         <div className="bet-details">
           <div className="detail-item">
             <span className="detail-label">🎲 Outcome:</span>
-            <span className="detail-value">{getOutcomeName(betData.bet.outcome)}</span>
+            <span className="detail-value">{getOutcomeName(outcomeNumber, match)}</span>
           </div>
           <div className="detail-item">
             <span className="detail-label">💰 Amount:</span>
@@ -202,21 +264,25 @@ const Portfolio = ({
           </div>
           <div className="detail-item">
             <span className="detail-label">🧾 Fee:</span>
-            <span className="detail-value">{betData.bet.feePercent}%</span>
+            <span className="detail-value">{betData.bet.feePercent || betData.feePercent || '3'}%</span>
           </div>
           <div className="detail-item">
             <span className="detail-label">📅 Placed:</span>
-            <span className="detail-value">{new Date().toLocaleDateString()}</span>
+            <span className="detail-value">{
+              betData.bet.placedAt && Number(betData.bet.placedAt) > 0 
+                ? new Date(Number(betData.bet.placedAt) * 1000).toLocaleDateString()
+                : 'Unknown'
+            }</span>
           </div>
         </div>
         
         {betData.market.isResolved && (
           <div className="resolution-section">
             <div className="winning-outcome">
-              <strong>🏆 Winning Outcome:</strong> {getOutcomeName(betData.market.winningOutcome)}
+              <strong>🏆 Winning Outcome:</strong> {getOutcomeName(safeToNumber(betData.market.winningOutcome), match)}
             </div>
             
-            {betData.bet.outcome === betData.market.winningOutcome ? (
+            {safeToNumber(betData.bet.outcome) === safeToNumber(betData.market.winningOutcome) ? (
               <div className="winning-bet">
                 {betData.bet.claimed ? (
                   <span className="claimed-badge">✅ Winnings Claimed</span>
@@ -250,25 +316,22 @@ const Portfolio = ({
 
   // Render database bet card
   const renderDatabaseBetCard = (bet) => {
-    const match = matches.find(m => m.id === bet.marketId);
-    const matchName = match ? `${match.homeTeam} vs ${match.awayTeam}` : 
-                      bet.homeTeam && bet.awayTeam ? `${bet.homeTeam} vs ${bet.awayTeam}` : 
-                      `Market #${bet.marketId}`;
+    // Try multiple ways to find the match
+    const match = matches.find(m => 
+      m.id === bet.marketId || 
+      m.id === bet.market_id ||
+      m.contractMarketId === bet.marketId ||
+      m.contract_market_id === bet.marketId
+    );
     
-    const getOutcomeName = (outcome) => {
-      if (match) {
-        if (outcome === 1) return match.homeTeam;
-        if (outcome === 2 && match.sport === 'Football') return 'Draw';
-        if ((outcome === 2 && match.sport !== 'Football') || outcome === 3) return match.awayTeam;
-      }
-      if (bet.homeTeam && bet.awayTeam) {
-        if (outcome === 1) return bet.homeTeam;
-        if (outcome === 2 && bet.sport === 'Football') return 'Draw';
-        if ((outcome === 2 && bet.sport !== 'Football') || outcome === 3) return bet.awayTeam;
-      }
-      return `Outcome ${outcome}`;
-    };
-
+    const matchName = match ? `${match.home_team || match.homeTeam} vs ${match.away_team || match.awayTeam}` : 
+                      bet.homeTeam && bet.awayTeam ? `${bet.homeTeam} vs ${bet.awayTeam}` : 
+                      `Market #${bet.marketId || bet.market_id}`;
+    
+    // Convert outcome to number for consistency
+    const outcomeNumber = safeToNumber(bet.outcome);
+    console.log('🎯 Rendering database bet - Market:', bet.marketId || bet.market_id, 'Outcome:', outcomeNumber, 'Match:', match);
+    
     const getStatusColor = (status) => {
       switch (status) {
         case 'pending': return 'orange';
@@ -294,11 +357,11 @@ const Portfolio = ({
         <div className="bet-details">
           <div className="detail-item">
             <span className="detail-label">🎲 Outcome:</span>
-            <span className="detail-value">{getOutcomeName(bet.outcome)}</span>
+            <span className="detail-value">{getOutcomeName(outcomeNumber, match)}</span>
           </div>
           <div className="detail-item">
             <span className="detail-label">💰 Amount:</span>
-            <span className="detail-value">{(parseFloat(bet.amountWei) / 1e18).toFixed(4)} ETH</span>
+            <span className="detail-value">{(safeToNumber(bet.amountWei || bet.amount_wei) / 1e18).toFixed(4)} ETH</span>
           </div>
           <div className="detail-item">
             <span className="detail-label">📅 Placed:</span>
@@ -397,7 +460,7 @@ const Portfolio = ({
                 <div className="stat-card primary">
                   <div className="stat-icon">📊</div>
                   <div className="stat-content">
-                    <div className="stat-value">{userBets.length + databaseBets.length}</div>
+                    <div className="stat-value">{deduplicatedUserBets.length + databaseBets.length}</div>
                     <div className="stat-label">Total Bets</div>
                   </div>
                 </div>
@@ -440,7 +503,7 @@ const Portfolio = ({
                     <div className="metric-item">
                       <span className="metric-label">Average Bet:</span>
                       <span className="metric-value">
-                        {(userBets.length + databaseBets.length) > 0 ? (totalWagered / (userBets.length + databaseBets.length)).toFixed(4) : '0'} ETH
+                        {(deduplicatedUserBets.length + databaseBets.length) > 0 ? (totalWagered / (deduplicatedUserBets.length + databaseBets.length)).toFixed(4) : '0'} ETH
                       </span>
                     </div>
                     <div className="metric-item">
@@ -458,7 +521,7 @@ const Portfolio = ({
                   </div>
                 </div>
 
-                {(userBets.length + databaseBets.length) > 0 && (
+                {(deduplicatedUserBets.length + databaseBets.length) > 0 && (
                   <div className="stat-section">
                     <h3>🎯 Betting Patterns</h3>
                     <div className="pattern-grid">

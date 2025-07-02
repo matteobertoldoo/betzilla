@@ -11,6 +11,7 @@ import Profile from './pages/Profile';
 import PublicHome from './pages/PublicHome';
 import About from './pages/About';
 import FAQ from './pages/FAQ';
+import ParimutuelOdds from './pages/ParimutuelOdds';
 import './App.css';
 
 function AppContent() {
@@ -22,6 +23,7 @@ function AppContent() {
     error,
     connectWallet,
     placeBet,
+    placeBetWithoutGlobalLoading,
     getAllUserBets,
     claimWinnings,
     getEstimatedOdds,
@@ -68,7 +70,7 @@ function AppContent() {
                   <Bet 
                     account={account}
                     contract={contract}
-                    placeBet={placeBet}
+                    placeBet={placeBetWithoutGlobalLoading}
                     getEstimatedOdds={getEstimatedOdds}
                     getCurrentFee={getCurrentFee}
                     getMarketDetails={getMarketDetails}
@@ -76,6 +78,7 @@ function AppContent() {
                   />
                 } 
               />
+              <Route path="/odds" element={<ParimutuelOdds />} />
               <Route 
                 path="/portfolio" 
                 element={

@@ -19,6 +19,12 @@ BetZilla è una piattaforma di scommesse sportive decentralizzata costruita su b
 - **Gestione Rischi**: Sistema di validazione per prevenire scommesse non valide
 - **Trasparenza**: Tutti i risultati sono verificabili sulla blockchain
 
+### 🎲 **Parimutuel Betting System**
+- **Real-time Odds**: Live parimutuel odds calculation for matches within 24 hours
+- **Pool-based Betting**: All bets pooled together, odds based on betting distribution
+- **Transparent Calculations**: Odds = (Total Pool - Fee) / Amount on Outcome
+- **Live Updates**: Odds refresh every 30 seconds as new bets are placed
+
 ## 🏗️ Architettura del Sistema
 
 ```
@@ -278,4 +284,4 @@ Questo progetto è rilasciato sotto licenza MIT. Vedi il file `LICENSE` per i de
 
 ---
 
-**⚠️ Disclaimer**: Questo è un progetto dimostrativo. Non utilizzare per scommesse reali senza le appropriate licenze e conformità normative. 
+**⚠️ Disclaimer**: Questo è un progetto dimostrativo. Non utilizzare per scommesse reali senza le appropriate licenze e conformità normative.

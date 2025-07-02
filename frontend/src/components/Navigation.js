@@ -86,6 +86,12 @@ const Navigation = ({ account, connectWallet, loading }) => {
             🎯 Bet
           </Link>
           <Link 
+            to="/odds" 
+            className={`nav-link ${location.pathname === '/odds' ? 'active' : ''}`}
+          >
+            📈 Live Odds
+          </Link>
+          <Link 
             to="/portfolio" 
             className={`nav-link ${location.pathname === '/portfolio' ? 'active' : ''}`}
           >
