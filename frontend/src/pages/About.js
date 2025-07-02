@@ -100,20 +100,20 @@ const About = () => {
           <div className="team-grid">
             <div className="team-member">
               <div className="member-avatar">
-                <span className="avatar-emoji">👨‍💻</span>
+                <img src="https://media.licdn.com/dms/image/v2/D4D35AQFpbXIKmlyrBQ/profile-framedphoto-shrink_200_200/profile-framedphoto-shrink_200_200/0/1693577999751?e=1752098400&v=beta&t=aaXlQ5zca_Fn0m80rCcOktaXecaEtPk84JphqpamQIk" alt="Matteo Bertoldo" />
               </div>
-              <h3>Mario Rossi</h3>
+              <h3>Matteo Bertoldo</h3>
               <p className="member-role">Founder & CEO</p>
               <p className="member-bio">
-                Blockchain enthusiast with 10+ years in fintech. Passionate about democratizing sports betting.
+                Blockchain enthusiast with 2 years in fintech. Passionate about democratizing sports betting.
               </p>
             </div>
             
             <div className="team-member">
               <div className="member-avatar">
-                <span className="avatar-emoji">👩‍💼</span>
+                <img src="https://media.licdn.com/dms/image/v2/D4E03AQG9TL0Wkld_ng/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1718270904593?e=1756944000&v=beta&t=-S4fYyyb1HIUASxToz8yFcCCcAQQIKGk84GEXAyL6Ms" alt="Filippo Basilico" />
               </div>
-              <h3>Sarah Johnson</h3>
+              <h3>Filippo Basilico</h3>
               <p className="member-role">CTO</p>
               <p className="member-bio">
                 Smart contract expert and security specialist. Former lead developer at major DeFi protocols.
@@ -122,9 +122,9 @@ const About = () => {
             
             <div className="team-member">
               <div className="member-avatar">
-                <span className="avatar-emoji">👨‍🎨</span>
+                <img src="https://media.licdn.com/dms/image/v2/D5603AQHngS8gRlUPRg/profile-displayphoto-shrink_200_200/B56ZTB00zTHwAY-/0/1738418639100?e=1756944000&v=beta&t=ajWR-o4448s_BxFRJrpVDdM-53SkpJqkrcgosfGVMrE" alt="Jacopo Corrao" />
               </div>
-              <h3>Alex Chen</h3>
+              <h3>Jacopo Corrao</h3>
               <p className="member-role">Head of Design</p>
               <p className="member-bio">
                 UX/UI designer focused on creating intuitive and beautiful betting experiences.
@@ -133,9 +133,9 @@ const About = () => {
             
             <div className="team-member">
               <div className="member-avatar">
-                <span className="avatar-emoji">👩‍📊</span>
+                <img src="https://media.licdn.com/dms/image/v2/D4E03AQHLvsmnJ4gNvw/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1725904945530?e=1756944000&v=beta&t=r9wDb7VSha6LiecST1Hscx7awcbds5BfP6wDZYGWe8g" alt="Mario Sguario" />
               </div>
-              <h3>Lisa Wang</h3>
+              <h3>Mario Sguario</h3>
               <p className="member-role">Head of Marketing</p>
               <p className="member-bio">
                 Growth expert with deep knowledge of sports betting markets and user acquisition.

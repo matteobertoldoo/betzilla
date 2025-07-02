@@ -51,13 +51,40 @@ The system includes these matches within 24 hours:
 
 ## 🎲 How Parimutuel Odds Work
 
-**Formula:** `Odds = (Total Pool × 0.97) / Amount on Outcome`
+**Dynamic Fee System:**
+- **Early Betting (>24h before match):** 2% fee, odds hidden
+- **Parimutuel Phase (<24h before match):** 3% fee, live odds visible
 
-**Example from Real Madrid vs Barcelona:**
-- Total Pool: 13.32 ETH
-- Home Bets: 6.05 ETH → Odds: 2.14x
-- Draw Bets: 0.62 ETH → Odds: 20.84x (high!)
-- Away Bets: 6.65 ETH → Odds: 1.94x
+**Parimutuel Formula:** `Odds = (Total Pool × (1 - Fee%)) / Amount on Outcome`
+
+**Example Progression:**
+
+**Early Phase (48h before match):**
+- Bet: 1 ETH on Real Madrid
+- Fee: 2% (0.02 ETH)
+- Status: "Hidden odds, early discount"
+
+**Parimutuel Phase (12h before match):**
+- Total Pool: 13.32 ETH  
+- Real Madrid Bets: 6.05 ETH
+- Fee: 3% → Net Pool: 12.92 ETH
+- Real Madrid Odds: 12.92 / 6.05 = **2.14x**
+
+## 🔄 Betting Phases
+
+### Phase 1: Early Betting (>24h before match)
+- ✅ **2% Platform Fee** (discount for early bets)
+- 🔒 **Hidden Odds** (blind betting)
+- 💡 Lower risk, lower fee
+
+### Phase 2: Parimutuel Phase (<24h before match)  
+- 📈 **3% Platform Fee** (standard rate)
+- 🔥 **Live Odds Visible** (real-time updates)
+- 🎯 See exactly what you're betting on
+
+### Phase 3: Match Started
+- ❌ **Betting Closed**
+- 🏆 **Odds Finalized** for settlement
 
 ## 🧪 Test Mode Features
 

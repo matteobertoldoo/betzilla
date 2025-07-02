@@ -3,7 +3,7 @@ const database = require('../database');
 class ParimutuelService {
   
   // Calculate parimutuel odds for a match based on database bets
-  calculateParimutuelOdds(bettingSummary, hasDrawOption = true) {
+  calculateParimutuelOdds(bettingSummary, hasDrawOption = true, matchStartTime = null) {
     // If no bets placed, return default odds indicating no action
     if (!bettingSummary || bettingSummary.total_pool === 0) {
       return hasDrawOption 
@@ -16,8 +16,20 @@ class ParimutuelService {
     const outcome2Total = parseFloat(bettingSummary.outcome_2_total) || 0;
     const outcome3Total = parseFloat(bettingSummary.outcome_3_total) || 0;
 
-    // Platform fee (3% as defined in smart contract)
-    const feePercentage = 0.03;
+    // Determine fee based on time until match
+    let feePercentage = 0.03; // Default 3%
+    if (matchStartTime) {
+      const now = new Date();
+      const matchTime = new Date(matchStartTime);
+      const hoursUntilMatch = (matchTime - now) / (1000 * 60 * 60);
+      
+      if (hoursUntilMatch > 24) {
+        feePercentage = 0.02; // 2% for early bets
+      } else {
+        feePercentage = 0.03; // 3% for late bets (parimutuel phase)
+      }
+    }
+
     const netPool = totalPool * (1 - feePercentage);
 
     const odds = [];
@@ -55,6 +67,24 @@ class ParimutuelService {
     return odds;
   }
 
+  // Get betting phase information
+  getBettingPhase(matchStartTime) {
+    const now = new Date();
+    const matchTime = new Date(matchStartTime);
+    const hoursUntilMatch = (matchTime - now) / (1000 * 60 * 60);
+    
+    return {
+      isEarlyPhase: hoursUntilMatch > 24,
+      isLatePhase: hoursUntilMatch <= 24 && hoursUntilMatch > 0,
+      isMatchStarted: hoursUntilMatch <= 0,
+      hoursUntilMatch: Math.max(0, hoursUntilMatch),
+      currentFeePercent: hoursUntilMatch > 24 ? 2 : 3,
+      phaseDescription: hoursUntilMatch > 24 ? 'Early Betting (Hidden Odds)' : 
+                       hoursUntilMatch > 0 ? 'Parimutuel Phase (Live Odds)' : 
+                       'Match Started'
+    };
+  }
+
   // Get all matches in next 24 hours with calculated parimutuel odds
   async getNext24HoursMatchesWithOdds() {
     try {
@@ -62,6 +92,7 @@ class ParimutuelService {
       
       const matchesWithOdds = matches.map(match => {
         const hasDrawOption = match.sport === 'Football' || match.sport === 'Soccer';
+        const bettingPhase = this.getBettingPhase(match.start_time);
         
         const bettingSummary = {
           total_pool: match.total_pool || 0,
@@ -71,7 +102,7 @@ class ParimutuelService {
           total_bets: match.total_bets || 0
         };
 
-        const parimutuelOdds = this.calculateParimutuelOdds(bettingSummary, hasDrawOption);
+        const parimutuelOdds = this.calculateParimutuelOdds(bettingSummary, hasDrawOption, match.start_time);
         
         return {
           id: match.id,
@@ -87,6 +118,7 @@ class ParimutuelService {
           status: match.status,
           contract_market_id: match.contract_market_id,
           has_draw_option: hasDrawOption,
+          betting_phase: bettingPhase,
           betting_summary: {
             total_bets: bettingSummary.total_bets,
             total_pool_wei: bettingSummary.total_pool,

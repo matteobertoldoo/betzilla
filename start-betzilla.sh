@@ -34,6 +34,32 @@ wait_for_service() {
     return 1
 }
 
+# Function to install dependencies if needed
+install_dependencies() {
+    local dir=$1
+    local component=$2
+    
+    if [ -f "$dir/package.json" ]; then
+        if [ ! -d "$dir/node_modules" ] || [ "$dir/package.json" -nt "$dir/node_modules" ]; then
+            echo "📦 Installing $component dependencies..."
+            cd "$dir"
+            npm install
+            if [ $? -eq 0 ]; then
+                echo "✅ $component dependencies installed successfully!"
+            else
+                echo "❌ Failed to install $component dependencies"
+                exit 1
+            fi
+            cd - > /dev/null
+        else
+            echo "✅ $component dependencies already installed"
+        fi
+    else
+        echo "❌ No package.json found in $dir"
+        exit 1
+    fi
+}
+
 # Stop any existing processes first
 echo "🛑 Stopping existing processes..."
 ./stop-betzilla.sh >/dev/null 2>&1
@@ -43,6 +69,12 @@ sleep 3
 check_port 3000
 check_port 4000
 check_port 8545
+
+# Install dependencies for all components
+echo "🔍 Checking and installing dependencies..."
+install_dependencies "contracts" "Contracts"
+install_dependencies "backend" "Backend"
+install_dependencies "frontend" "Frontend"
 
 # Start Hardhat node
 echo "🔗 Starting Hardhat node..."
@@ -72,6 +104,16 @@ fi
 CONTRACT_ADDRESS=$(grep "Contract address:" ../hardhat.log | tail -1 | awk '{print $NF}')
 if [ -n "$CONTRACT_ADDRESS" ]; then
     echo "Contract address: $CONTRACT_ADDRESS"
+    
+    # Update contract address in frontend if file exists
+    FRONTEND_HOOK="../frontend/src/hooks/useBetzilla.js"
+    if [ -f "$FRONTEND_HOOK" ]; then
+        echo "📝 Updating contract address in frontend..."
+        sed -i "s/const CONTRACT_ADDRESS = '[^']*'/const CONTRACT_ADDRESS = '$CONTRACT_ADDRESS'/" "$FRONTEND_HOOK"
+        echo "✅ Contract address updated in useBetzilla.js"
+    else
+        echo "⚠️  $FRONTEND_HOOK not found, skipping contract address update."
+    fi
 else
     echo "❌ Could not extract contract address"
     exit 1
@@ -131,4 +173,4 @@ echo ""
 echo "🔍 Quick status check:"
 echo "Frontend: $(curl -s http://localhost:3000 >/dev/null && echo '✅ Online' || echo '❌ Offline')"
 echo "Backend:  $(curl -s http://localhost:4000/api/health >/dev/null && echo '✅ Online' || echo '❌ Offline')"
-echo "Hardhat:  $(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545 >/dev/null && echo '✅ Online' || echo '❌ Offline')" 
+echo "Hardhat:  $(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545 >/dev/null && echo '✅ Online' || echo '❌ Offline')"

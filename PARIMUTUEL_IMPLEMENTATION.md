@@ -22,12 +22,13 @@
 - **Visual Indicators**: Different styling for parimutuel vs blind betting modes
 
 ### 4. Key Features
-- **Parimutuel Formula**: `Odds = (Total Pool × 0.97) / Amount on Outcome`
-- **3% Platform Fee**: Deducted from total pool before calculating payouts
-- **Live Updates**: Odds change as new bets are placed
+- **Dynamic Fee System**: 2% for early bets (>24h), 3% for parimutuel phase (<24h)
+- **Phase-Based Betting**: Early blind betting transitions to live parimutuel odds
+- **Live Updates**: Odds change as new bets are placed in parimutuel phase
 - **Dual Mode System**: 
-  - Matches within 24 hours: Show live parimutuel odds
-  - Other matches: Show "blind betting" mode with hidden odds
+  - Early Phase: Hidden odds with 2% fee discount
+  - Parimutuel Phase: Live odds with 3% standard fee
+  - Blind Betting: For matches further than 24h out
 
 ## 🚀 How to Test
 

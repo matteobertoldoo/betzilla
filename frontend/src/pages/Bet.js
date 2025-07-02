@@ -288,6 +288,25 @@ const Bet = ({
     return hoursUntilMatch <= 24 && hoursUntilMatch > 0;
   };
 
+  // Get betting phase info
+  const getBettingPhaseInfo = (startTime) => {
+    const matchTime = new Date(startTime);
+    const now = new Date();
+    const timeDiff = matchTime.getTime() - now.getTime();
+    const hoursUntilMatch = timeDiff / (1000 * 60 * 60);
+    
+    return {
+      isEarlyPhase: hoursUntilMatch > 24,
+      isParimutuelPhase: hoursUntilMatch <= 24 && hoursUntilMatch > 0,
+      isMatchStarted: hoursUntilMatch <= 0,
+      hoursUntilMatch: Math.max(0, hoursUntilMatch),
+      currentFeePercent: hoursUntilMatch > 24 ? 2 : 3,
+      phaseDescription: hoursUntilMatch > 24 ? 'Early Betting (2% Fee)' : 
+                       hoursUntilMatch > 0 ? 'Parimutuel Phase (3% Fee)' : 
+                       'Match Started'
+    };
+  };
+
   // Calculate parimutuel odds based on bet amounts
   const calculateParimutuelOdds = (marketId) => {
     if (!liveOdds[marketId]) return null;
@@ -791,17 +810,21 @@ const Bet = ({
                 <div className="odds-section">
                   <h4>Current Odds</h4>
                   {(() => {
-                    const isWithin24Hours = isMatchWithin24Hours(match.startTime);
+                    const phaseInfo = getBettingPhaseInfo(match.startTime);
                     const parimutuelData = hasParimutuelOdds(match.id) ? getParimutuelOddsForMatch(match.id) : null;
-                    const showParimutuel = isWithin24Hours && parimutuelData;
+                    const showParimutuel = phaseInfo.isParimutuelPhase && parimutuelData;
                     
                     if (showParimutuel) {
                       // Show parimutuel odds for matches within 24 hours
-                      const { display, pool } = parimutuelData;
+                      const { display, pool, betting_phase } = parimutuelData;
                       return (
                         <>
                           <div className="parimutuel-banner">
                             <span className="parimutuel-label">🔥 Live Parimutuel Odds</span>
+                            <div className="phase-info">
+                              <span className="phase-description">{betting_phase?.phaseDescription || 'Parimutuel Phase'}</span>
+                              <span className="fee-info">Fee: {betting_phase?.currentFeePercent || 3}%</span>
+                            </div>
                             <span className="pool-info">Pool: {(pool.total_pool_wei / 1e18).toFixed(4)} ETH</span>
                           </div>
                           <div className="odds-display parimutuel-mode">
@@ -845,7 +868,49 @@ const Bet = ({
                           </div>
                           <div className="odds-info">
                             <span className="parimutuel-info">
-                              🎲 Parimutuel Odds - Based on current betting pool
+                              🎲 Parimutuel Odds - Pool-based, updated in real-time
+                            </span>
+                          </div>
+                        </>
+                      );
+                    } else if (phaseInfo.isEarlyPhase) {
+                      // Show early betting phase
+                      return (
+                        <>
+                          <div className="early-betting-banner">
+                            <span className="early-label">⏰ Early Betting Phase</span>
+                            <div className="phase-info">
+                              <span className="phase-description">{phaseInfo.phaseDescription}</span>
+                              <span className="time-remaining">{Math.floor(phaseInfo.hoursUntilMatch)}h until parimutuel phase</span>
+                            </div>
+                          </div>
+                          <div className="odds-display early-mode">
+                            <div className="odds-item">
+                              <div className="odds-label">🏠 {match.homeTeam}</div>
+                              <div className="odds-value hidden">
+                                Hidden
+                              </div>
+                            </div>
+                            
+                            {match.hasDrawOption && (
+                              <div className="odds-item">
+                                <div className="odds-label">🤝 Draw</div>
+                                <div className="odds-value hidden">
+                                  Hidden
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="odds-item">
+                              <div className="odds-label">✈️ {match.awayTeam}</div>
+                              <div className="odds-value hidden">
+                                Hidden
+                              </div>
+                            </div>
+                          </div>
+                          <div className="odds-info">
+                            <span className="early-info">
+                              🔒 Early Phase - Lower fees, odds revealed in parimutuel phase
                             </span>
                           </div>
                         </>
@@ -894,6 +959,20 @@ const Bet = ({
                 </div>
 
                 <div className="betting-section">
+                  {/* Fee indicator */}
+                  {(() => {
+                    const phaseInfo = getBettingPhaseInfo(match.startTime);
+                    return (
+                      <div className={`fee-indicator ${phaseInfo.isEarlyPhase ? 'early-fee' : 'late-fee'}`}>
+                        <span className="fee-label">Current Fee:</span>
+                        <span className="fee-percentage">{phaseInfo.currentFeePercent}%</span>
+                        <span className="fee-description">
+                          {phaseInfo.isEarlyPhase ? '(Early betting discount)' : '(Parimutuel phase)'}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                  
                   {/* Test mode indicator */}
                   {!match.contractMarketId && (
                     <div className="test-mode-banner">
