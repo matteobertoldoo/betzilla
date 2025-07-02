@@ -75,21 +75,28 @@ contract BetZilla {
         require(block.timestamp < market.startTime, "Match started");
         require(outcome >= 1 && outcome <= 3, "Invalid outcome");
         require(msg.value > 0, "Bet must be > 0");
-        require(bets[marketId][msg.sender].amount == 0, "Already bet");
 
         market.totalAmount += msg.value;
         market.outcomeAmounts[outcome - 1] += msg.value;
 
-        bets[marketId][msg.sender] = Bet({
-            outcome: outcome,
-            amount: msg.value,
-            claimed: false,
-            refunded: false,
-            placedAt: block.timestamp
-        });
-
-        // Aggiorna lo storico dei marketId per l'utente
-        userMarketIds[msg.sender].push(marketId);
+        // Check if this is the first bet on this market for this user
+        bool isFirstBet = bets[marketId][msg.sender].amount == 0;
+        
+        if (isFirstBet) {
+            // Create new bet and add market to user's list
+            bets[marketId][msg.sender] = Bet({
+                outcome: outcome,
+                amount: msg.value,
+                claimed: false,
+                refunded: false,
+                placedAt: block.timestamp
+            });
+            
+            userMarketIds[msg.sender].push(marketId);
+        } else {
+            // For simplicity, prevent multiple bets for now
+            require(false, "Already placed bet on this market");
+        }
 
         emit BetPlaced(marketId, msg.sender, outcome, msg.value);
     }
@@ -187,6 +194,39 @@ contract BetZilla {
         
         (bool success, ) = payable(owner).call{value: balance}("");
         require(success, "Transfer failed");
+    }
+
+    // Get estimated odds for a market (returns 100x multiplier)
+    function getEstimatedOdds(uint256 marketId) external view marketExists(marketId) returns (uint256[3] memory) {
+        Market storage market = markets[marketId];
+        
+        // If market is closed, return final odds
+        if (market.isClosed) {
+            return market.finalOdds;
+        }
+        
+        // If no bets placed yet, return default odds
+        if (market.totalAmount == 0) {
+            return [uint256(200), 200, 200]; // 2.0x odds for all outcomes
+        }
+        
+        // Calculate simple estimated odds based on current pool
+        uint256[3] memory estimatedOdds;
+        for (uint i = 0; i < 3; i++) {
+            if (market.outcomeAmounts[i] > 0) {
+                // Simple odds calculation: total pool / outcome amount
+                estimatedOdds[i] = (market.totalAmount * 100) / market.outcomeAmounts[i];
+            } else {
+                estimatedOdds[i] = 500; // 5.0x default odds for outcomes with no bets
+            }
+        }
+        
+        return estimatedOdds;
+    }
+
+    // Get current fee percentage
+    function getCurrentFee(uint256 marketId) external view marketExists(marketId) returns (uint256) {
+        return FEE_PERCENT;
     }
 
     // Getter per i marketId su cui un utente ha scommesso

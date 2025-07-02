@@ -34,7 +34,7 @@ async function main() {
           
           // Update match with contract market ID
           const marketCountBigInt = await betzilla.marketCount();
-          const contractMarketId = Number(marketCountBigInt) - 1;
+          const contractMarketId = Number(marketCountBigInt); // Market ID equals marketCount after creation
           
           try {
             await axios.patch(`${backendUrl}/api/matches/${match.id}/market`, {

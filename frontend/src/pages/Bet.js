@@ -136,7 +136,7 @@ const Bet = ({
           );
           
           // Since contract_market_id wasn't updated due to auth issues during deployment,
-          // we'll map the first 30 unique matches to contract market IDs 0-29
+          // we'll map the first 30 unique matches to contract market IDs 1-30
           // Use a hash of the match details as a stable ID to avoid position-based issues
           const transformedMatches = uniqueMatches
             .slice(0, 30) // Only take first 30 matches since contract has 30 markets
@@ -144,7 +144,7 @@ const Bet = ({
               // Create a stable ID based on match content, but still use index for contract mapping
               const stableId = `${match.home_team}_${match.away_team}_${match.start_time}`.replace(/[^a-zA-Z0-9]/g, '_');
               return {
-                id: index, // This is the contract market ID (0-29)
+                id: index + 1, // This is the contract market ID (1-30) - contract markets start from 1
                 stableId: stableId, // This is for UI consistency
                 homeTeam: match.home_team,
                 awayTeam: match.away_team,
