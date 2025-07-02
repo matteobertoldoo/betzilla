@@ -216,6 +216,73 @@ class Database {
       });
     });
   }
+
+  // Get all bets for a specific match
+  async getBetsForMatch(marketId) {
+    const query = `
+      SELECT 
+        ub.id,
+        ub.user_id,
+        ub.market_id,
+        ub.outcome,
+        ub.amount_wei,
+        ub.transaction_hash,
+        ub.status,
+        ub.placed_at,
+        ub.is_winner,
+        ub.winnings_wei,
+        u.username,
+        u.wallet_address
+      FROM user_bets ub
+      JOIN users u ON ub.user_id = u.id
+      WHERE ub.market_id = ? AND ub.status = 'confirmed'
+      ORDER BY ub.placed_at DESC
+    `;
+    
+    return this.all(query, [marketId]);
+  }
+
+  // Get all matches in the next 24 hours with their bets
+  async getMatchesWithBetsNext24Hours() {
+    const query = `
+      SELECT 
+        m.*,
+        COUNT(ub.id) as total_bets,
+        SUM(CASE WHEN ub.outcome = 1 THEN CAST(ub.amount_wei AS REAL) ELSE 0 END) as outcome_1_total,
+        SUM(CASE WHEN ub.outcome = 2 THEN CAST(ub.amount_wei AS REAL) ELSE 0 END) as outcome_2_total,
+        SUM(CASE WHEN ub.outcome = 3 THEN CAST(ub.amount_wei AS REAL) ELSE 0 END) as outcome_3_total,
+        SUM(CAST(ub.amount_wei AS REAL)) as total_pool
+      FROM matches m
+      LEFT JOIN user_bets ub ON m.id = ub.market_id AND ub.status = 'confirmed'
+      WHERE datetime(m.start_time) BETWEEN datetime('now') AND datetime('now', '+24 hours')
+      GROUP BY m.id
+      ORDER BY m.start_time ASC
+    `;
+    
+    return this.all(query);
+  }
+
+  // Get summary statistics for a match
+  async getMatchBettingSummary(marketId) {
+    const query = `
+      SELECT 
+        market_id,
+        COUNT(*) as total_bets,
+        COUNT(DISTINCT user_id) as unique_bettors,
+        SUM(CAST(amount_wei AS REAL)) as total_pool,
+        SUM(CASE WHEN outcome = 1 THEN CAST(amount_wei AS REAL) ELSE 0 END) as outcome_1_total,
+        SUM(CASE WHEN outcome = 2 THEN CAST(amount_wei AS REAL) ELSE 0 END) as outcome_2_total,
+        SUM(CASE WHEN outcome = 3 THEN CAST(amount_wei AS REAL) ELSE 0 END) as outcome_3_total,
+        SUM(CASE WHEN outcome = 1 THEN 1 ELSE 0 END) as outcome_1_bets,
+        SUM(CASE WHEN outcome = 2 THEN 1 ELSE 0 END) as outcome_2_bets,
+        SUM(CASE WHEN outcome = 3 THEN 1 ELSE 0 END) as outcome_3_bets
+      FROM user_bets
+      WHERE market_id = ? AND status = 'confirmed'
+      GROUP BY market_id
+    `;
+    
+    return this.get(query, [marketId]);
+  }
 }
 
 module.exports = new Database();

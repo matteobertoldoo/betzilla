@@ -74,11 +74,11 @@ const Portfolio = ({
             )
           );
           
-          // Map to contract market IDs (1-30) to match Bet.js logic
+          // Map to contract market IDs (0-29) to match Bet.js logic
           const transformedMatches = uniqueMatches
             .slice(0, 30) // Only take first 30 matches since contract has 30 markets
             .map((match, index) => ({
-              id: index + 1, // This is the contract market ID (1-30) - same as Bet.js
+              id: index, // This is the contract market ID (0-29) - same as Bet.js
               homeTeam: match.home_team,
               awayTeam: match.away_team,
               league: match.league,
@@ -164,34 +164,11 @@ const Portfolio = ({
   const pendingDbBets = databaseBets.filter(bet => bet.status === 'pending' || bet.status === 'confirmed');
   const resolvedDbBets = databaseBets.filter(bet => bet.status === 'won' || bet.status === 'lost');
 
-  // Merge and deduplicate bets: prioritize blockchain bets over database bets
-  // If a bet exists in both blockchain and database (same marketId + similar amount), show only the blockchain version
-  const mergeAndDeduplicateBets = (blockchainBets, databaseBets) => {
-    const deduplicatedDatabaseBets = databaseBets.filter(dbBet => {
-      // Check if this database bet has a corresponding blockchain bet
-      const hasBlockchainVersion = blockchainBets.some(bcBet => {
-        const sameMarket = bcBet.marketId === dbBet.marketId;
-        const bcAmountEth = parseFloat(formatEther(bcBet.bet.amount));
-        const dbAmountEth = parseFloat(dbBet.amountWei) / 1e18;
-        const similarAmount = Math.abs(bcAmountEth - dbAmountEth) < 0.0001; // Small tolerance for floating point comparison
-        return sameMarket && similarAmount;
-      });
-      
-      // Only include database bet if no corresponding blockchain bet exists
-      return !hasBlockchainVersion;
-    });
-    
-    return [...blockchainBets, ...deduplicatedDatabaseBets];
-  };
-
-  // Create merged active and resolved bets
-  const mergedActiveBets = mergeAndDeduplicateBets(activeBets, pendingDbBets);
-  const mergedResolvedBets = mergeAndDeduplicateBets(resolvedBets, resolvedDbBets);
-
   const totalWagered = userBets.reduce((total, bet) => total + parseFloat(formatEther(bet.bet.amount)), 0) + 
                        databaseBets.reduce((total, bet) => total + parseFloat(bet.amountWei) / 1e18, 0);
-  const winRate = mergedResolvedBets.length > 0 ? 
-    (((winningBets.length + databaseBets.filter(bet => bet.status === 'won').length) / mergedResolvedBets.length) * 100).toFixed(1) : 0;
+  const winRate = resolvedBets.length + resolvedDbBets.length > 0 ? 
+    (((winningBets.length + databaseBets.filter(bet => bet.status === 'won').length) / 
+      (resolvedBets.length + resolvedDbBets.length)) * 100).toFixed(1) : 0;
 
   const renderBetCard = (betData) => {
     const match = matches.find(m => m.id === betData.marketId);
@@ -272,7 +249,7 @@ const Portfolio = ({
   };
 
   // Render database bet card
-  const renderDatabaseBetCard = (bet, index = 0) => {
+  const renderDatabaseBetCard = (bet) => {
     const match = matches.find(m => m.id === bet.marketId);
     const matchName = match ? `${match.homeTeam} vs ${match.awayTeam}` : 
                       bet.homeTeam && bet.awayTeam ? `${bet.homeTeam} vs ${bet.awayTeam}` : 
@@ -303,7 +280,7 @@ const Portfolio = ({
     };
 
     return (
-      <div key={bet.id || `db-bet-${bet.marketId}-${index}`} className="bet-card database-bet">
+      <div key={bet.id} className="bet-card database-bet">
         <div className="bet-header">
           <h3 className="match-name">{matchName}</h3>
           <span className={`status-badge ${bet.status}`} style={{ backgroundColor: getStatusColor(bet.status) }}>
@@ -360,13 +337,13 @@ const Portfolio = ({
             className={`tab-btn ${activeTab === 'active' ? 'active' : ''}`}
             onClick={() => setActiveTab('active')}
           >
-            ⏳ Active Bets ({mergedActiveBets.length})
+            ⏳ Active Bets ({activeBets.length + pendingDbBets.length})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'resolved' ? 'active' : ''}`}
             onClick={() => setActiveTab('resolved')}
           >
-            ✅ Resolved Bets ({mergedResolvedBets.length})
+            ✅ Resolved Bets ({resolvedBets.length + resolvedDbBets.length})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'statistics' ? 'active' : ''}`}
@@ -380,11 +357,10 @@ const Portfolio = ({
         <div className="tab-content">
           {activeTab === 'active' && (
             <div className="active-bets-section">
-              {mergedActiveBets.length > 0 ? (
+              {(activeBets.length > 0 || pendingDbBets.length > 0) ? (
                 <div className="bets-grid">
-                  {mergedActiveBets.map((bet, index) => 
-                    bet.bet ? renderBetCard(bet) : renderDatabaseBetCard(bet, index)
-                  )}
+                  {activeBets.map(renderBetCard)}
+                  {pendingDbBets.map(renderDatabaseBetCard)}
                 </div>
               ) : (
                 <div className="empty-state">
@@ -399,11 +375,10 @@ const Portfolio = ({
 
           {activeTab === 'resolved' && (
             <div className="resolved-bets-section">
-              {mergedResolvedBets.length > 0 ? (
+              {(resolvedBets.length > 0 || resolvedDbBets.length > 0) ? (
                 <div className="bets-grid">
-                  {mergedResolvedBets.map((bet, index) => 
-                    bet.bet ? renderBetCard(bet) : renderDatabaseBetCard(bet, index)
-                  )}
+                  {resolvedBets.map(renderBetCard)}
+                  {resolvedDbBets.map(renderDatabaseBetCard)}
                 </div>
               ) : (
                 <div className="empty-state">
@@ -422,7 +397,7 @@ const Portfolio = ({
                 <div className="stat-card primary">
                   <div className="stat-icon">📊</div>
                   <div className="stat-content">
-                    <div className="stat-value">{mergedActiveBets.length + mergedResolvedBets.length}</div>
+                    <div className="stat-value">{userBets.length + databaseBets.length}</div>
                     <div className="stat-label">Total Bets</div>
                   </div>
                 </div>

@@ -12,6 +12,7 @@ const { errorHandler } = require('./middleware/auth');
 const authRoutes = require('./routes/auth');
 const bettingRoutes = require('./routes/betting');
 const matchRoutes = require('./routes/matches');
+const parimutuelRoutes = require('./routes/parimutuel');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -46,6 +47,9 @@ app.use('/api/betting', bettingRoutes);
 
 // Match routes
 app.use('/api/matches', matchRoutes);
+
+// Parimutuel odds routes
+app.use('/api/parimutuel', parimutuelRoutes);
 
 // Sample match data
 const matches = [
