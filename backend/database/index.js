@@ -73,6 +73,25 @@ class Database {
         )
       `;
 
+      const createMatchesTable = `
+        CREATE TABLE IF NOT EXISTS matches (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title VARCHAR(255) NOT NULL,
+          description TEXT,
+          category VARCHAR(50) NOT NULL,
+          sport VARCHAR(50) NOT NULL,
+          league VARCHAR(100),
+          home_team VARCHAR(100),
+          away_team VARCHAR(100),
+          start_time DATETIME NOT NULL,
+          end_time DATETIME,
+          status VARCHAR(20) DEFAULT 'scheduled',
+          contract_market_id INTEGER,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `;
+
       const createIndexes = `
         CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
         CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
@@ -80,6 +99,10 @@ class Database {
         CREATE INDEX IF NOT EXISTS idx_user_sessions_token ON user_sessions(token_hash);
         CREATE INDEX IF NOT EXISTS idx_user_bets_user_id ON user_bets(user_id);
         CREATE INDEX IF NOT EXISTS idx_user_bets_market_id ON user_bets(market_id);
+        CREATE INDEX IF NOT EXISTS idx_matches_category ON matches(category);
+        CREATE INDEX IF NOT EXISTS idx_matches_sport ON matches(sport);
+        CREATE INDEX IF NOT EXISTS idx_matches_start_time ON matches(start_time);
+        CREATE INDEX IF NOT EXISTS idx_matches_status ON matches(status);
       `;
 
       // Execute table creation
@@ -103,6 +126,14 @@ class Database {
         this.db.run(createUserBetsTable, (err) => {
           if (err) {
             console.error('Error creating user_bets table:', err.message);
+            reject(err);
+            return;
+          }
+        });
+
+        this.db.run(createMatchesTable, (err) => {
+          if (err) {
+            console.error('Error creating matches table:', err.message);
             reject(err);
             return;
           }

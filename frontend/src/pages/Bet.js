@@ -19,10 +19,33 @@ const Bet = ({
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const response = await fetch('/api/markets');
+        const response = await fetch('http://localhost:4000/api/matches?upcoming=true&limit=30');
         const data = await response.json();
         if (data.success) {
-          setMatches(data.markets);
+          console.log('Raw matches from API:', data.data);
+          
+          // Since contract_market_id wasn't updated due to auth issues during deployment,
+          // we'll map the first 30 matches to contract market IDs 0-29
+          const transformedMatches = data.data
+            .slice(0, 30) // Only take first 30 matches since contract has 30 markets
+            .map((match, index) => ({
+              id: index, // Use sequential index as market ID (0-29)
+              homeTeam: match.home_team,
+              awayTeam: match.away_team,
+              league: match.league,
+              description: match.description,
+              startTime: match.start_time,
+              sport: match.sport,
+              category: match.category,
+              odds: {
+                home: 0, // Will be fetched from contract
+                away: 0, // Will be fetched from contract
+                draw: match.sport === 'Football' ? 0 : -1 // Only football has draws
+              }
+            }));
+          
+          console.log('Transformed matches for frontend:', transformedMatches);
+          setMatches(transformedMatches);
         }
       } catch (error) {
         console.error('Error fetching matches:', error);
@@ -123,10 +146,14 @@ const Bet = ({
                 <div className="match-header">
                   <div className="teams">
                     <h3>{match.homeTeam} vs {match.awayTeam}</h3>
-                    <span className="league-badge">{match.league}</span>
+                    <div className="match-badges">
+                      <span className="league-badge">{match.league}</span>
+                      <span className="sport-badge">{match.sport}</span>
+                    </div>
                   </div>
                   <div className="match-info">
                     <span className="match-date">📅 {new Date(match.startTime).toLocaleDateString()}</span>
+                    <span className="match-time">⏰ {new Date(match.startTime).toLocaleTimeString()}</span>
                   </div>
                 </div>
                 

@@ -4,7 +4,7 @@ import BetZillaArtifact from '../abi/BetZilla.json';
 const BetZillaABI = BetZillaArtifact.abi;
 
 // Contract address from latest deployment
-const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const CONTRACT_ADDRESS = '0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690';
 
 export const useBetzilla = () => {
   const [contract, setContract] = useState(null);
@@ -27,8 +27,6 @@ export const useBetzilla = () => {
 
       if (accounts.length > 0) {
         const provider = new ethers.BrowserProvider(window.ethereum);
-        const network = await provider.getNetwork();
-        console.log('Connected network:', network.chainId); // <--- AGGIUNTO
         const signer = await provider.getSigner();
         
         setAccount(accounts[0]);
@@ -57,7 +55,7 @@ export const useBetzilla = () => {
       setError(null);
 
       if (!window.ethereum) {
-        throw new Error('MetaMask not installed');
+        throw new Error('MetaMask not installed. Please install MetaMask to continue.');
       }
 
       // Request account access
@@ -81,8 +79,23 @@ export const useBetzilla = () => {
 
       return accounts[0];
     } catch (err) {
-      setError(err.message);
-      throw err;
+      console.error('Error connecting wallet:', err);
+      
+      // Handle specific error cases
+      let errorMessage = 'Failed to connect wallet';
+      
+      if (err.code === 4001) {
+        errorMessage = 'User rejected the connection request';
+      } else if (err.code === -32002) {
+        errorMessage = 'MetaMask is already processing a connection request';
+      } else if (err.message) {
+        errorMessage = err.message;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      }
+      
+      setError(errorMessage);
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -192,7 +205,7 @@ export const useBetzilla = () => {
     }
   };
 
-  // Get all user bets (usando getUserMarkets e Promise.all)
+  // Get all user bets (using getUserMarkets and Promise.all)
   const getAllUserBets = async () => {
     if (!contract || !account) {
       throw new Error('Wallet not connected');
@@ -200,9 +213,25 @@ export const useBetzilla = () => {
 
     try {
       console.log('🔍 Fetching user bets for account:', account);
-      console.log('📋 Contract address:', CONTRACT_ADDRESS);
 
-      const userMarketIds = await contract.getUserMarkets(account);
+      // Check if contract is properly connected first
+      if (!contract.target) {
+        throw new Error('Contract not properly initialized');
+      }
+
+      let userMarketIds;
+      try {
+        userMarketIds = await contract.getUserMarkets(account);
+      } catch (getUserMarketsError) {
+        console.error('❌ Error calling getUserMarkets:', getUserMarketsError);
+        // If getUserMarkets fails, return empty array instead of throwing
+        return [];
+      }
+
+      // If no markets, return empty array
+      if (!userMarketIds || userMarketIds.length === 0) {
+        return [];
+      }
 
       const userBets = await Promise.all(
         userMarketIds.map(async (id) => {
@@ -233,24 +262,21 @@ export const useBetzilla = () => {
         })
       );
 
-      console.log('🧪 Amount type:', typeof userBets[0]?.bet.amount, userBets[0]?.bet.amount?.toString());
+      // Simplified filtering - just check if amount > 0
       const filteredBets = userBets.filter(bet => {
         const amount = bet.bet.amount;
-        console.log('🧪 amount:', amount, 'type:', typeof amount);
-        if (amount && typeof amount === 'object' && typeof amount.gt === 'function') {
-          // BigNumber: usa .gt(0)
-          return amount.gt(0);
-        } else {
-          // Altrimenti confronto numerico
-          return Number(amount) > 0;
-        }
+        return amount && Number(amount) > 0;
       });
-      console.log('🎯 Total user bets found:', filteredBets.length);
+      
       return filteredBets;
     } catch (err) {
       console.error('💥 Error in getAllUserBets:', err);
-      setError(err.message);
-      throw err;
+      // Don't set error state for empty results
+      if (!err.message.includes('No markets found')) {
+        setError(err.message);
+      }
+      // Return empty array instead of throwing for better UX
+      return [];
     }
   };
 
@@ -278,17 +304,68 @@ export const useBetzilla = () => {
   // Get match details from backend
   const getMatchDetails = async (marketId) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/matches`);
+      const response = await fetch(`http://localhost:4000/api/matches/${marketId}`);
       const data = await response.json();
       
-      if (data.success && data.matches) {
-        // Find match by ID (marketId corresponds to match id)
-        const match = data.matches.find(m => m.id === marketId);
-        return match || null;
+      if (data.success && data.data) {
+        return data.data;
       }
       return null;
     } catch (error) {
       console.error('Error fetching match details:', error);
+      return null;
+    }
+  };
+
+  // Get all matches
+  const getAllMatches = async (filters = {}) => {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      if (filters.upcoming) queryParams.append('upcoming', 'true');
+      if (filters.category) queryParams.append('category', filters.category);
+      if (filters.sport) queryParams.append('sport', filters.sport);
+      if (filters.limit) queryParams.append('limit', filters.limit);
+      
+      const response = await fetch(`http://localhost:4000/api/matches?${queryParams}`);
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        return data.data;
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching matches:', error);
+      return [];
+    }
+  };
+
+  // Get estimated odds for a market
+  const getEstimatedOdds = async (marketId) => {
+    if (!contract) {
+      return null;
+    }
+
+    try {
+      const odds = await contract.getEstimatedOdds(marketId);
+      return odds;
+    } catch (error) {
+      console.error('Error fetching estimated odds:', error);
+      return null;
+    }
+  };
+
+  // Get current fee for a market
+  const getCurrentFee = async (marketId) => {
+    if (!contract) {
+      return null;
+    }
+
+    try {
+      const fee = await contract.getCurrentFee(marketId);
+      return fee;
+    } catch (error) {
+      console.error('Error fetching current fee:', error);
       return null;
     }
   };
@@ -306,5 +383,8 @@ export const useBetzilla = () => {
     getAllUserBets,
     claimWinnings,
     getMatchDetails,
+    getAllMatches,
+    getEstimatedOdds,
+    getCurrentFee,
   };
 };

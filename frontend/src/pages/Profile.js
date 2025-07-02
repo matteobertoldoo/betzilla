@@ -1,43 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import './Profile.css';
 
 const Profile = ({ account, contract }) => {
   const { user, logout } = useAuth();
-  const [userStats, setUserStats] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     username: user?.username || '',
     email: user?.email || ''
   });
-
-  useEffect(() => {
-    fetchUserStats();
-  }, []);
-
-  const fetchUserStats = async () => {
-    try {
-      const token = localStorage.getItem('betzilla_token');
-      if (!token) return;
-
-      const response = await fetch('http://localhost:4000/api/betting/stats', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUserStats(data.stats);
-      }
-    } catch (error) {
-      console.error('Failed to fetch user stats:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const formatAddress = (address) => {
     if (!address) return 'Not connected';
@@ -58,15 +29,9 @@ const Profile = ({ account, contract }) => {
     });
   };
 
-  const formatEther = (wei) => {
-    if (!wei || wei === '0') return '0.00';
-    return (parseFloat(wei) / 1e18).toFixed(4);
-  };
-
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    // This would require implementing user profile update API
-    console.log('Profile update functionality not implemented yet');
+    // TODO: Implement user profile update API
     setIsEditing(false);
   };
 
@@ -137,73 +102,73 @@ const Profile = ({ account, contract }) => {
           </div>
         </div>
 
-        <div className="profile-grid">
-          {/* Personal Information */}
-          <div className="profile-card">
-            <div className="card-header">
-              <h2>📋 Personal Information</h2>
-              <p>Your account details</p>
-            </div>
-            
-            {isEditing ? (
-              <form onSubmit={handleEditSubmit} className="edit-form">
-                <div className="form-group">
-                  <label>Username</label>
-                  <input
-                    type="text"
-                    value={editForm.username}
-                    onChange={(e) => setEditForm(prev => ({...prev, username: e.target.value}))}
-                    placeholder="Enter username"
-                  />
+        {/* Personal Information in Header Section */}
+        <div className="profile-card personal-info-card">
+          <div className="card-header">
+            <h2>📋 Personal Information</h2>
+            <p>Your account details</p>
+          </div>
+          
+          {isEditing ? (
+            <form onSubmit={handleEditSubmit} className="edit-form">
+              <div className="form-group">
+                <label>Username</label>
+                <input
+                  type="text"
+                  value={editForm.username}
+                  onChange={(e) => setEditForm(prev => ({...prev, username: e.target.value}))}
+                  placeholder="Enter username"
+                />
+              </div>
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm(prev => ({...prev, email: e.target.value}))}
+                  placeholder="Enter email"
+                />
+              </div>
+              <div className="form-actions">
+                <button type="submit" className="save-btn">💾 Save Changes</button>
+              </div>
+            </form>
+          ) : (
+            <div className="personal-details">
+              <div className="detail-row">
+                <div className="detail-label">
+                  <span className="label-icon">👤</span>
+                  Username
                 </div>
-                <div className="form-group">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    value={editForm.email}
-                    onChange={(e) => setEditForm(prev => ({...prev, email: e.target.value}))}
-                    placeholder="Enter email"
-                  />
-                </div>
-                <div className="form-actions">
-                  <button type="submit" className="save-btn">💾 Save Changes</button>
-                </div>
-              </form>
-            ) : (
-              <div className="personal-details">
-                <div className="detail-row">
-                  <div className="detail-label">
-                    <span className="label-icon">👤</span>
-                    Username
-                  </div>
-                  <div className="detail-value">
-                    <span>{user.username}</span>
-                  </div>
-                </div>
-                
-                <div className="detail-row">
-                  <div className="detail-label">
-                    <span className="label-icon">📧</span>
-                    Email
-                  </div>
-                  <div className="detail-value">
-                    <span>{user.email}</span>
-                  </div>
-                </div>
-                
-                <div className="detail-row">
-                  <div className="detail-label">
-                    <span className="label-icon">📅</span>
-                    Member Since
-                  </div>
-                  <div className="detail-value">
-                    <span>{formatDate(user.createdAt)}</span>
-                  </div>
+                <div className="detail-value">
+                  <span>{user.username}</span>
                 </div>
               </div>
-            )}
-          </div>
+              
+              <div className="detail-row">
+                <div className="detail-label">
+                  <span className="label-icon">📧</span>
+                  Email
+                </div>
+                <div className="detail-value">
+                  <span>{user.email}</span>
+                </div>
+              </div>
+              
+              <div className="detail-row">
+                <div className="detail-label">
+                  <span className="label-icon">📅</span>
+                  Member Since
+                </div>
+                <div className="detail-value">
+                  <span>{formatDate(user.createdAt)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
+        <div className="profile-grid">
           {/* Wallet Information */}
           <div className="profile-card">
             <div className="card-header">
@@ -267,82 +232,6 @@ const Profile = ({ account, contract }) => {
                 </>
               )}
             </div>
-          </div>
-
-          {/* Betting Statistics */}
-          <div className="profile-card">
-            <div className="card-header">
-              <h2>📊 Betting Statistics</h2>
-              <p>Your betting performance</p>
-            </div>
-            
-            {loading ? (
-              <div className="loading-stats">
-                <span>⏳ Loading statistics...</span>
-              </div>
-            ) : userStats ? (
-              <div className="stats-grid">
-                <div className="stat-item">
-                  <div className="stat-icon">🎯</div>
-                  <div className="stat-content">
-                    <div className="stat-value">{userStats.totalBets}</div>
-                    <div className="stat-label">Total Bets</div>
-                  </div>
-                </div>
-                
-                <div className="stat-item">
-                  <div className="stat-icon">🏆</div>
-                  <div className="stat-content">
-                    <div className="stat-value">{userStats.wins}</div>
-                    <div className="stat-label">Wins</div>
-                  </div>
-                </div>
-                
-                <div className="stat-item">
-                  <div className="stat-icon">❌</div>
-                  <div className="stat-content">
-                    <div className="stat-value">{userStats.losses}</div>
-                    <div className="stat-label">Losses</div>
-                  </div>
-                </div>
-                
-                <div className="stat-item">
-                  <div className="stat-icon">⏳</div>
-                  <div className="stat-content">
-                    <div className="stat-value">{userStats.pending}</div>
-                    <div className="stat-label">Pending</div>
-                  </div>
-                </div>
-                
-                <div className="stat-item wide">
-                  <div className="stat-icon">💰</div>
-                  <div className="stat-content">
-                    <div className="stat-value">{formatEther(userStats.totalWagered)} ETH</div>
-                    <div className="stat-label">Total Wagered</div>
-                  </div>
-                </div>
-                
-                <div className="stat-item wide">
-                  <div className="stat-icon">💎</div>
-                  <div className="stat-content">
-                    <div className="stat-value">{formatEther(userStats.totalWinnings)} ETH</div>
-                    <div className="stat-label">Total Winnings</div>
-                  </div>
-                </div>
-                
-                <div className="stat-item full-width">
-                  <div className="stat-icon">📈</div>
-                  <div className="stat-content">
-                    <div className="stat-value">{userStats.winRate}%</div>
-                    <div className="stat-label">Win Rate</div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="no-stats">
-                <span>📊 No betting statistics available</span>
-              </div>
-            )}
           </div>
 
           {/* Smart Contract Info */}

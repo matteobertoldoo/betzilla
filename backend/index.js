@@ -11,6 +11,7 @@ const { errorHandler } = require('./middleware/auth');
 // Import routes
 const authRoutes = require('./routes/auth');
 const bettingRoutes = require('./routes/betting');
+const matchRoutes = require('./routes/matches');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -42,6 +43,9 @@ app.use('/api/auth', authRoutes);
 
 // Betting routes
 app.use('/api/betting', bettingRoutes);
+
+// Match routes
+app.use('/api/matches', matchRoutes);
 
 // Sample match data
 const matches = [

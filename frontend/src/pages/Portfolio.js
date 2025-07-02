@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './Portfolio.css';
 
 const Portfolio = ({ 
@@ -12,22 +12,33 @@ const Portfolio = ({
   const [matches, setMatches] = useState([]);
   const [activeTab, setActiveTab] = useState('active'); // 'active', 'resolved', 'statistics'
 
-  const fetchUserBets = async () => {
+  const fetchUserBets = useCallback(async () => {
     try {
       const bets = await getAllUserBets();
       setUserBets(bets);
     } catch (error) {
       console.error('Error fetching user bets:', error);
     }
-  };
+  }, [getAllUserBets]);
 
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const response = await fetch('/api/markets');
+        const response = await fetch('http://localhost:4000/api/matches');
         const data = await response.json();
         if (data.success) {
-          setMatches(data.markets);
+          // Transform database matches to match current frontend structure
+          const transformedMatches = data.data.map(match => ({
+            id: match.contract_market_id || match.id,
+            homeTeam: match.home_team,
+            awayTeam: match.away_team,
+            league: match.league,
+            description: match.description,
+            startTime: match.start_time,
+            sport: match.sport,
+            category: match.category
+          }));
+          setMatches(transformedMatches);
         }
       } catch (error) {
         console.error('Error fetching matches:', error);

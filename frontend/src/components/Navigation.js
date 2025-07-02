@@ -4,11 +4,22 @@ import { useAuth } from '../hooks/useAuth';
 import './Navigation.css';
 
 const Navigation = ({ account, connectWallet, loading }) => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const location = useLocation();
 
   const formatAddress = (address) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const handleConnectWallet = async () => {
+    try {
+      await connectWallet();
+    } catch (error) {
+      console.error('Failed to connect wallet:', error);
+      // Display a user-friendly error message
+      const errorMessage = error?.message || error?.reason || 'Failed to connect wallet';
+      alert(`Error connecting wallet: ${errorMessage}`);
+    }
   };
 
   // Public navigation for non-authenticated users
@@ -91,14 +102,7 @@ const Navigation = ({ account, connectWallet, loading }) => {
         <div className="wallet-section">
           {isAuthenticated && (
             <div className="user-info">
-              <span className="username">👤 {user?.username}</span>
-              <button 
-                className="logout-btn"
-                onClick={logout}
-                title="Logout"
-              >
-                🚪 Logout
-              </button>
+              <span className="username">{user?.username}</span>
             </div>
           )}
           
@@ -110,7 +114,7 @@ const Navigation = ({ account, connectWallet, loading }) => {
           ) : (
             <button 
               className="wallet-connect-btn"
-              onClick={connectWallet}
+              onClick={handleConnectWallet}
               disabled={loading}
             >
               <div className="metamask-icon">🦊</div>
