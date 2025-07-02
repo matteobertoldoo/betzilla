@@ -475,7 +475,173 @@
   box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
 }
 
+/* Payout Section Styles */
+.payout-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+  color: white;
+}
 
+.payout-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payout-info {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.bet-summary {
+  display: grid;
+  gap: 8px;
+}
+
+.bet-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.bet-label {
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.bet-value {
+  font-weight: 600;
+}
+
+.payout-highlight {
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding-top: 10px;
+  margin-top: 5px;
+}
+
+.payout-highlight .bet-value {
+  font-size: 1.1rem;
+  color: #ffd700;
+}
+
+.profit-highlight {
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding-top: 8px;
+  margin-top: 5px;
+}
+
+.profit-positive {
+  color: #00ff88 !important;
+}
+
+.profit-negative {
+  color: #ff6b6b !important;
+}
+
+.payout-note {
+  margin-top: 15px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.note-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Upcoming Bets Summary */
+.upcoming-bets-summary {
+  background: linear-gradient(135deg, #ff7b7b 0%, #ff6b6b 100%);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 40px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+}
+
+.upcoming-bets-summary h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.summary-cards {
+  display: grid;
+  gap: 15px;
+}
+
+.summary-card {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 15px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.summary-match {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.summary-match strong {
+  font-size: 1.1rem;
+}
+
+.summary-time {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.summary-bet {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.95rem;
+}
+
+.summary-payout {
+  font-weight: 600;
+}
+
+.summary-payout.positive {
+  color: #00ff88;
+}
+
+.summary-payout.negative {
+  color: #ffcccb;
+}
+
+@media (min-width: 768px) {
+  .summary-cards {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+  
+  .summary-bet {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {

@@ -4,7 +4,7 @@ import BetZillaArtifact from '../abi/BetZilla.json';
 const BetZillaABI = BetZillaArtifact.abi;
 
 // Contract address from latest deployment
-const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const CONTRACT_ADDRESS = '0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690';
 
 export const useBetzilla = () => {
   const [contract, setContract] = useState(null);
@@ -222,7 +222,6 @@ export const useBetzilla = () => {
       let userMarketIds;
       try {
         userMarketIds = await contract.getUserMarkets(account);
-        console.log('📊 User market IDs from contract:', userMarketIds.map(id => Number(id)));
       } catch (getUserMarketsError) {
         console.error('❌ Error calling getUserMarkets:', getUserMarketsError);
         // If getUserMarkets fails, return empty array instead of throwing
@@ -231,27 +230,14 @@ export const useBetzilla = () => {
 
       // If no markets, return empty array
       if (!userMarketIds || userMarketIds.length === 0) {
-        console.log('📭 No markets found for user');
         return [];
       }
-
-      console.log(`🎯 Found ${userMarketIds.length} markets for user`);
 
       const userBets = await Promise.all(
         userMarketIds.map(async (id) => {
           const numericId = Number(id);
-          console.log(`🔍 Fetching bet for market ${numericId}`);
-          
           const [outcome, amount, claimed, refunded, placedAt] = await contract.getUserBet(numericId, account);
           const market = await contract.getMarket(numericId);
-
-          console.log(`📊 Market ${numericId} bet:`, {
-            outcome: Number(outcome),
-            amount: amount.toString(),
-            claimed,
-            refunded,
-            placedAt: Number(placedAt)
-          });
 
           return {
             marketId: numericId,
@@ -279,12 +265,9 @@ export const useBetzilla = () => {
       // Simplified filtering - just check if amount > 0
       const filteredBets = userBets.filter(bet => {
         const amount = bet.bet.amount;
-        const hasAmount = amount && Number(amount) > 0;
-        console.log(`🎯 Market ${bet.marketId} has amount: ${hasAmount} (${amount?.toString()})`);
-        return hasAmount;
+        return amount && Number(amount) > 0;
       });
       
-      console.log(`✅ Returning ${filteredBets.length} filtered bets`);
       return filteredBets;
     } catch (err) {
       console.error('💥 Error in getAllUserBets:', err);
