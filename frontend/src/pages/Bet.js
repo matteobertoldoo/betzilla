@@ -10,10 +10,68 @@ const Bet = ({
   loading 
 }) => {
   const [matches, setMatches] = useState([]);
-  const [betAmount, setBetAmount] = useState('');
-  const [selectedOutcome, setSelectedOutcome] = useState(1);
+  const [filteredMatches, setFilteredMatches] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [matchBetData, setMatchBetData] = useState({}); // Individual bet data per match
   const [liveOdds, setLiveOdds] = useState({});
   const [fee, setFee] = useState({});
+
+  // Initialize bet data for a match
+  const initializeMatchBetData = (matchId) => {
+    setMatchBetData(prev => ({
+      ...prev,
+      [matchId]: {
+        betAmount: prev[matchId]?.betAmount || '',
+        selectedOutcome: prev[matchId]?.selectedOutcome || 1
+      }
+    }));
+  };
+
+  // Update bet amount for a specific match
+  const updateBetAmount = (matchId, amount) => {
+    setMatchBetData(prev => ({
+      ...prev,
+      [matchId]: {
+        ...prev[matchId],
+        betAmount: amount
+      }
+    }));
+  };
+
+  // Update selected outcome for a specific match
+  const updateSelectedOutcome = (matchId, outcome) => {
+    setMatchBetData(prev => ({
+      ...prev,
+      [matchId]: {
+        ...prev[matchId],
+        selectedOutcome: outcome
+      }
+    }));
+  };
+
+  // Filter matches based on search term
+  const filterMatches = (matchesToFilter, search) => {
+    if (!search.trim()) {
+      return matchesToFilter;
+    }
+    
+    const searchLower = search.toLowerCase();
+    return matchesToFilter.filter(match => 
+      match.homeTeam?.toLowerCase().includes(searchLower) ||
+      match.awayTeam?.toLowerCase().includes(searchLower) ||
+      match.league?.toLowerCase().includes(searchLower) ||
+      match.sport?.toLowerCase().includes(searchLower) ||
+      match.description?.toLowerCase().includes(searchLower) ||
+      match.category?.toLowerCase().includes(searchLower)
+    );
+  };
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setFilteredMatches(filterMatches(matches, value));
+  };
 
   // Fetch matches from backend
   useEffect(() => {
@@ -26,7 +84,12 @@ const Bet = ({
           
           // Since contract_market_id wasn't updated due to auth issues during deployment,
           // we'll map the first 30 matches to contract market IDs 0-29
-          const transformedMatches = data.data
+          // Also remove duplicates based on title
+          const uniqueMatches = data.data.filter((match, index, self) => 
+            index === self.findIndex(m => m.title === match.title)
+          );
+          
+          const transformedMatches = uniqueMatches
             .slice(0, 30) // Only take first 30 matches since contract has 30 markets
             .map((match, index) => ({
               id: index, // Use sequential index as market ID (0-29)
@@ -46,6 +109,12 @@ const Bet = ({
           
           console.log('Transformed matches for frontend:', transformedMatches);
           setMatches(transformedMatches);
+          setFilteredMatches(transformedMatches); // Initialize filtered matches
+          
+          // Initialize bet data for each match
+          transformedMatches.forEach(match => {
+            initializeMatchBetData(match.id);
+          });
         }
       } catch (error) {
         console.error('Error fetching matches:', error);
@@ -82,7 +151,8 @@ const Bet = ({
   }, [contract, matches, getEstimatedOdds, getCurrentFee]);
 
   const handlePlaceBet = async (marketId) => {
-    if (!betAmount || betAmount <= 0) {
+    const betData = matchBetData[marketId];
+    if (!betData || !betData.betAmount || betData.betAmount <= 0) {
       alert('Please enter a valid bet amount');
       return;
     }
@@ -91,16 +161,18 @@ const Bet = ({
     const match = matches.find(m => m.id === marketId);
     if (match) {
       const maxOutcome = match.odds.draw > 0 ? 3 : 2;
-      if (selectedOutcome > maxOutcome) {
+      if (betData.selectedOutcome > maxOutcome) {
         alert(`Invalid outcome. For ${match.homeTeam} vs ${match.awayTeam}, valid outcomes are 1-${maxOutcome}`);
         return;
       }
     }
 
     try {
-      await placeBet(marketId, selectedOutcome, betAmount);
+      await placeBet(marketId, betData.selectedOutcome, betData.betAmount);
       alert('Bet placed successfully!');
-      setBetAmount('');
+      // Clear bet data for this match after successful bet
+      updateBetAmount(marketId, '');
+      updateSelectedOutcome(marketId, 1);
     } catch (error) {
       console.error('Smart contract error:', error);
       alert(`Error placing bet: ${error.message}`);
@@ -131,17 +203,69 @@ const Bet = ({
           <p>Place your blind bets before odds are revealed</p>
         </div>
 
-        {matches.length === 0 ? (
+        <div className="search-section">
+          <div className="search-container">
+            <div className="search-input-wrapper">
+              <span className="search-icon">🔍</span>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search matches by team, sport, league..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+              {searchTerm && (
+                <button 
+                  className="clear-search"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setFilteredMatches(matches);
+                  }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            <div className="search-results-info">
+              {searchTerm ? (
+                <span>
+                  Found {filteredMatches.length} match{filteredMatches.length !== 1 ? 'es' : ''} 
+                  {searchTerm && ` for "${searchTerm}"`}
+                </span>
+              ) : (
+                <span>Showing {filteredMatches.length} available matches</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {filteredMatches.length === 0 ? (
           <div className="no-matches">
             <div className="empty-state">
-              <div className="empty-icon">⚽</div>
-              <h3>No matches available</h3>
-              <p>Check back later for new betting opportunities!</p>
+              <div className="empty-icon">{searchTerm ? '🔍' : '⚽'}</div>
+              <h3>{searchTerm ? 'No matches found' : 'No matches available'}</h3>
+              <p>
+                {searchTerm 
+                  ? `Try searching for different terms or clear your search to see all matches.`
+                  : 'Check back later for new betting opportunities!'
+                }
+              </p>
+              {searchTerm && (
+                <button 
+                  className="clear-search-btn"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setFilteredMatches(matches);
+                  }}
+                >
+                  Clear Search
+                </button>
+              )}
             </div>
           </div>
         ) : (
           <div className="matches-grid">
-            {matches.map((match) => (
+            {filteredMatches.map((match) => (
               <div key={match.id} className="match-card">
                 <div className="match-header">
                   <div className="teams">
@@ -204,8 +328,8 @@ const Bet = ({
                       <label>Choose Outcome:</label>
                       <select 
                         className="outcome-select"
-                        value={selectedOutcome}
-                        onChange={(e) => setSelectedOutcome(parseInt(e.target.value))}
+                        value={matchBetData[match.id]?.selectedOutcome || 1}
+                        onChange={(e) => updateSelectedOutcome(match.id, parseInt(e.target.value))}
                       >
                         <option value={1}>🏠 {match.homeTeam}</option>
                         {match.odds.draw > 0 && <option value={2}>🤝 Draw</option>}
@@ -219,8 +343,8 @@ const Bet = ({
                         type="number"
                         className="bet-amount-input"
                         placeholder="0.01"
-                        value={betAmount}
-                        onChange={(e) => setBetAmount(e.target.value)}
+                        value={matchBetData[match.id]?.betAmount || ''}
+                        onChange={(e) => updateBetAmount(match.id, e.target.value)}
                         step="0.01"
                         min="0.001"
                       />
@@ -237,7 +361,7 @@ const Bet = ({
                   <button 
                     className="place-bet-btn"
                     onClick={() => handlePlaceBet(match.id)}
-                    disabled={loading || !betAmount || betAmount <= 0}
+                    disabled={loading || !matchBetData[match.id]?.betAmount || matchBetData[match.id]?.betAmount <= 0}
                   >
                     {loading ? (
                       <div className="btn-loading">
