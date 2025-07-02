@@ -1,13 +1,51 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+require('dotenv').config();
+
+// Import services and middleware
+const database = require('./database');
+const authService = require('./services/authService');
+const { errorHandler } = require('./middleware/auth');
+
+// Import routes
+const authRoutes = require('./routes/auth');
+const bettingRoutes = require('./routes/betting');
+const matchRoutes = require('./routes/matches');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  credentials: true
+}));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Trust proxy (for rate limiting and IP detection)
+app.set('trust proxy', 1);
+
+// Initialize database
+const initializeDatabase = async () => {
+  try {
+    await database.initialize();
+    console.log('✅ Database initialized successfully');
+  } catch (error) {
+    console.error('❌ Database initialization failed:', error.message);
+    process.exit(1);
+  }
+};
+
+// Authentication routes
+app.use('/api/auth', authRoutes);
+
+// Betting routes
+app.use('/api/betting', bettingRoutes);
+
+// Match routes
+app.use('/api/matches', matchRoutes);
 
 // Sample match data
 const matches = [
@@ -63,7 +101,9 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/api/health',
       matches: '/api/matches',
-      markets: '/api/markets'
+      markets: '/api/markets',
+      auth: '/api/auth',
+      betting: '/api/betting'
     },
     timestamp: new Date().toISOString()
   });
@@ -74,6 +114,7 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'BetZilla Backend is running!',
+    database: database.getDb() ? 'Connected' : 'Disconnected',
     timestamp: new Date().toISOString()
   });
 });
@@ -151,14 +192,7 @@ app.get('/api/markets/:id', (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
-  });
-});
+app.use(errorHandler);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -168,9 +202,47 @@ app.use('*', (req, res) => {
   });
 });
 
+// Cleanup function for graceful shutdown
+const cleanup = async () => {
+  console.log('\n🔄 Shutting down gracefully...');
+  try {
+    await database.close();
+    console.log('✅ Database connection closed');
+  } catch (error) {
+    console.error('❌ Error during cleanup:', error.message);
+  }
+  process.exit(0);
+};
+
+// Handle graceful shutdown
+process.on('SIGINT', cleanup);
+process.on('SIGTERM', cleanup);
+
+// Periodic cleanup of expired sessions (every hour)
+setInterval(async () => {
+  try {
+    await authService.cleanupExpiredSessions();
+  } catch (error) {
+    console.error('Session cleanup error:', error.message);
+  }
+}, parseInt(process.env.SESSION_CLEANUP_INTERVAL) || 3600000);
+
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 BetZilla Backend running on port ${PORT}`);
-  console.log(`📊 API available at http://localhost:${PORT}/api`);
-  console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
-}); 
+const startServer = async () => {
+  try {
+    await initializeDatabase();
+    
+    app.listen(PORT, () => {
+      console.log(`🚀 BetZilla Backend running on port ${PORT}`);
+      console.log(`📊 API available at http://localhost:${PORT}/api`);
+      console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
+      console.log(`🔐 Authentication: http://localhost:${PORT}/api/auth`);
+      console.log(`🎰 Betting: http://localhost:${PORT}/api/betting`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error.message);
+    process.exit(1);
+  }
+};
+
+startServer(); 

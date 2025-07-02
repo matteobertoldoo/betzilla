@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import './Portfolio.css';
 
 const Portfolio = ({ 
@@ -8,26 +9,85 @@ const Portfolio = ({
   claimWinnings,
   loading 
 }) => {
+  const { user } = useAuth();
   const [userBets, setUserBets] = useState([]);
+  const [databaseBets, setDatabaseBets] = useState([]);
   const [matches, setMatches] = useState([]);
   const [activeTab, setActiveTab] = useState('active'); // 'active', 'resolved', 'statistics'
 
-  const fetchUserBets = async () => {
+  // Fetch bets from database
+  const fetchDatabaseBets = useCallback(async () => {
+    if (!user) {
+      console.log('📊 No user authenticated, skipping database bets fetch');
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('betzilla_token');
+      if (!token) {
+        console.log('📊 No auth token found, skipping database bets fetch');
+        return;
+      }
+
+      console.log('📊 Fetching database bets for user:', user.username);
+      const response = await fetch('http://localhost:4000/api/betting/bets', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        console.log('📊 Database bets fetched successfully:', data.bets.length, 'bets');
+        console.log('📊 Database bets details:', data.bets);
+        setDatabaseBets(data.bets);
+      } else {
+        console.error('📊 Failed to fetch database bets:', data.message);
+      }
+    } catch (error) {
+      console.error('📊 Error fetching database bets:', error);
+    }
+  }, [user]);
+
+  const fetchUserBets = useCallback(async () => {
     try {
       const bets = await getAllUserBets();
       setUserBets(bets);
     } catch (error) {
       console.error('Error fetching user bets:', error);
     }
-  };
+  }, [getAllUserBets]);
 
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const response = await fetch('/api/markets');
+        const response = await fetch('http://localhost:4000/api/matches?upcoming=true&limit=30');
         const data = await response.json();
         if (data.success) {
-          setMatches(data.markets);
+          // Use the same transformation logic as Bet.js to ensure ID consistency
+          // Remove duplicates based on title and teams
+          const uniqueMatches = data.data.filter((match, index, self) => 
+            index === self.findIndex(m => 
+              m.title === match.title && 
+              m.home_team === match.home_team && 
+              m.away_team === match.away_team
+            )
+          );
+          
+          // Map to contract market IDs (0-29) to match Bet.js logic
+          const transformedMatches = uniqueMatches
+            .slice(0, 30) // Only take first 30 matches since contract has 30 markets
+            .map((match, index) => ({
+              id: index, // This is the contract market ID (0-29) - same as Bet.js
+              homeTeam: match.home_team,
+              awayTeam: match.away_team,
+              league: match.league,
+              description: match.description,
+              startTime: match.start_time,
+              sport: match.sport,
+              category: match.category
+            }));
+          setMatches(transformedMatches);
         }
       } catch (error) {
         console.error('Error fetching matches:', error);
@@ -41,7 +101,28 @@ const Portfolio = ({
     if (account && contract) {
       fetchUserBets();
     }
-  }, [account, contract, getAllUserBets]);
+    if (user) {
+      fetchDatabaseBets();
+    }
+  }, [account, contract, user, fetchUserBets, fetchDatabaseBets]);
+
+  // Refresh all bet data
+  const refreshAllBets = useCallback(async () => {
+    if (account && contract) {
+      await fetchUserBets();
+    }
+    if (user) {
+      await fetchDatabaseBets();
+    }
+  }, [account, contract, user, fetchUserBets, fetchDatabaseBets]);
+
+  // Expose refresh function globally for other components to use
+  useEffect(() => {
+    window.refreshPortfolio = refreshAllBets;
+    return () => {
+      delete window.refreshPortfolio;
+    };
+  }, [refreshAllBets]);
 
   const handleClaimWinnings = async (marketId) => {
     try {
@@ -79,8 +160,15 @@ const Portfolio = ({
   const winningBets = resolvedBets.filter(bet => bet.bet.outcome === bet.market.winningOutcome);
   const losingBets = resolvedBets.filter(bet => bet.bet.outcome !== bet.market.winningOutcome);
 
-  const totalWagered = userBets.reduce((total, bet) => total + parseFloat(formatEther(bet.bet.amount)), 0);
-  const winRate = resolvedBets.length > 0 ? ((winningBets.length / resolvedBets.length) * 100).toFixed(1) : 0;
+  // Database bets (pending, confirmed, etc.)
+  const pendingDbBets = databaseBets.filter(bet => bet.status === 'pending' || bet.status === 'confirmed');
+  const resolvedDbBets = databaseBets.filter(bet => bet.status === 'won' || bet.status === 'lost');
+
+  const totalWagered = userBets.reduce((total, bet) => total + parseFloat(formatEther(bet.bet.amount)), 0) + 
+                       databaseBets.reduce((total, bet) => total + parseFloat(bet.amountWei) / 1e18, 0);
+  const winRate = resolvedBets.length + resolvedDbBets.length > 0 ? 
+    (((winningBets.length + databaseBets.filter(bet => bet.status === 'won').length) / 
+      (resolvedBets.length + resolvedDbBets.length)) * 100).toFixed(1) : 0;
 
   const renderBetCard = (betData) => {
     const match = matches.find(m => m.id === betData.marketId);
@@ -89,8 +177,8 @@ const Portfolio = ({
     const getOutcomeName = (outcome) => {
       if (!match) return `Outcome ${outcome}`;
       if (outcome === 1) return match.homeTeam;
-      if (outcome === 2 && match.odds.draw > 0) return 'Draw';
-      if ((outcome === 2 && match.odds.draw === 0) || outcome === 3) return match.awayTeam;
+      if (outcome === 2 && match.odds && match.odds.draw > 0) return 'Draw';
+      if ((outcome === 2 && (!match.odds || match.odds.draw === 0)) || outcome === 3) return match.awayTeam;
       return `Outcome ${outcome}`;
     };
 
@@ -160,6 +248,81 @@ const Portfolio = ({
     );
   };
 
+  // Render database bet card
+  const renderDatabaseBetCard = (bet) => {
+    const match = matches.find(m => m.id === bet.marketId);
+    const matchName = match ? `${match.homeTeam} vs ${match.awayTeam}` : 
+                      bet.homeTeam && bet.awayTeam ? `${bet.homeTeam} vs ${bet.awayTeam}` : 
+                      `Market #${bet.marketId}`;
+    
+    const getOutcomeName = (outcome) => {
+      if (match) {
+        if (outcome === 1) return match.homeTeam;
+        if (outcome === 2 && match.sport === 'Football') return 'Draw';
+        if ((outcome === 2 && match.sport !== 'Football') || outcome === 3) return match.awayTeam;
+      }
+      if (bet.homeTeam && bet.awayTeam) {
+        if (outcome === 1) return bet.homeTeam;
+        if (outcome === 2 && bet.sport === 'Football') return 'Draw';
+        if ((outcome === 2 && bet.sport !== 'Football') || outcome === 3) return bet.awayTeam;
+      }
+      return `Outcome ${outcome}`;
+    };
+
+    const getStatusColor = (status) => {
+      switch (status) {
+        case 'pending': return 'orange';
+        case 'confirmed': return 'blue';
+        case 'won': return 'green';
+        case 'lost': return 'red';
+        default: return 'gray';
+      }
+    };
+
+    return (
+      <div key={bet.id} className="bet-card database-bet">
+        <div className="bet-header">
+          <h3 className="match-name">{matchName}</h3>
+          <span className={`status-badge ${bet.status}`} style={{ backgroundColor: getStatusColor(bet.status) }}>
+            {bet.status === 'pending' && '⏳ Pending'}
+            {bet.status === 'confirmed' && '✅ Confirmed'}
+            {bet.status === 'won' && '🏆 Won'}
+            {bet.status === 'lost' && '❌ Lost'}
+          </span>
+        </div>
+        
+        <div className="bet-details">
+          <div className="detail-item">
+            <span className="detail-label">🎲 Outcome:</span>
+            <span className="detail-value">{getOutcomeName(bet.outcome)}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">💰 Amount:</span>
+            <span className="detail-value">{(parseFloat(bet.amountWei) / 1e18).toFixed(4)} ETH</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">📅 Placed:</span>
+            <span className="detail-value">{new Date(bet.placedAt).toLocaleDateString()}</span>
+          </div>
+          {bet.transactionHash && (
+            <div className="detail-item">
+              <span className="detail-label">🔗 TX Hash:</span>
+              <span className="detail-value transaction-hash">
+                {bet.transactionHash.slice(0, 8)}...{bet.transactionHash.slice(-6)}
+              </span>
+            </div>
+          )}
+          {match && (
+            <div className="detail-item">
+              <span className="detail-label">🏟️ League:</span>
+              <span className="detail-value">{match.league}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="portfolio-page">
       <div className="container">
@@ -174,13 +337,13 @@ const Portfolio = ({
             className={`tab-btn ${activeTab === 'active' ? 'active' : ''}`}
             onClick={() => setActiveTab('active')}
           >
-            ⏳ Active Bets ({activeBets.length})
+            ⏳ Active Bets ({activeBets.length + pendingDbBets.length})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'resolved' ? 'active' : ''}`}
             onClick={() => setActiveTab('resolved')}
           >
-            ✅ Resolved Bets ({resolvedBets.length})
+            ✅ Resolved Bets ({resolvedBets.length + resolvedDbBets.length})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'statistics' ? 'active' : ''}`}
@@ -194,9 +357,10 @@ const Portfolio = ({
         <div className="tab-content">
           {activeTab === 'active' && (
             <div className="active-bets-section">
-              {activeBets.length > 0 ? (
+              {(activeBets.length > 0 || pendingDbBets.length > 0) ? (
                 <div className="bets-grid">
                   {activeBets.map(renderBetCard)}
+                  {pendingDbBets.map(renderDatabaseBetCard)}
                 </div>
               ) : (
                 <div className="empty-state">
@@ -211,9 +375,10 @@ const Portfolio = ({
 
           {activeTab === 'resolved' && (
             <div className="resolved-bets-section">
-              {resolvedBets.length > 0 ? (
+              {(resolvedBets.length > 0 || resolvedDbBets.length > 0) ? (
                 <div className="bets-grid">
                   {resolvedBets.map(renderBetCard)}
+                  {resolvedDbBets.map(renderDatabaseBetCard)}
                 </div>
               ) : (
                 <div className="empty-state">
@@ -232,7 +397,7 @@ const Portfolio = ({
                 <div className="stat-card primary">
                   <div className="stat-icon">📊</div>
                   <div className="stat-content">
-                    <div className="stat-value">{userBets.length}</div>
+                    <div className="stat-value">{userBets.length + databaseBets.length}</div>
                     <div className="stat-label">Total Bets</div>
                   </div>
                 </div>
@@ -248,7 +413,7 @@ const Portfolio = ({
                 <div className="stat-card warning">
                   <div className="stat-icon">🏆</div>
                   <div className="stat-content">
-                    <div className="stat-value">{winningBets.length}</div>
+                    <div className="stat-value">{winningBets.length + databaseBets.filter(bet => bet.status === 'won').length}</div>
                     <div className="stat-label">Wins</div>
                   </div>
                 </div>
@@ -256,7 +421,7 @@ const Portfolio = ({
                 <div className="stat-card error">
                   <div className="stat-icon">❌</div>
                   <div className="stat-content">
-                    <div className="stat-value">{losingBets.length}</div>
+                    <div className="stat-value">{losingBets.length + databaseBets.filter(bet => bet.status === 'lost').length}</div>
                     <div className="stat-label">Losses</div>
                   </div>
                 </div>
@@ -275,7 +440,7 @@ const Portfolio = ({
                     <div className="metric-item">
                       <span className="metric-label">Average Bet:</span>
                       <span className="metric-value">
-                        {userBets.length > 0 ? (totalWagered / userBets.length).toFixed(4) : '0'} ETH
+                        {(userBets.length + databaseBets.length) > 0 ? (totalWagered / (userBets.length + databaseBets.length)).toFixed(4) : '0'} ETH
                       </span>
                     </div>
                     <div className="metric-item">
@@ -284,10 +449,16 @@ const Portfolio = ({
                         {winningBets.filter(bet => !bet.bet.claimed).length}
                       </span>
                     </div>
+                    <div className="metric-item">
+                      <span className="metric-label">Active Bets:</span>
+                      <span className="metric-value">
+                        {activeBets.length + pendingDbBets.length}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {userBets.length > 0 && (
+                {(userBets.length + databaseBets.length) > 0 && (
                   <div className="stat-section">
                     <h3>🎯 Betting Patterns</h3>
                     <div className="pattern-grid">
