@@ -498,15 +498,16 @@
 .loading-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .btn-icon {
@@ -923,4 +924,39 @@
   margin: 0;
   opacity: 0.9;
   font-size: 0.9rem;
+}
+
+/* Market Status Indicators */
+.market-status-indicators {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.market-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.market-status.blockchain-enabled {
+  background-color: #22c55e;
+  color: white;
+  border-color: #16a34a;
+}
+
+.market-status.test-mode {
+  background-color: #f59e0b;
+  color: white;
+  border-color: #d97706;
+}
+
+.market-status.parimutuel {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #2563eb;
 }

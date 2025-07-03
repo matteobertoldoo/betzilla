@@ -380,7 +380,26 @@ export const useBetzilla = () => {
     }
 
     try {
-      const odds = await contract.getEstimatedOdds(marketId);
+      // Try to get market details first, then calculate odds from outcome amounts
+      const market = await contract.getMarket(marketId);
+      const outcomeAmounts = market[2]; // outcomeAmounts is at index 2
+      
+      if (!outcomeAmounts || outcomeAmounts.length === 0) {
+        return null;
+      }
+
+      // Calculate total pool
+      const totalPool = outcomeAmounts.reduce((sum, amount) => sum + Number(amount), 0);
+      if (totalPool === 0) {
+        return [0, 0, 0]; // Return default odds if no bets
+      }
+
+      // Calculate simple odds based on pool distribution
+      const odds = outcomeAmounts.map(amount => {
+        const amountNum = Number(amount);
+        return amountNum === 0 ? 0 : totalPool / amountNum;
+      });
+
       return odds;
     } catch (error) {
       console.error('Error fetching estimated odds:', error);
@@ -395,14 +414,9 @@ export const useBetzilla = () => {
     }
 
     try {
-      // Check if the function exists before calling it
-      if (typeof contract.getCurrentFee === 'function') {
-        const fee = await contract.getCurrentFee(marketId);
-        return Number(fee);
-      } else {
-        console.log('getCurrentFee function not available, using default fee');
-        return 3; // Default 3% fee
-      }
+      // Since getCurrentFee function doesn't exist in contract, return default fee
+      // The actual fee logic is handled in the smart contract during bet placement
+      return 3; // Default 3% fee
     } catch (error) {
       console.log('Error fetching current fee, using default:', error.message);
       return 3; // Default fee percentage
@@ -428,7 +442,7 @@ export const useBetzilla = () => {
         finalOdds: market[7]
       };
     } catch (err) {
-      setError(err.message);
+      console.error('Error fetching market details:', err);
       throw err;
     }
   };

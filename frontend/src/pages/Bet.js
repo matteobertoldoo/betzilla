@@ -206,55 +206,131 @@ const Bet = ({
         return;
       }
       
+      // Get maximum market ID from contract
+      let maxMarketId = 0;
+      try {
+        const marketCount = await contract.marketCount();
+        maxMarketId = Number(marketCount);
+        console.log(`📊 Contract has ${maxMarketId} markets (valid IDs: 1-${maxMarketId})`);
+      } catch (error) {
+        console.error('❌ Error fetching market count:', error);
+        return;
+      }
+      
       const oddsObj = {};
       const feeObj = {};
+      let validMarkets = 0;
+      let invalidMarkets = 0;
+      let marketsNeedingSync = [];
+      
       for (const match of matches) {
         const isWithin24Hours = isMatchWithin24Hours(match.startTime);
-        const marketId = match.contractMarketId || match.id; // Use contractMarketId if available, fallback to match.id
         
-        // For matches within 24 hours, prioritize parimutuel odds from backend
+        // Use contract_market_id from database
+        const contractMarketId = match.contract_market_id || match.contractMarketId;
+        
+        // Enhanced validation with proper timestamp checking
+        const isValidMarketId = contractMarketId && 
+                               Number.isInteger(Number(contractMarketId)) && 
+                               Number(contractMarketId) >= 1 && 
+                               Number(contractMarketId) <= maxMarketId;
+        
+        // Check if match is in the future
+        const matchTime = new Date(match.startTime);
+        const now = new Date();
+        const isFutureMatch = matchTime > now;
+        
+        if (!isValidMarketId) {
+          invalidMarkets++;
+          marketsNeedingSync.push({
+            matchId: match.id,
+            title: `${match.homeTeam} vs ${match.awayTeam}`,
+            contractMarketId: contractMarketId,
+            startTime: match.startTime,
+            isFutureMatch: isFutureMatch,
+            reason: !contractMarketId ? 'missing_id' : 
+                   Number(contractMarketId) < 1 ? 'invalid_range_low' :
+                   Number(contractMarketId) > maxMarketId ? 'invalid_range_high' : 'invalid_format'
+          });
+          
+          if (isWithin24Hours) {
+            console.log(`  └── Will use parimutuel odds from backend for this match`);
+          }
+          continue;
+        }
+        
+        validMarkets++;
+        
+        // For matches within 24 hours, prioritize parimutuel odds
         if (isWithin24Hours) {
-          console.log(`Match ${match.id} is within 24 hours - will use parimutuel odds from backend`);
+          console.log(`🕐 Match ${match.id} ("${match.homeTeam} vs ${match.awayTeam}") is within 24 hours - will use parimutuel odds from backend`);
           continue;
         }
         
-        // Skip matches without contract market ID for blockchain calls
-        if (!match.contractMarketId) {
-          console.log(`Skipping match ${match.id} - no contract market ID for blockchain interaction`);
+        // Only query contract for valid future matches
+        if (!isFutureMatch) {
+          console.log(`⏭️ Skipping contract query for past match: ${match.homeTeam} vs ${match.awayTeam}`);
           continue;
         }
         
+        // Query contract only with valid IDs for future matches
         try {
-          if (getMarketDetails && match.contractMarketId) {
-            // For matches within 24 hours, get market details for parimutuel calculation
-            // Only if there's a contract market ID
-            const marketDetails = await getMarketDetails(marketId);
+          if (getMarketDetails && contractMarketId) {
+            const marketDetails = await getMarketDetails(contractMarketId);
             oddsObj[match.id] = marketDetails.outcomeAmounts;
+            console.log(`✅ Fetched market details for contract market ${contractMarketId} (DB match ${match.id})`);
           } else {
-            // For other matches, get estimated odds as before
-            const odds = await getEstimatedOdds(marketId);
+            const odds = await getEstimatedOdds(contractMarketId);
             oddsObj[match.id] = odds;
+            console.log(`✅ Fetched estimated odds for contract market ${contractMarketId} (DB match ${match.id})`);
           }
         } catch (e) {
-          console.error(`Error fetching odds for match ${match.id} (contract market ${marketId}):`, e);
+          console.error(`❌ Error fetching odds for match ${match.id} (contract market ${contractMarketId}):`, e.message);
           oddsObj[match.id] = null;
         }
         
         try {
-          const f = await getCurrentFee(marketId);
+          const f = await getCurrentFee(contractMarketId);
           feeObj[match.id] = f;
         } catch (e) {
-          feeObj[match.id] = null;
+          console.error(`❌ Error fetching fee for match ${match.id} (contract market ${contractMarketId}):`, e.message);
+          feeObj[match.id] = 3; // Default fee
         }
       }
+      
+      // Enhanced result summary with timing information
+      console.log(`📈 Odds fetch summary: ${validMarkets} valid markets processed, ${invalidMarkets} need synchronization`);
+      
+      if (invalidMarkets > 0) {
+        console.log(`\n🔧 Markets needing synchronization:`);
+        marketsNeedingSync.forEach(market => {
+          const reasonText = {
+            'missing_id': 'No contract market ID assigned',
+            'invalid_range_low': 'Contract market ID too low (< 1)',
+            'invalid_range_high': `Contract market ID too high (> ${maxMarketId})`,
+            'invalid_format': 'Invalid contract market ID format'
+          };
+          const timingInfo = market.isFutureMatch ? '(Future match)' : '(Past match)';
+          console.log(`  • ${market.title} ${timingInfo} - ${reasonText[market.reason]}`);
+        });
+        
+        const futureUnsyncedCount = marketsNeedingSync.filter(m => m.isFutureMatch).length;
+        if (futureUnsyncedCount > 0) {
+          console.log(`\n💡 To fix synchronization for ${futureUnsyncedCount} future matches:`);
+          console.log(`   1. Run: npx hardhat run scripts/createMarketsFromDatabase.js --network localhost`);
+          console.log(`   2. This will create missing markets for future matches`);
+          console.log(`   3. Refresh the page after synchronization completes`);
+        }
+      }
+      
       setLiveOdds(oddsObj);
       setFee(feeObj);
       
-      // Fetch user bets after odds are loaded
       if (account) {
         await fetchUserBets();
       }
     };
+    
     fetchLiveOddsAndFee();
   }, [contract, matches, getEstimatedOdds, getCurrentFee, getMarketDetails, account]);
 
@@ -380,89 +456,116 @@ const Bet = ({
 
   // Fetch user's current bets for each match
   const fetchUserBets = async () => {
-    const userBetsObj = {};
-    
-    // First, try to fetch from database
-    if (user) {
-      try {
-        const token = localStorage.getItem('betzilla_token');
-        if (token) {
-          const response = await fetch('http://localhost:4000/api/betting/bets', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.bets) {
-              // Convert database bets to match the expected format
-              data.bets.forEach(bet => {
-                userBetsObj[bet.market_id] = {
-                  outcome: bet.outcome,
-                  amount: bet.amount_wei,
-                  claimed: bet.is_winner === true ? false : null, // Only set claimed for winners
-                  refunded: false,
-                  placedAt: new Date(bet.placed_at).getTime() / 1000,
-                  status: bet.status,
-                  isWinner: bet.is_winner,
-                  fromDatabase: true // Flag to indicate this is from database
-                };
-              });
-              console.log(`Loaded ${data.bets.length} bets from database`);
-            }
-          } else {
-            console.log('Failed to fetch user bets from database:', response.status);
-          }
-        }
-      } catch (error) {
-        console.log('Error fetching user bets from database:', error.message);
-      }
+    if (!account) {
+      console.log('No account connected, skipping user bets fetch');
+      return;
     }
-    
-    // Then, if we have a contract connection, try to fetch from blockchain
-    if (contract && account) {
-      let blockchainBetsFound = 0;
+
+    console.log('🔍 Fetching user bets...');
+    const userBetsObj = {};
+    let blockchainBetsFound = 0;
+
+    // 🔗 Fetch from blockchain only for matches with valid contract market IDs
+    if (contract) {
+      console.log('📡 Checking blockchain for user bets...');
+      
+      // 🎯 Prima ottieni il numero massimo di mercati
+      let maxMarketId = 0;
+      try {
+        const marketCount = await contract.marketCount();
+        maxMarketId = Number(marketCount);
+        console.log(`📊 Contract has ${maxMarketId} markets available`);
+      } catch (error) {
+        console.error('❌ Error getting market count:', error);
+        return;
+      }
+      
       for (const match of matches) {
-        // Only try to fetch from blockchain if we have a valid contract market ID
-        if (!match.contractMarketId || match.contractMarketId === null || match.contractMarketId === undefined) {
+        const contractMarketId = match.contractMarketId || match.contract_market_id;
+        
+        // 🚨 Validazione robusta
+        if (!contractMarketId || 
+            Number(contractMarketId) < 1 || 
+            Number(contractMarketId) > maxMarketId) {
+          console.log(`⏭️ Skipping match ${match.id} - invalid contract market ID: ${contractMarketId}`);
           continue;
         }
         
         try {
-          const userBet = await contract.getUserBet(match.contractMarketId, account);
+          console.log(`🔍 Checking user bet for contract market ${contractMarketId} (DB match ${match.id})`);
+          const userBet = await contract.getUserBet(contractMarketId, account);
+          
           if (userBet && Number(userBet[1]) > 0) { // userBet[1] is the amount
-            // Blockchain data takes precedence over database data
             userBetsObj[match.id] = {
               outcome: Number(userBet[0]),
               amount: userBet[1],
               claimed: userBet[2],
               refunded: userBet[3],
               placedAt: userBet[4],
-              fromDatabase: false // Flag to indicate this is from blockchain
+              fromDatabase: false,
+              contractMarketId: contractMarketId // 🎯 Salva anche l'ID del contratto
             };
             blockchainBetsFound++;
+            console.log(`✅ Found blockchain bet for match ${match.id}: ${Number(userBet[1])} wei`);
           }
         } catch (error) {
-          // Handle various error types gracefully
+          // 🔇 Non loggare errori normali per mercati inesistenti
           if (error.message.includes('could not decode result data') || 
-              error.message.includes('value="0x"') ||
               error.message.includes('execution reverted') ||
               error.message.includes('Invalid market')) {
-            // This is expected when no bet exists on blockchain or contract market doesn't exist
-            // Don't log this as it's normal in test mode
+            // Questo è normale quando non ci sono scommesse
           } else {
-            console.log(`Blockchain error for match ${match.id}:`, error.message);
+            console.log(`⚠️ Blockchain error for match ${match.id} (contract market ${contractMarketId}):`, error.message);
           }
         }
       }
+      
       if (blockchainBetsFound > 0) {
-        console.log(`Loaded ${blockchainBetsFound} bets from blockchain`);
+        console.log(`✅ Loaded ${blockchainBetsFound} bets from blockchain`);
+      } else {
+        console.log('📭 No blockchain bets found');
+      }
+    }
+
+    // 💾 Fetch from database
+    if (user) {
+      console.log('🗄️ Checking database for user bets...');
+      try {
+        const token = localStorage.getItem('betzilla_token');
+        if (token) {
+          const response = await fetch('http://localhost:4000/api/betting/bets', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await response.json();
+          
+          if (data.success && data.bets) {
+            console.log('📊 Database bets found:', data.bets.length);
+            
+            data.bets.forEach(bet => {
+              const matchId = bet.market_id;
+              
+              // 🔄 Solo se non abbiamo già dati blockchain per questo match
+              if (!userBetsObj[matchId]) {
+                userBetsObj[matchId] = {
+                  outcome: bet.outcome,
+                  amount: bet.amount_wei,
+                  claimed: false,
+                  refunded: false,
+                  placedAt: bet.placed_at,
+                  fromDatabase: true,
+                  status: bet.status
+                };
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error fetching database bets:', error);
       }
     }
     
     setUserBets(userBetsObj);
-    console.log(`Total user bets loaded: ${Object.keys(userBetsObj).length}`);
+    console.log(`📊 Total user bets loaded: ${Object.keys(userBetsObj).length}`);
   };
 
   // Helper function to get outcome name from number
@@ -535,6 +638,7 @@ const Bet = ({
     };
   };
 
+  // 🎯 STEP 7: Gestione robusta del piazzamento scommesse
   const handlePlaceBet = async (matchId) => {
     const match = matches.find(m => m.id === matchId);
     if (!match) {
@@ -542,16 +646,16 @@ const Bet = ({
       return;
     }
 
-    // Set loading state for this specific match
+    // 🔍 Use synced contract market ID from database - MOVED TO TOP
+    const contractMarketId = match.contract_market_id || match.contractMarketId;
+
     setBettingLoading(prev => ({ ...prev, [matchId]: true }));
 
     try {
-      // Use contract market ID if available, otherwise allow testing with database ID
-      const contractMarketId = match.contractMarketId;
-      
       if (!contractMarketId) {
-        // For testing purposes, allow betting even without contract market ID
-        console.log('No contract market ID - using test mode');
+        // 🧪 Test mode: save only to database
+        console.log('⚠️ No contract market ID - using test mode (database only)');
+        console.log('💡 Run market sync script to enable blockchain betting');
         
         const betData = matchBetData[matchId];
         if (!betData || !betData.betAmount || betData.betAmount <= 0) {
@@ -559,69 +663,69 @@ const Bet = ({
           return;
         }
 
-        // Test mode - just save to database without blockchain interaction
-        const amountWei = (parseFloat(betData.betAmount) * 1e18).toString();
-        
         if (user) {
-          await saveBetToDatabase(matchId, betData.selectedOutcome, amountWei, 'test-tx-hash');
-          alert('Test bet placed successfully! (No blockchain interaction)');
+          const amountWei = (parseFloat(betData.betAmount) * 1e18).toString();
+          await saveBetToDatabase(matchId, betData.selectedOutcome, amountWei, null);
+          alert('Test bet saved to database (no blockchain interaction)');
+          
+          updateBetAmount(matchId, '');
+          updateSelectedOutcome(matchId, 1);
+          await fetchUserBets();
+          
+          if (window.refreshPortfolio) {
+            window.refreshPortfolio();
+          }
         } else {
-          alert('Test bet recorded! (Please log in for real betting)');
+          alert('Please login to save test bets');
         }
-        
-        // Clear bet data
-        updateBetAmount(matchId, '');
-        updateSelectedOutcome(matchId, 1);
-        
-        // Refresh data
-        await fetchUserBets();
         return;
       }
-      
+
+      // 🔗 Blockchain mode: use contract market ID
       const betData = matchBetData[matchId];
       if (!betData || !betData.betAmount || betData.betAmount <= 0) {
         alert('Please enter a valid bet amount');
         return;
       }
 
-      // Validation outcome for market
-      if (match) {
-        const maxOutcome = match.hasDrawOption ? 3 : 2;
-        if (betData.selectedOutcome > maxOutcome) {
-          alert(`Invalid outcome. For ${match.homeTeam} vs ${match.awayTeam}, valid outcomes are 1-${maxOutcome}`);
-          return;
-        }
+      // 🎯 Validate outcome for sport type
+      const maxOutcome = match.hasDrawOption ? 3 : 2;
+      if (betData.selectedOutcome < 1 || betData.selectedOutcome > maxOutcome) {
+        alert(`Invalid outcome. For ${match.homeTeam} vs ${match.awayTeam}, valid outcomes are 1-${maxOutcome}`);
+        return;
       }
 
-      // Place bet on blockchain using contract market ID
+      console.log(`🎯 Placing bet: Contract Market ${contractMarketId}, Outcome ${betData.selectedOutcome}, Amount ${betData.betAmount} ETH`);
+      
+      // 🚀 Place bet on-chain
       const receipt = await placeBet(contractMarketId, betData.selectedOutcome, betData.betAmount);
       
-      // Calculate amount in Wei (same calculation as in the smart contract)
       const amountWei = (parseFloat(betData.betAmount) * 1e18).toString();
       
-      // Save bet to database after successful blockchain transaction (using database match ID)
+      // 💾 Save to database after successful blockchain transaction
       if (user) {
         await saveBetToDatabase(matchId, betData.selectedOutcome, amountWei, receipt.hash);
       }
       
-      alert('Bet placed successfully!');
+      alert('✅ Bet placed successfully on blockchain!');
       
-      // Clear bet data for this match after successful bet
       updateBetAmount(matchId, '');
       updateSelectedOutcome(matchId, 1);
-      
-      // Refresh user bets to show the new bet
       await fetchUserBets();
       
-      // Refresh portfolio data if available
       if (window.refreshPortfolio) {
         window.refreshPortfolio();
       }
+      
     } catch (error) {
-      console.error('Smart contract error:', error);
-      alert(`Error placing bet: ${error.message}`);
+      console.error('❌ Smart contract error:', error);
+      
+      if (error.message.includes('Market does not exist')) {
+        alert(`❌ Market ${contractMarketId} does not exist in contract. Please run the market sync script.`);
+      } else {
+        alert(`Error placing bet: ${error.message}`);
+      }
     } finally {
-      // Clear loading state for this specific match
       setBettingLoading(prev => ({ ...prev, [matchId]: false }));
     }
   };
@@ -787,250 +891,285 @@ const Bet = ({
           </div>
         ) : (
           <div className="matches-grid">
-            {filteredMatches.map((match) => (
-              <div key={match.stableId} className="match-card">
-                <div className="match-header">
-                  <div className="teams">
-                    <h3>{match.homeTeam} vs {match.awayTeam}</h3>
-                    <div className="match-badges">
-                      <span className="league-badge">{match.league}</span>
-                      <span className="sport-badge">{match.sport}</span>
+            {filteredMatches.map((match) => {
+              const isWithin24Hours = isMatchWithin24Hours(match.startTime);
+              const contractMarketId = match.contractMarketId || match.contract_market_id;
+              const hasValidContractId = contractMarketId && Number(contractMarketId) >= 1;
+              
+              return (
+                <div key={match.stableId} className="match-card">
+                  <div className="match-header">
+                    <div className="teams">
+                      <h3>{match.homeTeam} vs {match.awayTeam}</h3>
+                      
+                      {/* 🎯 Indicatori di stato del mercato */}
+                      <div className="market-status-indicators">
+                        {hasValidContractId ? (
+                          <span className="market-status blockchain-enabled">
+                            🔗 Contract Market #{contractMarketId}
+                          </span>
+                        ) : (
+                          <span className="market-status test-mode">
+                            🧪 Test Mode (No Contract)
+                          </span>
+                        )}
+                        
+                        {isWithin24Hours && (
+                          <span className="market-status parimutuel">
+                            ⏰ Parimutuel Phase
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="match-badges">
+                        <span className="league-badge">{match.league}</span>
+                        <span className="sport-badge">{match.sport}</span>
+                      </div>
+                    </div>
+                    <div className="match-info">
+                      <span className="match-date">📅 {new Date(match.startTime).toLocaleDateString()}</span>
+                      <span className="match-time">⏰ {new Date(match.startTime).toLocaleTimeString()}</span>
                     </div>
                   </div>
-                  <div className="match-info">
-                    <span className="match-date">📅 {new Date(match.startTime).toLocaleDateString()}</span>
-                    <span className="match-time">⏰ {new Date(match.startTime).toLocaleTimeString()}</span>
-                  </div>
-                </div>
-                
-                <div className="match-description">
-                  <p>{match.description}</p>
-                </div>
-                
-                <div className="odds-section">
-                  <h4>Current Odds</h4>
-                  {(() => {
-                    const phaseInfo = getBettingPhaseInfo(match.startTime);
-                    const parimutuelData = hasParimutuelOdds(match.id) ? getParimutuelOddsForMatch(match.id) : null;
-                    const showParimutuel = phaseInfo.isParimutuelPhase && parimutuelData;
-                    
-                    if (showParimutuel) {
-                      // Show parimutuel odds for matches within 24 hours
-                      const { display, pool, betting_phase } = parimutuelData;
-                      return (
-                        <>
-                          <div className="parimutuel-banner">
-                            <span className="parimutuel-label">🔥 Live Parimutuel Odds</span>
-                            <div className="phase-info">
-                              <span className="phase-description">{betting_phase?.phaseDescription || 'Parimutuel Phase'}</span>
-                              <span className="fee-info">Fee: {betting_phase?.currentFeePercent || 3}%</span>
-                            </div>
-                            <span className="pool-info">Pool: {(pool.total_pool_wei / 1e18).toFixed(4)} ETH</span>
-                          </div>
-                          <div className="odds-display parimutuel-mode">
-                            <div className="odds-item">
-                              <div className="odds-label">🏠 {match.homeTeam}</div>
-                              <div className={`odds-value ${display.home === 'No bets' ? 'no-bets' : 'live-odds'}`}>
-                                {display.home === 'No bets' ? 'No bets' : `${display.home}x`}
-                              </div>
-                              {display.home !== 'No bets' && (
-                                <div className="odds-pool">
-                                  {(pool.outcome_amounts_wei[0] / 1e18).toFixed(4)} ETH
-                                </div>
-                              )}
-                            </div>
-                            
-                            {match.hasDrawOption && (
-                              <div className="odds-item">
-                                <div className="odds-label">🤝 Draw</div>
-                                <div className={`odds-value ${display.draw === 'No bets' ? 'no-bets' : 'live-odds'}`}>
-                                  {display.draw === 'No bets' ? 'No bets' : `${display.draw}x`}
-                                </div>
-                                {display.draw !== 'No bets' && (
-                                  <div className="odds-pool">
-                                    {(pool.outcome_amounts_wei[1] / 1e18).toFixed(4)} ETH
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                            
-                            <div className="odds-item">
-                              <div className="odds-label">✈️ {match.awayTeam}</div>
-                              <div className={`odds-value ${display.away === 'No bets' ? 'no-bets' : 'live-odds'}`}>
-                                {display.away === 'No bets' ? 'No bets' : `${display.away}x`}
-                              </div>
-                              {display.away !== 'No bets' && (
-                                <div className="odds-pool">
-                                  {(pool.outcome_amounts_wei[match.hasDrawOption ? 2 : 1] / 1e18).toFixed(4)} ETH
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="odds-info">
-                            <span className="parimutuel-info">
-                              🎲 Parimutuel Odds - Pool-based, updated in real-time
-                            </span>
-                          </div>
-                        </>
-                      );
-                    } else if (phaseInfo.isEarlyPhase) {
-                      // Show early betting phase
-                      return (
-                        <>
-                          <div className="early-betting-banner">
-                            <span className="early-label">⏰ Early Betting Phase</span>
-                            <div className="phase-info">
-                              <span className="phase-description">{phaseInfo.phaseDescription}</span>
-                              <span className="time-remaining">{Math.floor(phaseInfo.hoursUntilMatch)}h until parimutuel phase</span>
-                            </div>
-                          </div>
-                          <div className="odds-display early-mode">
-                            <div className="odds-item">
-                              <div className="odds-label">🏠 {match.homeTeam}</div>
-                              <div className="odds-value hidden">
-                                Hidden
-                              </div>
-                            </div>
-                            
-                            {match.hasDrawOption && (
-                              <div className="odds-item">
-                                <div className="odds-label">🤝 Draw</div>
-                                <div className="odds-value hidden">
-                                  Hidden
-                                </div>
-                              </div>
-                            )}
-                            
-                            <div className="odds-item">
-                              <div className="odds-label">✈️ {match.awayTeam}</div>
-                              <div className="odds-value hidden">
-                                Hidden
-                              </div>
-                            </div>
-                          </div>
-                          <div className="odds-info">
-                            <span className="early-info">
-                              🔒 Early Phase - Lower fees, odds revealed in parimutuel phase
-                            </span>
-                          </div>
-                        </>
-                      );
-                    } else {
-                      // Show blind betting message for other matches
-                      return (
-                        <>
-                          <div className="blind-betting-banner">
-                            <span className="blind-label">👁️‍🗨️ Blind Betting Mode</span>
-                            <span className="blind-info">Odds revealed at match start</span>
-                          </div>
-                          <div className="odds-display blind-mode">
-                            <div className="odds-item">
-                              <div className="odds-label">🏠 {match.homeTeam}</div>
-                              <div className="odds-value blind">
-                                Hidden
-                              </div>
-                            </div>
-                            
-                            {match.hasDrawOption && (
-                              <div className="odds-item">
-                                <div className="odds-label">🤝 Draw</div>
-                                <div className="odds-value blind">
-                                  Hidden
-                                </div>
-                              </div>
-                            )}
-                            
-                            <div className="odds-item">
-                              <div className="odds-label">✈️ {match.awayTeam}</div>
-                              <div className="odds-value blind">
-                                Hidden
-                              </div>
-                            </div>
-                          </div>
-                          <div className="odds-info">
-                            <span className="blind-info">
-                              🔒 Blind Betting - Odds revealed at match start
-                            </span>
-                          </div>
-                        </>
-                      );
-                    }
-                  })()}
-                </div>
-
-                <div className="betting-section">
-                  {/* Fee indicator */}
-                  {(() => {
-                    const phaseInfo = getBettingPhaseInfo(match.startTime);
-                    return (
-                      <div className={`fee-indicator ${phaseInfo.isEarlyPhase ? 'early-fee' : 'late-fee'}`}>
-                        <span className="fee-label">Current Fee:</span>
-                        <span className="fee-percentage">{phaseInfo.currentFeePercent}%</span>
-                        <span className="fee-description">
-                          {phaseInfo.isEarlyPhase ? '(Early betting discount)' : '(Parimutuel phase)'}
-                        </span>
-                      </div>
-                    );
-                  })()}
                   
-                  {/* Test mode indicator */}
-                  {!match.contractMarketId && (
+                  {/* Test mode banner per mercati senza contract ID */}
+                  {!hasValidContractId && (
                     <div className="test-mode-banner">
                       <span className="test-mode-label">🧪 Test Mode</span>
                       <span className="test-mode-info">Betting without blockchain interaction</span>
                     </div>
                   )}
                   
-                  <div className="bet-controls">
-                    <div className="outcome-selector">
-                      <label>Choose Outcome:</label>
-                      <select 
-                        className="outcome-select"
-                        value={matchBetData[match.id]?.selectedOutcome || 1}
-                        onChange={(e) => updateSelectedOutcome(match.id, parseInt(e.target.value))}
-                      >
-                        <option value={1}>🏠 {match.homeTeam}</option>
-                        {match.hasDrawOption && <option value={2}>🤝 Draw</option>}
-                        <option value={match.hasDrawOption ? 3 : 2}>🚀 {match.awayTeam}</option>
-                      </select>
-                    </div>
-                    
-                    <div className="amount-input">
-                      <label>Bet Amount (ETH):</label>
-                      <input
-                        type="number"
-                        className="bet-amount-input"
-                        placeholder="0.01"
-                        value={matchBetData[match.id]?.betAmount || ''}
-                        onChange={(e) => updateBetAmount(match.id, e.target.value)}
-                        step="0.01"
-                        min="0.001"
-                      />
-                    </div>
+                  {/* ...existing match content... */}
+                  <div className="match-description">
+                    <p>{match.description}</p>
                   </div>
                   
+                  <div className="odds-section">
+                    <h4>Current Odds</h4>
+                    {(() => {
+                      const phaseInfo = getBettingPhaseInfo(match.startTime);
+                      const parimutuelData = hasParimutuelOdds(match.id) ? getParimutuelOddsForMatch(match.id) : null;
+                      const showParimutuel = phaseInfo.isParimutuelPhase && parimutuelData;
+                      
+                      if (showParimutuel) {
+                        // Show parimutuel odds for matches within 24 hours
+                        const { display, pool, betting_phase } = parimutuelData;
+                        return (
+                          <>
+                            <div className="parimutuel-banner">
+                              <span className="parimutuel-label">🔥 Live Parimutuel Odds</span>
+                              <div className="phase-info">
+                                <span className="phase-description">{betting_phase?.phaseDescription || 'Parimutuel Phase'}</span>
+                                <span className="fee-info">Fee: {betting_phase?.currentFeePercent || 3}%</span>
+                              </div>
+                              <span className="pool-info">Pool: {(pool.total_pool_wei / 1e18).toFixed(4)} ETH</span>
+                            </div>
+                            <div className="odds-display parimutuel-mode">
+                              <div className="odds-item">
+                                <div className="odds-label">🏠 {match.homeTeam}</div>
+                                <div className={`odds-value ${display.home === 'No bets' ? 'no-bets' : 'live-odds'}`}>
+                                  {display.home === 'No bets' ? 'No bets' : `${display.home}x`}
+                                </div>
+                                {display.home !== 'No bets' && (
+                                  <div className="odds-pool">
+                                    {(pool.outcome_amounts_wei[0] / 1e18).toFixed(4)} ETH
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {match.hasDrawOption && (
+                                <div className="odds-item">
+                                  <div className="odds-label">🤝 Draw</div>
+                                  <div className={`odds-value ${display.draw === 'No bets' ? 'no-bets' : 'live-odds'}`}>
+                                    {display.draw === 'No bets' ? 'No bets' : `${display.draw}x`}
+                                  </div>
+                                  {display.draw !== 'No bets' && (
+                                    <div className="odds-pool">
+                                      {(pool.outcome_amounts_wei[1] / 1e18).toFixed(4)} ETH
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              
+                              <div className="odds-item">
+                                <div className="odds-label">✈️ {match.awayTeam}</div>
+                                <div className={`odds-value ${display.away === 'No bets' ? 'no-bets' : 'live-odds'}`}>
+                                  {display.away === 'No bets' ? 'No bets' : `${display.away}x`}
+                                </div>
+                                {display.away !== 'No bets' && (
+                                  <div className="odds-pool">
+                                    {(pool.outcome_amounts_wei[match.hasDrawOption ? 2 : 1] / 1e18).toFixed(4)} ETH
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="odds-info">
+                              <span className="parimutuel-info">
+                                🎲 Parimutuel Odds - Pool-based, updated in real-time
+                              </span>
+                            </div>
+                          </>
+                        );
+                      } else if (phaseInfo.isEarlyPhase) {
+                        // Show early betting phase
+                        return (
+                          <>
+                            <div className="early-betting-banner">
+                              <span className="early-label">⏰ Early Betting Phase</span>
+                              <div className="phase-info">
+                                <span className="phase-description">{phaseInfo.phaseDescription}</span>
+                                <span className="time-remaining">{Math.floor(phaseInfo.hoursUntilMatch)}h until parimutuel phase</span>
+                              </div>
+                            </div>
+                            <div className="odds-display early-mode">
+                              <div className="odds-item">
+                                <div className="odds-label">🏠 {match.homeTeam}</div>
+                                <div className="odds-value hidden">
+                                  Hidden
+                                </div>
+                              </div>
+                              
+                              {match.hasDrawOption && (
+                                <div className="odds-item">
+                                  <div className="odds-label">🤝 Draw</div>
+                                  <div className="odds-value hidden">
+                                    Hidden
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <div className="odds-item">
+                                <div className="odds-label">✈️ {match.awayTeam}</div>
+                                <div className="odds-value hidden">
+                                  Hidden
+                                </div>
+                              </div>
+                            </div>
+                            <div className="odds-info">
+                              <span className="early-info">
+                                🔒 Early Phase - Lower fees, odds revealed in parimutuel phase
+                              </span>
+                            </div>
+                          </>
+                        );
+                      } else {
+                        // Show blind betting message for other matches
+                        return (
+                          <>
+                            <div className="blind-betting-banner">
+                              <span className="blind-label">👁️‍🗨️ Blind Betting Mode</span>
+                              <span className="blind-info">Odds revealed at match start</span>
+                            </div>
+                            <div className="odds-display blind-mode">
+                              <div className="odds-item">
+                                <div className="odds-label">🏠 {match.homeTeam}</div>
+                                <div className="odds-value blind">
+                                  Hidden
+                                </div>
+                              </div>
+                              
+                              {match.hasDrawOption && (
+                                <div className="odds-item">
+                                  <div className="odds-label">🤝 Draw</div>
+                                  <div className="odds-value blind">
+                                    Hidden
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <div className="odds-item">
+                                <div className="odds-label">✈️ {match.awayTeam}</div>
+                                <div className="odds-value blind">
+                                  Hidden
+                                </div>
+                              </div>
+                            </div>
+                            <div className="odds-info">
+                              <span className="blind-info">
+                                🔒 Blind Betting - Odds revealed at match start
+                              </span>
+                            </div>
+                          </>
+                        );
+                      }
+                    })()}
+                  </div>
 
-                  
-                  <button 
-                    className={`place-bet-btn ${!match.contractMarketId ? 'test-mode' : ''}`}
-                    onClick={() => handlePlaceBet(match.id)}
-                    disabled={bettingLoading[match.id] || !matchBetData[match.id]?.betAmount || matchBetData[match.id]?.betAmount <= 0}
-                  >
-                    {bettingLoading[match.id] ? (
-                      <div className="btn-loading">
-                        <span className="loading-spinner"></span>
-                        Placing Bet...
+                  <div className="betting-section">
+                    {/* Fee indicator */}
+                    {(() => {
+                      const phaseInfo = getBettingPhaseInfo(match.startTime);
+                      return (
+                        <div className={`fee-indicator ${phaseInfo.isEarlyPhase ? 'early-fee' : 'late-fee'}`}>
+                          <span className="fee-label">Current Fee:</span>
+                          <span className="fee-percentage">{phaseInfo.currentFeePercent}%</span>
+                          <span className="fee-description">
+                            {phaseInfo.isEarlyPhase ? '(Early betting discount)' : '(Parimutuel phase)'}
+                          </span>
+                        </div>
+                      );
+                    })()}
+                    
+                    {/* Test mode indicator */}
+                    {!match.contractMarketId && (
+                      <div className="test-mode-banner">
+                        <span className="test-mode-label">🧪 Test Mode</span>
+                        <span className="test-mode-info">Betting without blockchain interaction</span>
                       </div>
-                    ) : (
-                      <>
-                        <span className="btn-icon">{!match.contractMarketId ? '🧪' : '🎯'}</span>
-                        {!match.contractMarketId ? 'Place Test Bet' : 'Place Bet'}
-                      </>
                     )}
-                  </button>
+                    
+                    <div className="bet-controls">
+                      <div className="outcome-selector">
+                        <label>Choose Outcome:</label>
+                        <select 
+                          className="outcome-select"
+                          value={matchBetData[match.id]?.selectedOutcome || 1}
+                          onChange={(e) => updateSelectedOutcome(match.id, parseInt(e.target.value))}
+                        >
+                          <option value={1}>🏠 {match.homeTeam}</option>
+                          {match.hasDrawOption && <option value={2}>🤝 Draw</option>}
+                          <option value={match.hasDrawOption ? 3 : 2}>🚀 {match.awayTeam}</option>
+                        </select>
+                      </div>
+                      
+                      <div className="amount-input">
+                        <label>Bet Amount (ETH):</label>
+                        <input
+                          type="number"
+                          className="bet-amount-input"
+                          placeholder="0.01"
+                          value={matchBetData[match.id]?.betAmount || ''}
+                          onChange={(e) => updateBetAmount(match.id, e.target.value)}
+                          step="0.01"
+                          min="0.001"
+                        />
+                      </div>
+                    </div>
+                    
+
+                    
+                    <button 
+                      className={`place-bet-btn ${!match.contractMarketId ? 'test-mode' : ''}`}
+                      onClick={() => handlePlaceBet(match.id)}
+                      disabled={bettingLoading[match.id] || !matchBetData[match.id]?.betAmount || matchBetData[match.id]?.betAmount <= 0}
+                    >
+                      {bettingLoading[match.id] ? (
+                        <div className="btn-loading">
+                          <span className="loading-spinner"></span>
+                          Placing Bet...
+                        </div>
+                      ) : (
+                        <>
+                          <span className="btn-icon">{!match.contractMarketId ? '🧪' : '🎯'}</span>
+                          {!match.contractMarketId ? 'Place Test Bet' : 'Place Bet'}
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

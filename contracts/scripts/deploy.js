@@ -12,9 +12,25 @@ async function main() {
   const address = await betzilla.getAddress();
   console.log("✅ BetZilla deployed to:", address);
 
-  // Create markets from database
-  console.log("📊 Creating markets from database...");
+  // Create markets from database - ONLY if no markets exist yet
+  console.log("📊 Checking existing markets...");
+  const existingMarketCount = await betzilla.marketCount();
   
+  if (Number(existingMarketCount) > 0) {
+    console.log(`⚠️ Contract already has ${existingMarketCount} markets, skipping market creation`);
+    console.log("💡 Use 'createMarketsFromDatabase.js' script to sync database matches");
+  } else {
+    console.log("📊 Creating initial markets from database...");
+    await createMarketsFromDatabase(betzilla);
+  }
+
+  console.log("🎉 Deployment complete!");
+  console.log(`📊 Total markets created: ${Number(await betzilla.marketCount())}`);
+  console.log("Contract address:", address);
+}
+
+// New function to create markets from database with proper sync
+async function createMarketsFromDatabase(betzilla) {
   try {
     // Fetch matches from the backend API
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:4000';
@@ -28,23 +44,30 @@ async function main() {
         try {
           // Convert start time to Unix timestamp
           const startTimestamp = Math.floor(new Date(match.start_time).getTime() / 1000);
+          const currentTime = Math.floor(Date.now() / 1000);
+          
+          // Skip matches that have already started
+          if (startTimestamp <= currentTime) {
+            console.log(`⏭️ Skipping ${match.title} - match already started`);
+            continue;
+          }
           
           // Create market on blockchain
           await betzilla.createMarket(match.title, startTimestamp);
           
           // Update match with contract market ID
           const marketCountBigInt = await betzilla.marketCount();
-          const contractMarketId = Number(marketCountBigInt); // Market ID equals marketCount after creation
+          const contractMarketId = Number(marketCountBigInt);
           
           try {
             await axios.patch(`${backendUrl}/api/matches/${match.id}/market`, {
               contractMarketId: contractMarketId
             });
+            console.log(`✅ Created and synced market: ${match.title} (Contract ID: ${contractMarketId}, DB ID: ${match.id})`);
           } catch (updateError) {
             console.warn(`⚠️ Failed to update match ${match.id} with market ID: ${updateError.message}`);
           }
           
-          console.log(`✅ Created market: ${match.title} (Market ID: ${contractMarketId})`);
           marketCount++;
         } catch (error) {
           console.error(`❌ Failed to create market for: ${match.title} - ${error.message}`);
@@ -60,10 +83,6 @@ async function main() {
     console.warn(`⚠️ Could not connect to backend (${error.message}), creating sample markets...`);
     await createSampleMarkets(betzilla);
   }
-
-  console.log("🎉 Deployment complete!");
-  console.log(`📊 Total markets created: ${Number(await betzilla.marketCount())}`);
-  console.log("Contract address:", address);
 }
 
 // Fallback function to create sample markets if database is not available
@@ -95,4 +114,4 @@ main()
   .catch((error) => {
     console.error(error);
     process.exit(1);
-  }); 
+  });
