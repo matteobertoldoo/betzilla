@@ -19,7 +19,7 @@ wait_for_service() {
     local service_name=$2
     local max_attempts=30
     local attempt=1
-    
+
     echo "⏳ Waiting for $service_name to be ready..."
     while [ $attempt -le $max_attempts ]; do
         if curl -s "$url" >/dev/null 2>&1; then
@@ -38,7 +38,7 @@ wait_for_service() {
 install_dependencies() {
     local dir=$1
     local component=$2
-    
+
     if [ -f "$dir/package.json" ]; then
         if [ ! -d "$dir/node_modules" ] || [ "$dir/package.json" -nt "$dir/node_modules" ]; then
             echo "📦 Installing $component dependencies..."
@@ -91,21 +91,19 @@ fi
 
 # Deploy contract
 echo "📦 Deploying BetZilla contract..."
-echo "🚀 Deploying BetZilla contract..."
 npx hardhat run scripts/deploy.js --network localhost >> ../hardhat.log 2>&1
-if [ $? -eq 0 ]; then
-    echo "✅ Contract deployed successfully!"
-else
+if [ $? -ne 0 ]; then
     echo "❌ Contract deployment failed"
     exit 1
 fi
+echo "✅ Contract deployed successfully!"
 
 # Extract contract address from logs
 CONTRACT_ADDRESS=$(grep "Contract address:" ../hardhat.log | tail -1 | awk '{print $NF}')
 if [ -n "$CONTRACT_ADDRESS" ]; then
-    echo "Contract address: $CONTRACT_ADDRESS"
-    
-    # Update contract address in frontend if file exists
+    echo "📍 Contract address: $CONTRACT_ADDRESS"
+
+    # Update contract address in frontend
     FRONTEND_HOOK="../frontend/src/hooks/useBetzilla.js"
     if [ -f "$FRONTEND_HOOK" ]; then
         echo "📝 Updating contract address in frontend..."
@@ -132,6 +130,26 @@ echo "Backend started with PID: $BACKEND_PID"
 if ! wait_for_service "http://localhost:4000/api/health" "Backend"; then
     echo "❌ Failed to start backend"
     exit 1
+fi
+
+cd ..
+
+# Run market synchronization script from contracts
+cd contracts
+echo "🔄 Syncing/creating markets from database... can take a while (45sec)"
+if [ -f scripts/createMarketsFromDatabase.js ]; then
+    npx hardhat run scripts/createMarketsFromDatabase.js --network localhost > ../marketsync.log 2>&1
+    if [ $? -eq 0 ]; then
+        echo "✅ Markets synchronized successfully!"
+    else
+        echo "❌ Market synchronization failed. Check marketsync.log for details."
+        echo "------ marketsync.log (last 20 lines) ------"
+        tail -20 ../marketsync.log
+        echo "--------------------------------------------"
+        exit 1
+    fi
+else
+    echo "⚠️  scripts/createMarketsFromDatabase.js not found. Skipping market sync."
 fi
 
 cd ..
@@ -167,10 +185,6 @@ echo "📝 Logs:"
 echo "Hardhat: hardhat.log"
 echo "Backend: backend.log"
 echo "Frontend: frontend.log"
+echo "Market Sync: marketsync.log"
 echo ""
 echo "🛑 To stop all services, run: ./stop-betzilla.sh"
-echo ""
-echo "🔍 Quick status check:"
-echo "Frontend: $(curl -s http://localhost:3000 >/dev/null && echo '✅ Online' || echo '❌ Offline')"
-echo "Backend:  $(curl -s http://localhost:4000/api/health >/dev/null && echo '✅ Online' || echo '❌ Offline')"
-echo "Hardhat:  $(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545 >/dev/null && echo '✅ Online' || echo '❌ Offline')"
