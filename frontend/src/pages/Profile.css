@@ -1,6 +1,6 @@
 .profile-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
   padding: 20px 0;
 }
 
@@ -13,35 +13,34 @@
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 30px;
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(145deg, rgba(44, 62, 80, 0.3), rgba(52, 73, 94, 0.3));
   padding: 30px;
   border-radius: 20px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .header-content {
   display: flex;
-  align-items: center;
-  gap: 20px;
+  align-items: flex-start;
+  gap: 0;
+  flex: 1;
 }
 
 .user-avatar {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  display: none;
 }
 
 .avatar-icon {
   font-size: 24px;
   color: white;
+}
+
+.header-text {
+  margin: 0;
+  padding: 0;
 }
 
 .header-text h1 {
@@ -73,14 +72,15 @@
 }
 
 .edit-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(45deg, #2c3e50, #34495e);
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .edit-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: linear-gradient(45deg, #34495e, #2c3e50);
   transform: translateY(-2px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .logout-btn {
@@ -105,34 +105,36 @@
 }
 
 .profile-card {
-  background: #ffffff;
+  background: linear-gradient(145deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9));
   border-radius: 16px;
   padding: 32px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  color: #ecf0f1;
 }
 
 .profile-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .card-header {
   margin-bottom: 28px;
-  border-bottom: 2px solid #f1f3f4;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 20px;
 }
 
 .card-header h2 {
-  color: #1f2937;
+  color: #ffffff;
   margin: 0 0 8px 0;
   font-size: 1.4rem;
   font-weight: 700;
 }
 
 .card-header p {
-  color: #6b7280;
+  color: rgba(236, 240, 241, 0.8);
   margin: 0;
   font-size: 0.95rem;
 }
@@ -149,7 +151,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .detail-row:last-child {
@@ -161,7 +163,7 @@
   align-items: center;
   gap: 12px;
   font-weight: 600;
-  color: #374151;
+  color: #ecf0f1;
   min-width: 140px;
 }
 
@@ -177,33 +179,40 @@
   justify-content: flex-end;
 }
 
+.detail-value span {
+  color: #ffffff;
+  font-weight: 500;
+}
+
 .address-full {
   font-family: 'Courier New', monospace;
   font-size: 0.8rem;
-  color: #666;
+  color: rgba(236, 240, 241, 0.7);
   display: none;
 }
 
 .address-short {
   font-family: 'Courier New', monospace;
   font-size: 0.9rem;
-  color: #333;
+  color: #ecf0f1;
   font-weight: 500;
 }
 
 .copy-btn {
-  background: #f8f9fa;
-  border: 1px solid #e1e5e9;
+  background: rgba(44, 62, 80, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 8px 12px;
   cursor: pointer;
+  color: #ecf0f1;
   transition: all 0.3s ease;
   font-size: 0.9rem;
 }
 
 .copy-btn:hover {
-  background: #e9ecef;
+  background: rgba(52, 73, 94, 0.9);
   transform: translateY(-1px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Status Badges */
@@ -227,15 +236,15 @@
 }
 
 .network-badge {
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeaa7;
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+  border: 1px solid rgba(52, 152, 219, 0.3);
 }
 
 .chain-badge {
-  background: #d1ecf1;
-  color: #0c5460;
-  border: 1px solid #bee5eb;
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.3);
 }
 
 /* Edit Form */

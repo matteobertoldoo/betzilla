@@ -7,9 +7,9 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
   min-height: 100vh;
-  color: #333;
+  color: #ecf0f1;
 }
 
 .App {
@@ -48,23 +48,27 @@ body {
   text-align: center;
   margin-bottom: 40px;
   padding: 30px 0;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(44, 62, 80, 0.2);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .header h1 {
   font-size: 3.5rem;
   font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header h1 .gradient-text {
   background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: gradientShift 3s ease-in-out infinite;
-  margin-bottom: 10px;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 @keyframes gradientShift {
@@ -78,27 +82,44 @@ body {
   font-weight: 300;
 }
 
+/* Page title styles for better readability */
+.page-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.page-title.with-emoji {
+  /* Ensure emojis are visible and readable */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Card styles */
 .card {
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(145deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9));
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 30px;
   margin-bottom: 30px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
+  color: #ecf0f1;
 }
 
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .card h2 {
   font-size: 2rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #ffffff;
   margin-bottom: 20px;
   border-bottom: 3px solid #3498db;
   padding-bottom: 10px;
@@ -107,7 +128,7 @@ body {
 .card h3 {
   font-size: 1.4rem;
   font-weight: 600;
-  color: #34495e;
+  color: #ecf0f1;
   margin-bottom: 15px;
 }
 
@@ -136,60 +157,70 @@ body {
 
 /* Button styles */
 .button {
-  background: linear-gradient(45deg, #3498db, #2980b9);
+  background: linear-gradient(45deg, #2c3e50, #34495e);
   color: white;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 12px 24px;
   border-radius: 50px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 4px 15px rgba(44, 62, 80, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
-  background: linear-gradient(45deg, #2980b9, #3498db);
+  box-shadow: 0 8px 25px rgba(44, 62, 80, 0.5);
+  background: linear-gradient(45deg, #34495e, #2c3e50);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .button:disabled {
-  background: #bdc3c7;
+  background: #7f8c8d;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .button.success {
   background: linear-gradient(45deg, #27ae60, #2ecc71);
-  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .button.success:hover {
-  box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+  box-shadow: 0 8px 25px rgba(39, 174, 96, 0.5);
   background: linear-gradient(45deg, #2ecc71, #27ae60);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Input styles */
 .input {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(44, 62, 80, 0.8);
   margin-bottom: 10px;
+  color: #ecf0f1;
 }
 
 .input:focus {
   outline: none;
   border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
   transform: translateY(-1px);
+  background: rgba(44, 62, 80, 0.9);
+}
+
+.input::placeholder {
+  color: rgba(236, 240, 241, 0.6);
 }
 
 select.input {
@@ -226,25 +257,27 @@ select.input {
 
 /* Betting portfolio styles */
 .bet-details {
-  background: rgba(52, 152, 219, 0.1);
+  background: rgba(44, 62, 80, 0.2);
   padding: 15px;
   border-radius: 10px;
   margin: 15px 0;
   border-left: 4px solid #3498db;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .resolution-details {
-  background: rgba(39, 174, 96, 0.1);
+  background: rgba(44, 62, 80, 0.2);
   padding: 15px;
   border-radius: 10px;
   margin: 15px 0;
   border-left: 4px solid #27ae60;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .empty-state {
   text-align: center;
   padding: 40px 20px;
-  color: #7f8c8d;
+  color: rgba(236, 240, 241, 0.7);
   font-style: italic;
 }
 
@@ -263,31 +296,33 @@ select.input {
 .stat-item {
   text-align: center;
   padding: 20px;
-  background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+  background: linear-gradient(135deg, rgba(44, 62, 80, 0.3), rgba(52, 73, 94, 0.3));
   border-radius: 15px;
-  border: 1px solid rgba(52, 152, 219, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
 }
 
 .stat-item:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(52, 152, 219, 0.2);
+  box-shadow: 0 10px 25px rgba(44, 62, 80, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .stat-value {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: #ffffff;
   margin-bottom: 8px;
-  background: linear-gradient(45deg, #3498db, #9b59b6);
+  background: linear-gradient(45deg, #3498db, #2ecc71);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .stat-label {
   font-size: 0.9rem;
-  color: #7f8c8d;
+  color: rgba(236, 240, 241, 0.8);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -304,17 +339,19 @@ select.input {
 .odds-item {
   text-align: center;
   flex: 1;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, rgba(44, 62, 80, 0.8), rgba(52, 73, 94, 0.8));
   padding: 15px;
   border-radius: 15px;
   color: white;
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 20px rgba(44, 62, 80, 0.4);
   transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .odds-item:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 12px 30px rgba(44, 62, 80, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .odds-value {
@@ -352,6 +389,21 @@ select.input {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Utility classes for special gradient effects when needed */
+.gradient-brand-text {
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-accent-text {
+  background: linear-gradient(45deg, #3498db, #2ecc71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Responsive design */
@@ -408,4 +460,4 @@ select.input {
   .input {
     padding: 10px 14px;
   }
-} 
+}

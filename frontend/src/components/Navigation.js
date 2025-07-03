@@ -101,19 +101,13 @@ const Navigation = ({ account, connectWallet, loading }) => {
             to="/profile" 
             className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}
           >
-            👤 Profile
+            👤 {user?.username || 'Profile'}
           </Link>
         </div>
 
         <div className="wallet-section">
-          {isAuthenticated && (
-            <div className="user-info">
-              <span className="username">{user?.username}</span>
-            </div>
-          )}
-          
           {account ? (
-            <div className="wallet-connected">
+            <div className="wallet-connected" title={`Connected: ${account}`}>
               <div className="metamask-icon">🦊</div>
               <span className="wallet-address">{formatAddress(account)}</span>
             </div>
@@ -122,6 +116,7 @@ const Navigation = ({ account, connectWallet, loading }) => {
               className="wallet-connect-btn"
               onClick={handleConnectWallet}
               disabled={loading}
+              title="Connect your MetaMask wallet"
             >
               <div className="metamask-icon">🦊</div>
               {loading ? <span className="loading"></span> : 'Connect Wallet'}

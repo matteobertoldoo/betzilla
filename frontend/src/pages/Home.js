@@ -10,7 +10,7 @@ const Home = () => {
           <div className="hero-content">
             <div className="hero-text">
               <h1 className="hero-title">
-                Welcome to <span className="brand-name">BetZilla</span>
+                Welcome to <span className="brand-name gradient-brand-text">BetZilla</span>
               </h1>
               <p className="hero-subtitle">
                 The Future of Decentralized Sports Betting

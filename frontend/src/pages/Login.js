@@ -110,7 +110,7 @@ const Login = () => {
       <div className="login-container">
         <div className="login-card">
           <div className="login-header">
-            <h1>🎰 BetZilla</h1>
+            <h1>BetZilla</h1>
             <h2>{isLoginMode ? 'Welcome Back' : 'Join BetZilla'}</h2>
             <p>
               {isLoginMode 

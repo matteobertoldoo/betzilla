@@ -4,7 +4,7 @@
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
   padding: 100px 0;
   color: white;
   position: relative;
@@ -77,26 +77,27 @@
 }
 
 .cta-primary {
-  background: white;
-  color: #667eea;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(45deg, #3498db, #2ecc71);
+  color: white;
+  box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
 }
 
 .cta-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 15px 40px rgba(52, 152, 219, 0.4);
 }
 
 .cta-secondary {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(45deg, #2c3e50, #34495e);
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
 }
 
 .cta-secondary:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: linear-gradient(45deg, #34495e, #2c3e50);
   transform: translateY(-3px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .hero-image {
@@ -146,7 +147,7 @@
 /* Features Section */
 .features-section {
   padding: 100px 0;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
 }
 
 .section-header {
@@ -157,13 +158,13 @@
 .section-header h2 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #333;
+  color: #ffffff;
   margin: 0 0 15px 0;
 }
 
 .section-header p {
   font-size: 1.2rem;
-  color: #666;
+  color: rgba(236, 240, 241, 0.9);
   margin: 0;
 }
 
@@ -174,18 +175,20 @@
 }
 
 .feature-card {
-  background: white;
+  background: linear-gradient(145deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9));
   padding: 40px 30px;
   border-radius: 20px;
   text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
-  border: 1px solid #e9ecef;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ecf0f1;
 }
 
 .feature-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .feature-icon {
@@ -193,7 +196,7 @@
   margin-bottom: 20px;
   display: inline-block;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
   border-radius: 50%;
   width: 80px;
   height: 80px;
@@ -206,12 +209,12 @@
 .feature-card h3 {
   font-size: 1.4rem;
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
   margin: 0 0 15px 0;
 }
 
 .feature-card p {
-  color: #666;
+  color: rgba(236, 240, 241, 0.9);
   line-height: 1.6;
   margin: 0;
 }
@@ -219,7 +222,7 @@
 /* How It Works Section */
 .how-it-works-section {
   padding: 100px 0;
-  background: white;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
 }
 
 .steps-grid {
@@ -239,7 +242,7 @@
 .step-number {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -255,12 +258,12 @@
 .step-content h3 {
   font-size: 1.3rem;
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
   margin: 0 0 10px 0;
 }
 
 .step-content p {
-  color: #666;
+  color: rgba(236, 240, 241, 0.9);
   line-height: 1.6;
   margin: 0;
 }
@@ -268,7 +271,7 @@
 /* Stats Section */
 .stats-section {
   padding: 80px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
   color: white;
 }
 
@@ -303,7 +306,7 @@
 /* CTA Section */
 .cta-section {
   padding: 100px 0;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
 }
 
 .cta-content {
@@ -315,20 +318,20 @@
 .cta-content h2 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #333;
+  color: #ffffff;
   margin: 0 0 20px 0;
 }
 
 .cta-content p {
   font-size: 1.2rem;
-  color: #666;
+  color: rgba(236, 240, 241, 0.9);
   margin: 0 0 40px 0;
   line-height: 1.6;
 }
 
 .cta-button {
   display: inline-block;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
   color: white;
   padding: 18px 40px;
   border-radius: 12px;
@@ -336,12 +339,12 @@
   font-size: 1.2rem;
   text-decoration: none;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 10px 30px rgba(52, 152, 219, 0.4);
 }
 
 .cta-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 15px 40px rgba(52, 152, 219, 0.5);
 }
 
 /* Mobile Responsive */

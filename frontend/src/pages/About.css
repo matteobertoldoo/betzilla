@@ -4,7 +4,7 @@
 
 /* About Hero Section */
 .about-hero {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
   padding: 100px 0 80px 0;
   color: white;
   text-align: center;
@@ -31,7 +31,7 @@
 /* Mission Section */
 .mission-section {
   padding: 100px 0;
-  background: white;
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
 }
 
 .mission-content {
@@ -44,14 +44,14 @@
 .mission-text h2 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #333;
+  color: #ffffff;
   margin: 0 0 30px 0;
 }
 
 .mission-text p {
   font-size: 1.1rem;
   line-height: 1.8;
-  color: #666;
+  color: rgba(236, 240, 241, 0.9);
   margin: 0 0 20px 0;
 }
 
@@ -101,7 +101,7 @@
 /* Values Section */
 .values-section {
   padding: 100px 0;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
 }
 
 .section-header {
@@ -112,13 +112,13 @@
 .section-header h2 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #333;
+  color: #ffffff;
   margin: 0 0 15px 0;
 }
 
 .section-header p {
   font-size: 1.2rem;
-  color: #666;
+  color: rgba(236, 240, 241, 0.9);
   margin: 0;
 }
 
@@ -129,18 +129,20 @@
 }
 
 .value-card {
-  background: white;
+  background: linear-gradient(145deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9));
   padding: 40px 30px;
   border-radius: 20px;
   text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
-  border: 1px solid #e9ecef;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ecf0f1;
 }
 
 .value-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .value-icon {
@@ -148,7 +150,7 @@
   margin-bottom: 20px;
   display: inline-block;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
   border-radius: 50%;
   width: 80px;
   height: 80px;
@@ -161,12 +163,12 @@
 .value-card h3 {
   font-size: 1.4rem;
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
   margin: 0 0 15px 0;
 }
 
 .value-card p {
-  color: #666;
+  color: rgba(236, 240, 241, 0.9);
   line-height: 1.6;
   margin: 0;
 }
@@ -174,7 +176,7 @@
 /* Team Section */
 .team-section {
   padding: 100px 0;
-  background: white;
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
 }
 
 .team-grid {
@@ -185,16 +187,18 @@
 
 .team-member {
   text-align: center;
-  background: #f8f9fa;
+  background: linear-gradient(145deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9));
   padding: 40px 30px;
   border-radius: 20px;
   transition: all 0.3s ease;
-  border: 1px solid #e9ecef;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ecf0f1;
 }
 
 .team-member:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .member-avatar {
@@ -226,7 +230,7 @@
 .team-member h3 {
   font-size: 1.3rem;
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
   margin: 0 0 5px 0;
 }
 
@@ -249,7 +253,7 @@
 /* Technology Section */
 .technology-section {
   padding: 100px 0;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
 }
 
 .tech-content {
@@ -262,14 +266,14 @@
 .tech-text h2 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #333;
+  color: #ffffff;
   margin: 0 0 20px 0;
 }
 
 .tech-text > p {
   font-size: 1.1rem;
   line-height: 1.8;
-  color: #666;
+  color: rgba(236, 240, 241, 0.9);
   margin: 0 0 40px 0;
 }
 
@@ -287,7 +291,7 @@
 
 .tech-icon {
   font-size: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
   color: white;
   width: 50px;
   height: 50px;
@@ -301,12 +305,12 @@
 .tech-feature h4 {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
   margin: 0 0 8px 0;
 }
 
 .tech-feature p {
-  color: #666;
+  color: rgba(236, 240, 241, 0.9);
   line-height: 1.6;
   margin: 0;
 }
@@ -353,7 +357,7 @@
 /* Vision Section */
 .vision-section {
   padding: 100px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
   color: white;
 }
 

@@ -1,6 +1,7 @@
 .settings-page {
   min-height: 100vh;
   padding: 40px 0;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
 }
 
 .page-header {
@@ -11,16 +12,14 @@
 .page-header h1 {
   font-size: 3rem;
   font-weight: 700;
-  background: linear-gradient(45deg, #e67e22, #f39c12);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff;
   margin-bottom: 15px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .page-header p {
   font-size: 1.2rem;
-  color: #7f8c8d;
+  color: rgba(236, 240, 241, 0.8);
 }
 
 /* Wallet Prompt */
@@ -32,24 +31,25 @@
 }
 
 .prompt-content {
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(145deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9));
   backdrop-filter: blur(10px);
   border-radius: 30px;
   padding: 60px 40px;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ecf0f1;
 }
 
 .prompt-content h2 {
   font-size: 2rem;
-  color: #2c3e50;
+  color: #ffffff;
   margin-bottom: 20px;
 }
 
 .prompt-content p {
   font-size: 1.1rem;
-  color: #7f8c8d;
+  color: rgba(236, 240, 241, 0.8);
   margin-bottom: 30px;
 }
 
@@ -66,18 +66,19 @@
 }
 
 .settings-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(145deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9));
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
+  color: #ecf0f1;
 }
 
 .settings-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
 }
 
 .settings-card.danger {
@@ -87,19 +88,19 @@
 /* Card Header */
 .card-header {
   margin-bottom: 25px;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 15px;
 }
 
 .card-header h2 {
   font-size: 1.4rem;
-  color: #2c3e50;
+  color: #ffffff;
   margin-bottom: 8px;
   font-weight: 600;
 }
 
 .card-header p {
-  color: #7f8c8d;
+  color: rgba(236, 240, 241, 0.8);
   font-size: 0.9rem;
   margin: 0;
 }
@@ -110,7 +111,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .detail-row:last-child {
@@ -122,7 +123,7 @@
   align-items: center;
   gap: 10px;
   font-weight: 500;
-  color: #2c3e50;
+  color: #ffffff;
   font-size: 0.95rem;
 }
 
@@ -142,14 +143,14 @@
 .address-full {
   font-family: 'Courier New', monospace;
   font-size: 0.8rem;
-  color: #7f8c8d;
+  color: rgba(236, 240, 241, 0.8);
   display: none;
 }
 
 .address-short {
   font-family: 'Courier New', monospace;
   font-size: 0.9rem;
-  color: #2c3e50;
+  color: #ffffff;
   font-weight: 500;
 }
 
@@ -222,7 +223,7 @@
   align-items: center;
   gap: 10px;
   font-weight: 500;
-  color: #2c3e50;
+  color: #ffffff;
   font-size: 0.95rem;
 }
 
@@ -297,14 +298,14 @@ input:checked + .toggle-slider:before {
 
 .help-content h3 {
   font-size: 1rem;
-  color: #2c3e50;
+  color: #ffffff;
   margin-bottom: 4px;
   font-weight: 600;
 }
 
 .help-content p {
   font-size: 0.9rem;
-  color: #7f8c8d;
+  color: rgba(236, 240, 241, 0.8);
   margin: 0;
 }
 
@@ -342,14 +343,14 @@ input:checked + .toggle-slider:before {
 
 .danger-content h3 {
   font-size: 1rem;
-  color: #2c3e50;
+  color: #ffffff;
   margin-bottom: 4px;
   font-weight: 600;
 }
 
 .danger-content p {
   font-size: 0.9rem;
-  color: #7f8c8d;
+  color: rgba(236, 240, 241, 0.8);
   margin: 0;
 }
 
@@ -380,6 +381,7 @@ input:checked + .toggle-slider:before {
 
   .page-header h1 {
     font-size: 2.5rem;
+    color: #ffffff;
   }
 
   .settings-card {
@@ -427,6 +429,7 @@ input:checked + .toggle-slider:before {
 
   .page-header h1 {
     font-size: 2rem;
+    color: #ffffff;
   }
 
   .card-header h2 {

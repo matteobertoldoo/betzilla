@@ -11,16 +11,14 @@
 .page-header h1 {
   font-size: 3rem;
   font-weight: 700;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff;
   margin-bottom: 15px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .page-header p {
   font-size: 1.2rem;
-  color: #7f8c8d;
+  color: rgba(236, 240, 241, 0.9);
 }
 
 /* Wallet Prompt */
@@ -32,24 +30,24 @@
 }
 
 .prompt-content {
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(145deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9));
   backdrop-filter: blur(10px);
   border-radius: 30px;
   padding: 60px 40px;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .prompt-content h2 {
   font-size: 2rem;
-  color: #2c3e50;
+  color: #ffffff;
   margin-bottom: 20px;
 }
 
 .prompt-content p {
   font-size: 1.1rem;
-  color: #7f8c8d;
+  color: rgba(236, 240, 241, 0.9);
   margin-bottom: 30px;
 }
 
@@ -780,6 +778,7 @@
 
   .page-header h1 {
     font-size: 2.5rem;
+    color: #2c3e50;
   }
 
   .match-card {
@@ -823,6 +822,7 @@
 
   .page-header h1 {
     font-size: 2rem;
+    color: #2c3e50;
   }
 
   .teams h3 {
