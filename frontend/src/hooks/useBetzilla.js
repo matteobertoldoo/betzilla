@@ -155,10 +155,14 @@ export const useBetzilla = () => {
       setLoading(true);
       setError(null);
 
+      // Assicurati che amount sia una stringa/numero decimale (es: "0.01")
+      const value = ethers.parseEther(amount.toString());
+
       console.log(`🎯 Placing bet: Market ${marketId}, Outcome ${outcome}, Amount ${amount} ETH`);
 
+      // Passa value come opzione della transazione
       const tx = await contract.placeBet(marketId, outcome, {
-        value: ethers.parseEther(amount.toString())
+        value
       });
 
       console.log(`📝 Transaction hash: ${tx.hash}`);
