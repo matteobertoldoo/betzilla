@@ -53,7 +53,7 @@ contract BetZilla {
     uint256 public constant EARLY_FEE_PERCENT = 2;     // 2% fee for bets placed >24h before match
     uint256 public constant LATE_FEE_PERCENT = 3;      // 3% fee for bets placed <24h before match
     uint256 public constant MIN_ODDS = 101;            // Minimum 1.01x odds to prevent losses
-    uint256 public constant MIN_POOL_SIZE = 1 ether;   // Minimum total bets to close market
+    uint256 public constant MIN_POOL_SIZE = 0.002 ether;   // Minimum total bets to close market
     uint256 public constant MIN_BET_AMOUNT = 0.001 ether; // Minimum individual bet size
 
     // === MAPPINGS ===
