@@ -405,7 +405,7 @@ async function testBetZillaComplete() {
     
     const bettingPhase = await betZilla.getBettingPhase(3);
     console.log(`\n📊 Betting Phase for Market 3:`);
-    console.log(`  Is early phase: ${bettingPhase[0]}`);
+    console.log(`  Is early bird phase: ${bettingPhase[0]} 🐦`);
     console.log(`  Is late phase: ${bettingPhase[1]}`);
     console.log(`  Current fee percent: ${bettingPhase[2]}%`);
     console.log(`  Hours until match: ${bettingPhase[3]}`);

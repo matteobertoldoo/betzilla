@@ -38,16 +38,18 @@ BetZilla è una piattaforma di scommesse sportive decentralizzata costruita su b
   - **Fee Ridotta**: 2% di commissione per chi scommette con più di 24 ore di anticipo.
   - **Quote Nascoste**: Le quote non sono visibili ("Blind Betting"), per evitare manipolazioni.
   - **Obiettivo**: Incentivare scommesse anticipate con fee più bassa.
+  - **Indicatore**: Viene mostrato "2% Fee" in verde sui match cards.
 - **Parimutuel Phase (<24h)**:
   - **Fee Standard**: 3% di commissione.
   - **Quote Visibili**: Le quote parimutuel vengono mostrate e aggiornate live.
   - **Obiettivo**: Massima trasparenza e dinamismo nelle ultime ore prima della partita.
+  - **Indicatore**: Viene mostrato "3% Fee" in arancione sui match cards.
 - **Match Started**:
   - **Scommesse Chiuse**: Non è più possibile piazzare scommesse.
   - **Quote Finali**: Le quote finali vengono fissate e usate per il calcolo delle vincite.
 
 ### Esempio di Flusso
-1. **Scommetti in Early Phase**: Scommetti su una partita che inizia tra 2 giorni. Paghi solo il 2% di fee, ma non conosci le quote.
+1. **Scommetti in Early Phase**: Scommetti su una partita che inizia tra 2 giorni. Paghi solo il 2% di fee (Early Bird Discount! 🐦), ma non conosci le quote fino alla fase parimutuel.
 2. **Scommetti in Parimutuel Phase**: Scommetti su una partita che inizia tra 6 ore. Paghi il 3% di fee e vedi le quote aggiornate in tempo reale.
 3. **Calcolo Vincite**: Quando la partita è risolta, le vincite vengono calcolate usando le quote parimutuel finali e la fee in base a quando hai piazzato la scommessa.
 

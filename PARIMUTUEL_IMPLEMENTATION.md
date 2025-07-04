@@ -20,15 +20,17 @@
 - **Enhanced Bet Page**: Shows parimutuel odds for matches within 24 hours
 - **Real-time Updates**: Odds refresh every 30 seconds
 - **Visual Indicators**: Different styling for parimutuel vs blind betting modes
+- **Fee Display**: Clear commission indicators (2% green for early, 3% orange for parimutuel)
 
 ### 4. Key Features
 - **Dynamic Fee System**: 2% for early bets (>24h), 3% for parimutuel phase (<24h)
 - **Phase-Based Betting**: Early blind betting transitions to live parimutuel odds
 - **Live Updates**: Odds change as new bets are placed in parimutuel phase
 - **Dual Mode System**: 
-  - Early Phase: Hidden odds with 2% fee discount
-  - Parimutuel Phase: Live odds with 3% standard fee
+  - Early Phase: 🐦 Early Bird Special - Discounted fees (2%), odds revealed when betting heats up!
+  - Parimutuel Phase: Live odds with 3% standard fee (shown in orange)
   - Blind Betting: For matches further than 24h out
+- **Transparent Fee Display**: Users always see exactly what commission they'll pay
 
 ## 🚀 How to Test
 

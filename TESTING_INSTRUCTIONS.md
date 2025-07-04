@@ -39,15 +39,17 @@ The parimutuel betting system is now fully implemented and ready for testing! He
 
 ## 📊 Current Test Data
 
-The system includes these matches within 24 hours:
+The system includes these matches within 24 hours (showing 3% commission):
 
-1. **Premier League: Manchester United vs Liverpool** (No bets yet)
-2. **La Liga: Real Madrid vs Barcelona** (Has parimutuel odds!)
-3. **NBA: Lakers vs Warriors** (No bets yet)
-4. **Champions League: PSG vs Bayern Munich** (No bets yet)
-5. **Real Madrid vs Barcelona - El Clasico** (Has parimutuel odds!)
-6. **Serie A: Juventus vs AC Milan** (No bets yet)
-7. **Chelsea vs Arsenal** (Has parimutuel odds!)
+1. **Premier League: Manchester United vs Liverpool** (No bets yet - 3% fee)
+2. **La Liga: Real Madrid vs Barcelona** (Has parimutuel odds! - 3% fee)
+3. **NBA: Lakers vs Warriors** (No bets yet - 3% fee)
+4. **Champions League: PSG vs Bayern Munich** (No bets yet - 3% fee)
+5. **Real Madrid vs Barcelona - El Clasico** (Has parimutuel odds! - 3% fee)
+6. **Serie A: Juventus vs AC Milan** (No bets yet - 3% fee)
+7. **Chelsea vs Arsenal** (Has parimutuel odds! - 3% fee)
+
+Matches more than 24 hours away show 2% commission (early betting discount).
 
 ## 🎲 How Parimutuel Odds Work
 
@@ -61,8 +63,8 @@ The system includes these matches within 24 hours:
 
 **Early Phase (48h before match):**
 - Bet: 1 ETH on Real Madrid
-- Fee: 2% (0.02 ETH)
-- Status: "Hidden odds, early discount"
+- Fee: 2% (0.02 ETH) - Early Bird Discount! 🐦
+- Status: "🔒 Early Bird Special - Discounted fees, odds revealed when betting heats up!"
 
 **Parimutuel Phase (12h before match):**
 - Total Pool: 13.32 ETH  

@@ -156,6 +156,10 @@ const ParimutuelOdds = () => {
                       <span>Total Bets: </span>
                       <strong>{match.betting_summary.total_bets}</strong>
                     </div>
+                    <div className="pool-fee">
+                      <span>Commission: </span>
+                      <strong className="fee-highlight">3%</strong>
+                    </div>
                   </div>
                 </div>
 
@@ -198,7 +202,7 @@ const ParimutuelOdds = () => {
 
                 <div className="match-actions">
                   <button className="bet-now-btn">
-                    🎯 Place Bet
+                    🎯 Place Bet (3% fee)
                   </button>
                   <button className="details-btn">
                     📊 View Details

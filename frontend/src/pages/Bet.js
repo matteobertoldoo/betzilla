@@ -1012,6 +1012,11 @@ const Bet = ({
                             ⏰ Parimutuel Phase
                           </span>
                         )}
+                        
+                        {/* Fee indicator */}
+                        <span className={`fee-indicator ${isWithin24Hours ? 'parimutuel-fee' : 'early-fee'}`}>
+                          💰 {isWithin24Hours ? '3%' : '2%'} Fee
+                        </span>
                       </div>
                       
                       <div className="match-badges">
@@ -1058,7 +1063,10 @@ const Bet = ({
                           <>
                             <div className="parimutuel-banner">
                               <span className="parimutuel-label">🔥 Live odds can still change</span>
-                              <span className="pool-info">Pool: {(pool.total_pool_wei / 1e18).toFixed(4)} ETH</span>
+                              <div className="banner-details">
+                                <span className="pool-info">Pool: {(pool.total_pool_wei / 1e18).toFixed(4)} ETH</span>
+                                <span className="fee-info">3% commission</span>
+                              </div>
                             </div>
                             <div className="odds-display parimutuel-mode">
                               <div className="odds-item">
@@ -1136,7 +1144,7 @@ const Bet = ({
                             </div>
                             <div className="odds-info">
                               <span className="early-info">
-                                🔒 Early Phase - Lower fees, odds revealed in parimutuel phase
+                                🐦 Early Bird Special - Discounted fees (2%), odds revealed when betting heats up!
                               </span>
                             </div>
                           </>
@@ -1175,7 +1183,7 @@ const Bet = ({
                             </div>
                             <div className="odds-info">
                               <span className="blind-info">
-                                🔒 Blind Betting - Odds revealed at match start
+                                🔒 Blind Betting - Odds revealed at match start (2% commission)
                               </span>
                             </div>
                           </>
