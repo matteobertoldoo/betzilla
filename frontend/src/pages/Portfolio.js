@@ -251,11 +251,9 @@ const Portfolio = ({
   
   // Convert database bets to the same format as blockchain bets for unified handling
   const formattedDatabaseBets = databaseBets.map(dbBet => {
+    // Database bet marketId should only match with database match ID (m.id)
     const match = matches.find(m => 
-      m.id === dbBet.marketId || 
-      m.id === dbBet.market_id ||
-      m.contractMarketId === dbBet.marketId ||
-      m.contract_market_id === dbBet.marketId
+      m.id === (dbBet.marketId || dbBet.market_id)
     );
     
     return {
@@ -299,11 +297,9 @@ const Portfolio = ({
     ((winningBets.length / resolvedBets.length) * 100).toFixed(1) : 0;
 
   const renderBetCard = (betData, key) => {
-    // Try multiple ways to find the match
+    // For blockchain bets, marketId is the contract market ID, so match with contractMarketId
     const match = matches.find(m => 
-      m.id === betData.marketId || 
-      m.contractMarketId === betData.marketId ||
-      m.contract_market_id === betData.marketId
+      (m.contractMarketId || m.contract_market_id) === betData.marketId
     );
     const matchName = match ? `${match.home_team || match.homeTeam} vs ${match.away_team || match.awayTeam}` : `Market #${betData.marketId}`;
     
@@ -397,12 +393,9 @@ const Portfolio = ({
       status: betData.status
     } : betData;
 
-    // Try multiple ways to find the match
+    // For database bets, marketId is the database match ID, so match with m.id
     const match = matches.find(m => 
-      m.id === bet.marketId || 
-      m.id === bet.market_id ||
-      m.contractMarketId === bet.marketId ||
-      m.contract_market_id === bet.marketId
+      m.id === (bet.marketId || bet.market_id)
     );
     
     const matchName = match ? `${match.home_team || match.homeTeam} vs ${match.away_team || match.awayTeam}` : 
