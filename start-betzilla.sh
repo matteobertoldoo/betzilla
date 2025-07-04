@@ -2,6 +2,9 @@
 
 echo "🎰 Starting BETZILLA - Decentralized Sports Betting Platform"
 echo "=========================================================="
+echo "ℹ️  Note: The system uses Hardhat test accounts for contract deployment"
+echo "   and fake data population. Your MetaMask wallet won't be affected."
+echo ""
 
 # Function to check if a port is in use
 check_port() {
@@ -159,6 +162,7 @@ fi
 
 # Place fake on-chain bets for test users
 echo "💸 Placing fake on-chain bets for test users..."
+echo "   Using Hardhat test accounts #1-#8 (Account #0 reserved for user testing)"
 npx hardhat run scripts/placeFakeBetsOnChain.js --network localhost
 
 cd ..

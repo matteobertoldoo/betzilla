@@ -3,7 +3,7 @@ const axios = require("axios");
 
 const FRIENDS = [
   "alice_bet",
-  "bob_gambler",
+  "bob_gambler", 
   "carol_sports",
   "david_fan",
   "eve_bettor",
@@ -14,11 +14,17 @@ const FRIENDS = [
 
 async function main() {
   console.log("💸 Placing fake bets on-chain for test users...");
+  console.log("ℹ️  Using Hardhat accounts #1-#8 (excluding Account #0 for user testing)");
 
-  // 1. Get Hardhat accounts
+  // 1. Get Hardhat accounts (skip Account #0)
   const signers = await ethers.getSigners();
-  // Map friend usernames to signers (first 8)
-  const friendSigners = signers.slice(0, FRIENDS.length);
+  // Use accounts 1-8 for fake bets, leaving Account #0 clean for user testing
+  const friendSigners = signers.slice(1, FRIENDS.length + 1);
+
+  console.log(`📋 Using ${friendSigners.length} test accounts for fake betting:`);
+  friendSigners.forEach((signer, i) => {
+    console.log(`   ${FRIENDS[i]}: ${signer.address}`);
+  });
 
   // 2. Get contract instance
   const contractAddress = process.env.BETZILLA_CONTRACT || "0x5FbDB2315678afecb367f032d93F642f64180aa3";

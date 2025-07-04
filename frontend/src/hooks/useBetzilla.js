@@ -4,7 +4,7 @@ import BetZillaArtifact from '../abi/BetZilla.json';
 const BetZillaABI = BetZillaArtifact.abi;
 
 // Contract address from latest deployment
-const CONTRACT_ADDRESS = '0xc351628EB244ec633d5f21fBD6621e1a683B1181';
+const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 export const useBetzilla = () => {
   const [contract, setContract] = useState(null);
