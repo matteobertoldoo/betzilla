@@ -1,302 +1,302 @@
 # 🎰 BetZilla - Decentralized Sports Betting Platform
 
-BetZilla è una piattaforma di scommesse sportive decentralizzata costruita su blockchain Ethereum con un innovativo sistema di **Parimutuel Betting** e **Blind Betting**. Gli utenti possono piazzare scommesse con quote dinamiche basate sui pool di scommesse, creando un'esperienza trasparente e anti-manipolazione.
+BetZilla is a decentralized sports betting platform built on Ethereum blockchain with an innovative **Parimutuel Betting** and **Blind Betting** system. Users can place bets with dynamic odds based on betting pools, creating a transparent and anti-manipulation experience.
 
-## 🚀 Avvio Rapido
+## 🚀 Quick Start
 
-### Avvia Tutto con Un Comando
+### Start Everything with One Command
 ```bash
 ./start-betzilla.sh
 ```
 
-### Spegni Tutto
+### Stop Everything
 ```bash
 ./stop-betzilla.sh
 ```
 
-**È tutto qui!** Il sistema avvia automaticamente:
-- 🔗 Hardhat blockchain locale (porta 8545)
-- 🖥️ Backend API (porta 4000)
-- 🌐 Frontend React (porta 3000)
-- 📦 Deploy automatico del contratto
-- 🎲 Popolamento database con partite e scommesse test
+**That's it!** The system automatically starts:
+- 🔗 Hardhat local blockchain (port 8545)
+- 🖥️ Backend API (port 4000)
+- 🌐 React Frontend (port 3000)
+- 📦 Automatic contract deployment
+- 🎲 Database population with test matches and bets
 
-## 📹 Demo Video - Betting Live in Azione!
+## 📹 Demo Video - Live Betting in Action!
 
-**🎥 Guarda BetZilla in azione - Piazzamento scommessa reale con MetaMask:**
+**🎥 Watch BetZilla in action - Real betting with MetaMask:**
 
 [![BetZilla Demo - Live Betting](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://youtu.be/AFbMlGc3xXA)
 
-*Video dimostrativo: connessione MetaMask, piazzamento scommessa, transazione blockchain e aggiornamento portfolio in tempo reale.*
+*Demo video: MetaMask connection, bet placement, blockchain transaction and real-time portfolio updates.*
 
-## 🖼️ Due Fasi di Betting - Screenshot
+## 🖼️ Two Betting Phases - Screenshots
 
-### 🔒 **Blind Betting Phase** (>24h dalla partita)
-*Quote nascoste - Early Bird Discount 2% fee*
+### 🔒 **Blind Betting Phase** (>24h before match)
+*Hidden odds - Early Bird Discount 2% fee*
 
 ![Hidden Quotes](hidden.png)
 
-### 👁️ **Parimutuel Phase** (<24h dalla partita)  
-*Quote visibili e live - 3% fee standard*
+### 👁️ **Parimutuel Phase** (<24h before match)  
+*Visible and live odds - 3% standard fee*
 
 ![Discoverable Quotes](discoverable.png)
 
-## 🧪 Testing Completo
+## 🧪 Complete Testing
 
-### 🎯 **Test LIVE Betting con MetaMask**
-**Puoi testare SUBITO il sistema di scommesse reale!**
+### 🎯 **LIVE Betting Test with MetaMask**
+**You can test the real betting system RIGHT NOW!**
 
-1. **Avvia il sistema**:
+1. **Start the system**:
 ```bash
 ./start-betzilla.sh
 ```
 
-2. **Vai sul sito**: http://localhost:3000
+2. **Go to the website**: http://localhost:3000
 
-3. **Connetti MetaMask**:
-   - Configura rete Hardhat (Chain ID: 31337, RPC: http://127.0.0.1:8545)
-   - Usa l'account test: `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`
+3. **Connect MetaMask**:
+   - Configure Hardhat network (Chain ID: 31337, RPC: http://127.0.0.1:8545)
+   - Use test account: `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`
    - Private Key: `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`
 
-4. **Accedi con MetaMask**:
-   - Clicca "🦊 Sign in with MetaMask" 
-   - Firma il messaggio per autenticarti
-   - Il sistema ti registra automaticamente
+4. **Login with MetaMask**:
+   - Click "🦊 Sign in with MetaMask" 
+   - Sign the message to authenticate
+   - System automatically registers you
 
-5. **Vai alla sezione Bet** e **piazza una scommessa**:
-   - Scegli una partita
-   - Seleziona outcome (Home/Draw/Away)
-   - Inserisci importo (es. 0.01 ETH)
-   - Clicca "Place Bet"
+5. **Go to Bet section** and **place a bet**:
+   - Choose a match
+   - Select outcome (Home/Draw/Away)
+   - Enter amount (e.g. 0.01 ETH)
+   - Click "Place Bet"
 
-6. **Verifica che funziona**:
-   - ✅ **MetaMask**: Vedrai la transazione e l'ETH sottratto dal wallet
-   - ✅ **Blockchain Logs**: Nel terminale dove gira Hardhat vedrai:
+6. **Verify it works**:
+   - ✅ **MetaMask**: You'll see the transaction and ETH deducted from wallet
+   - ✅ **Blockchain Logs**: In the terminal running Hardhat you'll see:
      ```
      eth_sendTransaction
      Transaction: 0x123abc...
      Block: #XX
      Gas used: XXXX
      ```
-   - ✅ **Portfolio**: La scommessa apparirà nel tuo portfolio
-   - ✅ **Database**: Scommessa salvata nel database
+   - ✅ **Portfolio**: The bet will appear in your portfolio
+   - ✅ **Database**: Bet saved in database
 
-### 🔥 **Prova i Due Sistemi di Betting**
+### 🔥 **Try Both Betting Systems**
 
-**Sistema Parimutuel (Partite entro 24h)**:
-- Quote **live** che cambiano in tempo reale
-- Fee 3% - quote visibili
-- Pool condiviso tra tutti i giocatori
+**Parimutuel System (Matches within 24h)**:
+- **Live** odds that change in real-time
+- 3% fee - visible odds
+- Shared pool among all players
 
-**Sistema Early Bird (Partite >24h)**:
-- Quote **nascoste** (blind betting)
-- Fee 2% - sconto early bird!
-- Quote rivelate solo quando si avvicina la partita
+**Early Bird System (Matches >24h)**:
+- **Hidden** odds (blind betting)
+- 2% fee - early bird discount!
+- Odds revealed only when match approaches
 
-### Test dal Sito Web 
-1. Vai su: http://localhost:3000
-2. Testa il piazzamento scommesse in modalità test
-3. Visualizza le quote parimutuel live per partite entro 24h
-4. Prova il blind betting per partite future
+### Website Testing 
+1. Go to: http://localhost:3000
+2. Test bet placement in test mode
+3. View live parimutuel odds for matches within 24h
+4. Try blind betting for future matches
 
-### Test Automatico Completo
-Per testare **tutto** il sistema (distribuzione vincite, raccolta fee, calcoli parimutuel, edge cases):
+### Complete Automated Testing
+To test **everything** (winnings distribution, fee collection, parimutuel calculations, edge cases):
 
 ```bash
 ./test-parimutuel.sh
 ```
 
-Questo script testa:
-- ✅ Sistema completo di scommesse
-- ✅ Calcoli parimutuel accurati
-- ✅ Distribuzione vincite corretta
-- ✅ Raccolta fee (2% early, 3% live)
-- ✅ Edge cases e validazioni
-- ✅ Integrazione backend
-- ✅ Gestione errori
+This script tests:
+- ✅ Complete betting system
+- ✅ Accurate parimutuel calculations
+- ✅ Correct winnings distribution
+- ✅ Fee collection (2% early, 3% live)
+- ✅ Edge cases and validations
+- ✅ Backend integration
+- ✅ Error handling
 
-## 🌟 Caratteristiche Principali
+## 🌟 Key Features
 
-### 🎯 **Sistema Parimutuel Innovativo**
-- **Quote Dinamiche**: Le quote cambiano in base alla distribuzione delle scommesse nel pool
-- **Trasparenza Totale**: Formula: `Odds = (Pool Totale - Fee) / Importo su Outcome`
-- **Aggiornamenti Live**: Quote aggiornate ogni 30 secondi per partite entro 24h
-- **Anti-Manipolazione**: Nessuna casa può manipolare le quote
+### 🎯 **Innovative Parimutuel System**
+- **Dynamic Odds**: Odds change based on bet distribution in the pool
+- **Total Transparency**: Formula: `Odds = (Total Pool - Fee) / Amount on Outcome`
+- **Live Updates**: Odds updated every 30 seconds for matches within 24h
+- **Anti-Manipulation**: No house can manipulate odds
 
-### 💰 **Sistema di Fee Dinamico**
-- **Early Betting (>24h)**: 2% fee, quote nascoste (blind betting)
-- **Parimutuel Phase (<24h)**: 3% fee, quote visibili e live
-- **Incentivo Anticipato**: Premia chi scommette prima con fee ridotta
+### 💰 **Dynamic Fee System**
+- **Early Betting (>24h)**: 2% fee, hidden odds (blind betting)
+- **Parimutuel Phase (<24h)**: 3% fee, visible and live odds
+- **Early Incentive**: Rewards early bettors with reduced fees
 
 ### 🔒 **Blind Betting**
-- **Scommesse Cieche**: Piazzi scommesse prima che le quote vengano rivelate
-- **Trasparenza Blockchain**: Tutte le transazioni registrate e verificabili
-- **Nessuna Manipolazione**: Quote rivelate solo nella fase finale
+- **Blind Bets**: Place bets before odds are revealed
+- **Blockchain Transparency**: All transactions recorded and verifiable
+- **No Manipulation**: Odds revealed only in final phase
 
-### 📊 **Gestione Avanzata**
-- **Scommesse Multiple**: Più scommesse sullo stesso mercato
-- **Portfolio Completo**: Tracking scommesse attive e risolte
-- **Claim Automatico**: Ritiro vincite quando partite sono risolte
+### 📊 **Advanced Management**
+- **Multiple Bets**: Multiple bets on the same market
+- **Complete Portfolio**: Tracking active and resolved bets
+- **Automatic Claim**: Withdraw winnings when matches are resolved
 
-## 🎲 Come Funziona
+## 🎲 How It Works
 
-### Fasi di Betting
-1. **Early Phase (>24h prima della partita)**:
+### Betting Phases
+1. **Early Phase (>24h before match)**:
    - Fee: 2% (Early Bird Discount! 🐦)
-   - Quote: Nascoste (blind betting)
-   - Vantaggio: Fee ridotta per chi scommette prima
+   - Odds: Hidden (blind betting)
+   - Advantage: Reduced fee for early bettors
 
-2. **Parimutuel Phase (<24h prima della partita)**:
+2. **Parimutuel Phase (<24h before match)**:
    - Fee: 3% (standard)
-   - Quote: Visibili e aggiornate live
-   - Vantaggio: Vedi esattamente su cosa stai scommettendo
+   - Odds: Visible and updated live
+   - Advantage: See exactly what you're betting on
 
 3. **Match Started**:
-   - Scommesse: Chiuse
-   - Quote: Finali per calcolo vincite
+   - Betting: Closed
+   - Odds: Final for winnings calculation
 
-### Esempio Pratico
+### Practical Example
 ```
-Early Phase: Real Madrid vs Barcelona (48h prima)
-├── Scommetti: 1 ETH su Real Madrid
+Early Phase: Real Madrid vs Barcelona (48h before)
+├── Bet: 1 ETH on Real Madrid
 ├── Fee: 2% (0.02 ETH) - Early Bird!
-└── Status: "🔒 Quote rivelate quando si scalda il betting!"
+└── Status: "🔒 Odds revealed when betting heats up!"
 
-Parimutuel Phase: (12h prima)
-├── Pool Totale: 13.32 ETH
-├── Su Real Madrid: 6.05 ETH
+Parimutuel Phase: (12h before)
+├── Total Pool: 13.32 ETH
+├── On Real Madrid: 6.05 ETH
 ├── Fee: 3% → Net Pool: 12.92 ETH
-└── Quote Real Madrid: 12.92 / 6.05 = 2.14x
+└── Real Madrid Odds: 12.92 / 6.05 = 2.14x
 ```
 
-## 🏗️ Architettura
+## 🏗️ Architecture
 
 ```
 BetZilla/
-├── contracts/          # Smart Contracts Solidity
-├── backend/           # API Node.js/Express  
+├── contracts/          # Solidity Smart Contracts
+├── backend/           # Node.js/Express API  
 ├── frontend/         # React App
-├── start-betzilla.sh # Avvio tutto
-├── stop-betzilla.sh  # Spegni tutto
-└── test-parimutuel.sh # Test completo
+├── start-betzilla.sh # Start everything
+├── stop-betzilla.sh  # Stop everything
+└── test-parimutuel.sh # Complete testing
 ```
 
-## 📱 Interfaccia
+## 📱 Interface
 
 ### 🌐 **Frontend** (http://localhost:3000)
-- **Live Odds**: Quote parimutuel in tempo reale
-- **Bet Placement**: Piazzamento scommesse **reali** con MetaMask
-- **Portfolio**: Tracking scommesse e vincite
-- **MetaMask Integration**: Autenticazione e transazioni blockchain
+- **Live Odds**: Real-time parimutuel odds
+- **Bet Placement**: **Real** bet placement with MetaMask
+- **Portfolio**: Bet and winnings tracking
+- **MetaMask Integration**: Authentication and blockchain transactions
 
 ### 🖥️ **Backend** (http://localhost:4000)
-- **API Matches**: Endpoint partite disponibili
-- **Parimutuel Calculations**: Calcoli quote dinamiche
-- **Database**: Storage scommesse e risultati
+- **API Matches**: Available matches endpoints
+- **Parimutuel Calculations**: Dynamic odds calculations
+- **Database**: Bet and result storage
 
 ### 🔗 **Blockchain** (http://localhost:8545)
-- **Smart Contract**: Logica scommesse decentralizzata **attiva**
-- **Hardhat Node**: Blockchain locale per sviluppo
-- **MetaMask**: Connessione wallet **funzionante** con transazioni reali
+- **Smart Contract**: **Active** decentralized betting logic
+- **Hardhat Node**: Local blockchain for development
+- **MetaMask**: **Working** wallet connection with real transactions
 
-## 🛠️ Setup Tecnico Avanzato
+## 🛠️ Advanced Technical Setup
 
-### Prerequisiti
+### Prerequisites
 - Node.js 16+
 - npm/yarn
-- MetaMask (opzionale)
+- MetaMask (optional)
 
-### Configurazione MetaMask (Opzionale)
+### MetaMask Configuration (Optional)
 ```
 Network: Hardhat Local
 RPC URL: http://127.0.0.1:8545
 Chain ID: 31337
 Currency: ETH
 
-Account Test:
+Test Account:
 Address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 ```
 
-### Installazione Manuale
+### Manual Installation
 ```bash
 # Clone repository
 git clone <repo-url>
 cd betzilla
 
-# Installa dipendenze
+# Install dependencies
 cd contracts && npm install
 cd ../backend && npm install  
 cd ../frontend && npm install
 
-# Avvio manuale
+# Manual startup
 cd contracts && npx hardhat node        # Terminal 1
 npx hardhat run scripts/deploy.js       # Terminal 2
 cd ../backend && npm start              # Terminal 3
 cd ../frontend && npm start             # Terminal 4
 ```
 
-## 🔧 Sviluppo
+## 🔧 Development
 
 ### Smart Contract (BetZilla.sol)
-- **placeBet()**: Piazzamento scommesse con validazione
-- **createMarket()**: Creazione mercati scommesse
-- **resolveMarket()**: Risoluzione con outcome vincente
-- **claimWinnings()**: Ritiro vincite automatico
+- **placeBet()**: Bet placement with validation
+- **createMarket()**: Betting market creation
+- **resolveMarket()**: Resolution with winning outcome
+- **claimWinnings()**: Automatic winnings withdrawal
 
-### API Backend
-- **GET /api/matches**: Lista partite disponibili
-- **GET /api/matches/:id/odds**: Quote parimutuel live
-- **POST /api/test-bet**: Piazzamento scommesse test
-- **GET /api/health**: Status sistema
+### Backend API
+- **GET /api/matches**: Available matches list
+- **GET /api/matches/:id/odds**: Live parimutuel odds
+- **POST /api/test-bet**: Test bet placement
+- **GET /api/health**: System status
 
-### Frontend React
-- **useBetzilla.js**: Hook interazione smart contract
-- **App.js**: Interfaccia principale responsive
-- **Live Updates**: Aggiornamento quote ogni 30s
+### React Frontend
+- **useBetzilla.js**: Smart contract interaction hook
+- **App.js**: Responsive main interface
+- **Live Updates**: Odds updates every 30s
 
-## 🚨 Risoluzione Problemi
+## 🚨 Troubleshooting
 
-### Errori Comuni
-- **"Port in use"**: Usa `./stop-betzilla.sh` prima di riavviare
-- **"Contract not deployed"**: Riavvia con `./start-betzilla.sh`
-- **"MetaMask error"**: Configura rete Hardhat (ChainID 31337)
+### Common Errors
+- **"Port in use"**: Use `./stop-betzilla.sh` before restarting
+- **"Contract not deployed"**: Restart with `./start-betzilla.sh`
+- **"MetaMask error"**: Configure Hardhat network (ChainID 31337)
 
 ### Debug
 ```bash
-# Controlla processi
+# Check processes
 ps aux | grep -E "(hardhat|node|react)"
 
-# Controlla porte
+# Check ports
 lsof -i :3000,4000,8545
 
-# Log applicazioni
+# Application logs
 tail -f hardhat.log backend.log frontend.log
 ```
 
 ## 📈 Roadmap
 
-- [ ] **Mobile App**: Applicazione nativa iOS/Android
-- [ ] **Multi-Sport**: Supporto calcio, basket, tennis, F1
-- [ ] **Layer 2**: Integrazione Polygon/Arbitrum
-- [ ] **Oracle Integration**: Feed risultati automatici
-- [ ] **DAO Governance**: Sistema governance decentralizzato
-- [ ] **DeFi Integration**: Yield farming e staking
+- [ ] **Mobile App**: Native iOS/Android application
+- [ ] **Multi-Sport**: Support for football, basketball, tennis, F1
+- [ ] **Layer 2**: Polygon/Arbitrum integration
+- [ ] **Oracle Integration**: Automatic result feeds
+- [ ] **DAO Governance**: Decentralized governance system
+- [ ] **DeFi Integration**: Yield farming and staking
 
-## 🤝 Contribuire
+## 🤝 Contributing
 
-1. Fork del repository
-2. Crea branch feature (`git checkout -b feature/NuovaFeature`)
-3. Commit modifiche (`git commit -m 'Aggiungi NuovaFeature'`)
-4. Push branch (`git push origin feature/NuovaFeature`)
-5. Apri Pull Request
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/NewFeature`)
+3. Commit changes (`git commit -m 'Add NewFeature'`)
+4. Push branch (`git push origin feature/NewFeature`)
+5. Open Pull Request
 
-## 📄 Licenza
+## 📄 License
 
-Progetto rilasciato sotto licenza MIT.
+Project released under MIT license.
 
 ---
 
-**⚠️ Disclaimer**: Progetto dimostrativo. Non utilizzare per scommesse reali senza appropriate licenze e conformità normative.
+**⚠️ Disclaimer**: Demonstration project. Do not use for real betting without appropriate licenses and regulatory compliance.
 
-**🎯 Quick Start**: `./start-betzilla.sh` → http://localhost:3000 → **Divertiti!** 🚀
+**🎯 Quick Start**: `./start-betzilla.sh` → http://localhost:3000 → **Have fun!** 🚀
