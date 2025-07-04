@@ -1,14 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '../hooks/useAuth';
 import './Profile.css';
 
 const Profile = ({ account, contract }) => {
-  const { user, logout } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    username: user?.username || '',
-    email: user?.email || ''
-  });
+  const { user } = useAuth();
 
   const formatAddress = (address) => {
     if (!address) return 'Not connected';
@@ -27,12 +22,6 @@ const Profile = ({ account, contract }) => {
       month: 'long',
       day: 'numeric'
     });
-  };
-
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    // TODO: Implement user profile update API
-    setIsEditing(false);
   };
 
   const updateWalletAddress = async () => {
@@ -86,20 +75,6 @@ const Profile = ({ account, contract }) => {
               <p>Manage your account information and preferences</p>
             </div>
           </div>
-          <div className="header-actions">
-            <button 
-              className="edit-btn"
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              {isEditing ? '❌ Cancel' : '✏️ Edit'}
-            </button>
-            <button 
-              className="logout-btn"
-              onClick={logout}
-            >
-              🚪 Logout
-            </button>
-          </div>
         </div>
 
         {/* Personal Information in Header Section */}
@@ -109,63 +84,37 @@ const Profile = ({ account, contract }) => {
             <p>Your account details</p>
           </div>
           
-          {isEditing ? (
-            <form onSubmit={handleEditSubmit} className="edit-form">
-              <div className="form-group">
-                <label>Username</label>
-                <input
-                  type="text"
-                  value={editForm.username}
-                  onChange={(e) => setEditForm(prev => ({...prev, username: e.target.value}))}
-                  placeholder="Enter username"
-                />
+          <div className="personal-details">
+            <div className="detail-row">
+              <div className="detail-label">
+                <span className="label-icon">👤</span>
+                Username
               </div>
-              <div className="form-group">
-                <label>Email</label>
-                <input
-                  type="email"
-                  value={editForm.email}
-                  onChange={(e) => setEditForm(prev => ({...prev, email: e.target.value}))}
-                  placeholder="Enter email"
-                />
-              </div>
-              <div className="form-actions">
-                <button type="submit" className="save-btn">💾 Save Changes</button>
-              </div>
-            </form>
-          ) : (
-            <div className="personal-details">
-              <div className="detail-row">
-                <div className="detail-label">
-                  <span className="label-icon">👤</span>
-                  Username
-                </div>
-                <div className="detail-value">
-                  <span>{user.username}</span>
-                </div>
-              </div>
-              
-              <div className="detail-row">
-                <div className="detail-label">
-                  <span className="label-icon">📧</span>
-                  Email
-                </div>
-                <div className="detail-value">
-                  <span>{user.email}</span>
-                </div>
-              </div>
-              
-              <div className="detail-row">
-                <div className="detail-label">
-                  <span className="label-icon">📅</span>
-                  Member Since
-                </div>
-                <div className="detail-value">
-                  <span>{formatDate(user.createdAt)}</span>
-                </div>
+              <div className="detail-value">
+                <span>{user.username}</span>
               </div>
             </div>
-          )}
+            
+            <div className="detail-row">
+              <div className="detail-label">
+                <span className="label-icon">📧</span>
+                Email
+              </div>
+              <div className="detail-value">
+                <span>{user.email}</span>
+              </div>
+            </div>
+            
+            <div className="detail-row">
+              <div className="detail-label">
+                <span className="label-icon">📅</span>
+                Member Since
+              </div>
+              <div className="detail-value">
+                <span>{formatDate(user.createdAt)}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="profile-grid">
@@ -274,32 +223,6 @@ const Profile = ({ account, contract }) => {
                 <div className="detail-value">
                   <span className="chain-badge">31337</span>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Security Settings */}
-          <div className="profile-card">
-            <div className="card-header">
-              <h2>🔐 Security</h2>
-              <p>Account security settings</p>
-            </div>
-            
-            <div className="security-section">
-              <div className="security-item">
-                <div className="security-content">
-                  <h3>Change Password</h3>
-                  <p>Update your account password</p>
-                </div>
-                <button className="security-btn">Change</button>
-              </div>
-              
-              <div className="security-item">
-                <div className="security-content">
-                  <h3>Two-Factor Authentication</h3>
-                  <p>Add extra security to your account</p>
-                </div>
-                <button className="security-btn">Enable</button>
               </div>
             </div>
           </div>

@@ -1051,13 +1051,6 @@ const Bet = ({
                         // Show early betting phase
                         return (
                           <>
-                            <div className="early-betting-banner">
-                              <span className="early-label">⏰ Early Betting Phase</span>
-                              <div className="phase-info">
-                                <span className="phase-description">{phaseInfo.phaseDescription}</span>
-                                <span className="time-remaining">{Math.floor(phaseInfo.hoursUntilMatch)}h until parimutuel phase</span>
-                              </div>
-                            </div>
                             <div className="odds-display early-mode">
                               <div className="odds-item">
                                 <div className="odds-label">🏠 {match.homeTeam}</div>
@@ -1133,20 +1126,6 @@ const Bet = ({
                   </div>
 
                   <div className="betting-section">
-                    {/* Fee indicator */}
-                    {(() => {
-                      const phaseInfo = getBettingPhaseInfo(match.startTime);
-                      return (
-                        <div className={`fee-indicator ${phaseInfo.isEarlyPhase ? 'early-fee' : 'late-fee'}`}>
-                          <span className="fee-label">Current Fee:</span>
-                          <span className="fee-percentage">{phaseInfo.currentFeePercent}%</span>
-                          <span className="fee-description">
-                            {phaseInfo.isEarlyPhase ? '(Early betting discount)' : '(Parimutuel phase)'}
-                          </span>
-                        </div>
-                      );
-                    })()}
-                    
                     {/* Test mode indicator */}
                     {!match.contractMarketId && (
                       <div className="test-mode-banner">

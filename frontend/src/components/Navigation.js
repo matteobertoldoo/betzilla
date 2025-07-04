@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import './Navigation.css';
 
 const Navigation = ({ account, connectWallet, loading }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
 
   const formatAddress = (address) => {
@@ -86,12 +86,6 @@ const Navigation = ({ account, connectWallet, loading }) => {
             🎯 Bet
           </Link>
           <Link 
-            to="/odds" 
-            className={`nav-link ${location.pathname === '/odds' ? 'active' : ''}`}
-          >
-            📈 Live Odds
-          </Link>
-          <Link 
             to="/portfolio" 
             className={`nav-link ${location.pathname === '/portfolio' ? 'active' : ''}`}
           >
@@ -122,6 +116,14 @@ const Navigation = ({ account, connectWallet, loading }) => {
               {loading ? <span className="loading"></span> : 'Connect Wallet'}
             </button>
           )}
+          
+          <button 
+            className="logout-btn"
+            onClick={logout}
+            title="Logout"
+          >
+            🚪 Logout
+          </button>
         </div>
       </div>
     </nav>

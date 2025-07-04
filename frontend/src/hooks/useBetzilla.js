@@ -206,21 +206,6 @@ export const useBetzilla = () => {
     }
   };
 
-  // Get market info
-  const getMarket = async (marketId) => {
-    if (!contract) {
-      throw new Error('Contract not connected');
-    }
-
-    try {
-      const market = await contract.markets(marketId);
-      return market;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
-  };
-
   // Get user bet
   const getUserBet = async (marketId) => {
     if (!contract || !account) {
@@ -460,7 +445,6 @@ export const useBetzilla = () => {
     connectWallet,
     placeBet,
     placeBetWithoutGlobalLoading,
-    getMarket,
     getUserBet,
     getAllUserBets,
     claimWinnings,
