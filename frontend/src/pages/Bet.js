@@ -22,6 +22,7 @@ const Bet = ({
   const [payoutCalculations, setPayoutCalculations] = useState({}); // Store payout calculations
   const [bettingLoading, setBettingLoading] = useState({}); // Individual loading state for each match
   const [parimutuelMatches, setParimutuelMatches] = useState([]); // Store matches with parimutuel odds
+  const [notification, setNotification] = useState(null); // For success/error notifications
 
   // Initialize bet data for a match
   const initializeMatchBetData = (matchId) => {
@@ -54,6 +55,21 @@ const Bet = ({
         selectedOutcome: outcome
       }
     }));
+  };
+
+  // Show notification with auto-dismiss timer
+  const showNotification = (message, type = 'success', duration = 5000) => {
+    setNotification({ message, type });
+    
+    // Auto-dismiss after specified duration
+    setTimeout(() => {
+      setNotification(null);
+    }, duration);
+  };
+
+  // Manually dismiss notification
+  const dismissNotification = () => {
+    setNotification(null);
   };
 
   // Filter matches based on search term
@@ -122,81 +138,81 @@ const Bet = ({
   };
 
   // Fetch matches from backend
+  const fetchMatches = async () => {
+    try {
+      const response = await fetch('http://localhost:4000/api/matches?upcoming=true&limit=30');
+      const data = await response.json();
+      if (data.success) {
+        console.log('Raw matches from API:', data.data);
+        
+        // Remove duplicates based on title and teams
+        const uniqueMatches = data.data.filter((match, index, self) => 
+          index === self.findIndex(m => 
+            m.title === match.title && 
+            m.home_team === match.home_team && 
+            m.away_team === match.away_team
+          )
+        );
+        
+        // Transform matches to use proper contract market IDs
+        const transformedMatches = uniqueMatches.map((match, index) => {
+          // Create a stable ID based on match content
+          const stableId = `${match.home_team}_${match.away_team}_${match.start_time}`.replace(/[^a-zA-Z0-9]/g, '_');
+          return {
+            id: match.id, // Use database ID for UI state management
+            contractMarketId: match.contract_market_id, // Use contract market ID for blockchain calls
+            stableId: stableId, // This is for UI consistency
+            homeTeam: match.home_team,
+            awayTeam: match.away_team,
+            league: match.league,
+            description: match.description,
+            startTime: match.start_time,
+            sport: match.sport,
+            category: match.category,
+            hasDrawOption: match.sport === 'Football' || match.sport === 'Soccer', // Football/Soccer matches have draw option
+            odds: {
+              home: 0, // Will be fetched from contract
+              away: 0, // Will be fetched from contract
+              draw: (match.sport === 'Football' || match.sport === 'Soccer') ? 0 : -1 // Only football/soccer has draws
+            }
+          };
+        });
+        
+        console.log('Transformed matches for frontend:', transformedMatches);
+        setMatches(transformedMatches);
+        setFilteredMatches(transformedMatches); // Initialize filtered matches
+        
+        // Initialize bet data for each match
+        transformedMatches.forEach(match => {
+          initializeMatchBetData(match.id);
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching matches:', error);
+    }
+  };
+
+  const fetchParimutuelOdds = async () => {
+    try {
+      const response = await fetch('http://localhost:4000/api/parimutuel/matches/next24hours');
+      const data = await response.json();
+      if (data.success) {
+        console.log('Parimutuel matches with odds:', data.data.matches);
+        setParimutuelMatches(data.data.matches);
+      }
+    } catch (error) {
+      console.error('Error fetching parimutuel odds:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchMatches = async () => {
-      try {
-        const response = await fetch('http://localhost:4000/api/matches?upcoming=true&limit=30');
-        const data = await response.json();
-        if (data.success) {
-          console.log('Raw matches from API:', data.data);
-          
-          // Remove duplicates based on title and teams
-          const uniqueMatches = data.data.filter((match, index, self) => 
-            index === self.findIndex(m => 
-              m.title === match.title && 
-              m.home_team === match.home_team && 
-              m.away_team === match.away_team
-            )
-          );
-          
-          // Transform matches to use proper contract market IDs
-          const transformedMatches = uniqueMatches.map((match, index) => {
-            // Create a stable ID based on match content
-            const stableId = `${match.home_team}_${match.away_team}_${match.start_time}`.replace(/[^a-zA-Z0-9]/g, '_');
-            return {
-              id: match.id, // Use database ID for UI state management
-              contractMarketId: match.contract_market_id, // Use contract market ID for blockchain calls
-              stableId: stableId, // This is for UI consistency
-              homeTeam: match.home_team,
-              awayTeam: match.away_team,
-              league: match.league,
-              description: match.description,
-              startTime: match.start_time,
-              sport: match.sport,
-              category: match.category,
-              hasDrawOption: match.sport === 'Football' || match.sport === 'Soccer', // Football/Soccer matches have draw option
-              odds: {
-                home: 0, // Will be fetched from contract
-                away: 0, // Will be fetched from contract
-                draw: (match.sport === 'Football' || match.sport === 'Soccer') ? 0 : -1 // Only football/soccer has draws
-              }
-            };
-          });
-          
-          console.log('Transformed matches for frontend:', transformedMatches);
-          setMatches(transformedMatches);
-          setFilteredMatches(transformedMatches); // Initialize filtered matches
-          
-          // Initialize bet data for each match
-          transformedMatches.forEach(match => {
-            initializeMatchBetData(match.id);
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching matches:', error);
-      }
-    };
-
-    const fetchParimutuelOdds = async () => {
-      try {
-        const response = await fetch('http://localhost:4000/api/parimutuel/matches/next24hours');
-        const data = await response.json();
-        if (data.success) {
-          console.log('Parimutuel matches with odds:', data.data.matches);
-          setParimutuelMatches(data.data.matches);
-        }
-      } catch (error) {
-        console.error('Error fetching parimutuel odds:', error);
-      }
-    };
-
     fetchMatches();
     fetchParimutuelOdds();
     
     // Refresh parimutuel odds every 30 seconds
     const interval = setInterval(fetchParimutuelOdds, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load live odds and fees for each match
   useEffect(() => {
@@ -642,7 +658,7 @@ const Bet = ({
   const handlePlaceBet = async (matchId) => {
     const match = matches.find(m => m.id === matchId);
     if (!match) {
-      alert('Match not found');
+      showNotification('Match not found', 'error');
       return;
     }
 
@@ -659,14 +675,14 @@ const Bet = ({
         
         const betData = matchBetData[matchId];
         if (!betData || !betData.betAmount || betData.betAmount <= 0) {
-          alert('Please enter a valid bet amount');
+          showNotification('Please enter a valid bet amount', 'error');
           return;
         }
 
         if (user) {
           const amountWei = (parseFloat(betData.betAmount) * 1e18).toString();
           await saveBetToDatabase(matchId, betData.selectedOutcome, amountWei, null);
-          alert('Test bet saved to database (no blockchain interaction)');
+          showNotification('🧪 Test bet saved to database (no blockchain interaction)', 'success');
           
           updateBetAmount(matchId, '');
           updateSelectedOutcome(matchId, 1);
@@ -676,7 +692,7 @@ const Bet = ({
             window.refreshPortfolio();
           }
         } else {
-          alert('Please login to save test bets');
+          showNotification('Please login to save test bets', 'error');
         }
         return;
       }
@@ -684,14 +700,14 @@ const Bet = ({
       // Blockchain mode: usa contractMarketId!
       const betData = matchBetData[matchId];
       if (!betData || !betData.betAmount || betData.betAmount <= 0) {
-        alert('Please enter a valid bet amount');
+        showNotification('Please enter a valid bet amount', 'error');
         return;
       }
 
       // 🎯 Validate outcome for sport type
       const maxOutcome = match.hasDrawOption ? 3 : 2;
       if (betData.selectedOutcome < 1 || betData.selectedOutcome > maxOutcome) {
-        alert(`Invalid outcome. For ${match.homeTeam} vs ${match.awayTeam}, valid outcomes are 1-${maxOutcome}`);
+        showNotification(`Invalid outcome. For ${match.homeTeam} vs ${match.awayTeam}, valid outcomes are 1-${maxOutcome}`, 'error');
         return;
       }
 
@@ -707,19 +723,16 @@ const Bet = ({
         await saveBetToDatabase(matchId, betData.selectedOutcome, amountWei, receipt.hash);
       }
       
-      alert('✅ Bet placed successfully on blockchain!');
+      showNotification('✅ Bet placed successfully on blockchain!', 'success', 7000);
       
       updateBetAmount(matchId, '');
       updateSelectedOutcome(matchId, 1);
       await fetchUserBets();
 
-      // AGGIUNGI QUESTO PER FORZARE IL REFRESH DELLE QUOTE PARIMUTUEL
-      if (typeof window !== 'undefined' && window.location) {
-        window.location.reload();
-      }
-      // oppure, meglio: richiama fetchParimutuelOdds() se disponibile
-      // await fetchParimutuelOdds();
-
+      // Refresh data without reloading the page
+      await fetchMatches();
+      await fetchParimutuelOdds();
+      
       if (window.refreshPortfolio) {
         window.refreshPortfolio();
       }
@@ -728,9 +741,9 @@ const Bet = ({
       console.error('❌ Smart contract error:', error);
       
       if (error.message.includes('Market does not exist')) {
-        alert(`❌ Market ${contractMarketId} does not exist in contract. Please run the market sync script.`);
+        showNotification(`❌ Market ${contractMarketId} does not exist in contract. Please run the market sync script.`, 'error', 8000);
       } else {
-        alert(`Error placing bet: ${error.message}`);
+        showNotification(`Error placing bet: ${error.message}`, 'error', 8000);
       }
     } finally {
       setBettingLoading(prev => ({ ...prev, [matchId]: false }));
@@ -784,6 +797,22 @@ const Bet = ({
 
   return (
     <div className="bet-page">
+      {/* Notification component */}
+      {notification && (
+        <div className={`notification ${notification.type}`}>
+          <div className="notification-content">
+            <span className="notification-message">{notification.message}</span>
+            <button 
+              className="notification-close" 
+              onClick={dismissNotification}
+              aria-label="Dismiss notification"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+      
       <div className="container">
         {/* Test mode indicator */}
         {contract && matches.length > 0 && matches.every(m => !m.contractMarketId) && (

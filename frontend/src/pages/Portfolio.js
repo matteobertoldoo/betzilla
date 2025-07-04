@@ -203,55 +203,102 @@ const Portfolio = ({
 
   // Helper function to deduplicate bets - prefer database bets over blockchain bets
   const deduplicateBets = (blockchainBets, databaseBets) => {
-    // Create a set of market IDs that exist in database bets
-    const dbMarketIds = new Set();
-    databaseBets.forEach(dbBet => {
-      // Add various possible market ID formats
-      if (dbBet.marketId) dbMarketIds.add(dbBet.marketId);
-      if (dbBet.market_id) dbMarketIds.add(dbBet.market_id);
-      if (dbBet.contractMarketId) dbMarketIds.add(dbBet.contractMarketId);
-      if (dbBet.contract_market_id) dbMarketIds.add(dbBet.contract_market_id);
+    // Create a map of contract market ID to database market ID
+    const contractToDbMarketMap = new Map();
+    matches.forEach(match => {
+      if (match.contractMarketId || match.contract_market_id) {
+        const contractId = match.contractMarketId || match.contract_market_id;
+        const dbId = match.id;
+        contractToDbMarketMap.set(contractId, dbId);
+      }
     });
 
-    console.log('🔍 Deduplication process:');
-    console.log('  - Database market IDs found:', Array.from(dbMarketIds));
-    console.log('  - Blockchain bets before dedup:', blockchainBets.map(b => `Market ${b.marketId}`));
-    console.log('  - Database bets:', databaseBets.map(b => `Market ${b.marketId || b.market_id} (${b.status})`));
+    // Create a set of contract market IDs that have database bets
+    const contractMarketIdsWithDbBets = new Set();
+    databaseBets.forEach(dbBet => {
+      const dbMarketId = dbBet.marketId || dbBet.market_id;
+      // Find the contract market ID for this database market
+      const match = matches.find(m => m.id === dbMarketId);
+      if (match && (match.contractMarketId || match.contract_market_id)) {
+        const contractId = match.contractMarketId || match.contract_market_id;
+        contractMarketIdsWithDbBets.add(contractId);
+      }
+    });
+
+    console.log('🔍 Enhanced deduplication process:');
+    console.log('  - Contract to DB market mapping:', Array.from(contractToDbMarketMap.entries()));
+    console.log('  - Contract market IDs with DB bets:', Array.from(contractMarketIdsWithDbBets));
+    console.log('  - Blockchain bets before dedup:', blockchainBets.map(b => `Contract Market ${b.marketId}`));
+    console.log('  - Database bets:', databaseBets.map(b => `DB Market ${b.marketId || b.market_id} (${b.status})`));
 
     // Filter out blockchain bets that have corresponding database entries
     const filteredBlockchainBets = blockchainBets.filter(blockchainBet => {
-      const hasDbEntry = dbMarketIds.has(blockchainBet.marketId);
+      const hasDbEntry = contractMarketIdsWithDbBets.has(blockchainBet.marketId);
       if (hasDbEntry) {
-        console.log(`  ❌ Filtering out blockchain bet for market ${blockchainBet.marketId} (has database entry)`);
+        console.log(`  ❌ Filtering out blockchain bet for contract market ${blockchainBet.marketId} (has database entry)`);
       } else {
-        console.log(`  ✅ Keeping blockchain bet for market ${blockchainBet.marketId} (no database entry)`);
+        console.log(`  ✅ Keeping blockchain bet for contract market ${blockchainBet.marketId} (no database entry)`);
       }
       return !hasDbEntry;
     });
 
-    console.log('  - Final result: blockchain bets after dedup:', filteredBlockchainBets.map(b => `Market ${b.marketId}`));
+    console.log('  - Final result: blockchain bets after dedup:', filteredBlockchainBets.map(b => `Contract Market ${b.marketId}`));
     return filteredBlockchainBets;
   };
 
   // Apply deduplication
   const deduplicatedUserBets = deduplicateBets(userBets, databaseBets);
   
-  const activeBets = deduplicatedUserBets.filter(bet => !bet.market.isResolved);
-  const resolvedBets = deduplicatedUserBets.filter(bet => bet.market.isResolved);
-  const winningBets = resolvedBets.filter(bet => bet.bet.outcome === bet.market.winningOutcome);
-  const losingBets = resolvedBets.filter(bet => bet.bet.outcome !== bet.market.winningOutcome);
+  // Convert database bets to the same format as blockchain bets for unified handling
+  const formattedDatabaseBets = databaseBets.map(dbBet => {
+    const match = matches.find(m => 
+      m.id === dbBet.marketId || 
+      m.id === dbBet.market_id ||
+      m.contractMarketId === dbBet.marketId ||
+      m.contract_market_id === dbBet.marketId
+    );
+    
+    return {
+      marketId: dbBet.marketId || dbBet.market_id,
+      bet: {
+        outcome: dbBet.outcome,
+        amount: dbBet.amountWei || dbBet.amount_wei,
+        claimed: dbBet.status === 'won' && dbBet.claimed,
+        placedAt: dbBet.placedAt || dbBet.placed_at
+      },
+      market: match ? {
+        isResolved: dbBet.status === 'won' || dbBet.status === 'lost',
+        winningOutcome: dbBet.is_winner ? dbBet.outcome : (dbBet.status === 'lost' ? (dbBet.outcome === 1 ? 2 : 1) : null)
+      } : { isResolved: false },
+      transactionHash: dbBet.transactionHash || dbBet.transaction_hash,
+      status: dbBet.status,
+      isDatabaseBet: true
+    };
+  });
 
-  // Database bets (pending, confirmed, etc.)
-  const pendingDbBets = databaseBets.filter(bet => bet.status === 'pending' || bet.status === 'confirmed');
-  const resolvedDbBets = databaseBets.filter(bet => bet.status === 'won' || bet.status === 'lost');
+  // Merge all bets (deduplicated blockchain + database bets)
+  const allBets = [...deduplicatedUserBets, ...formattedDatabaseBets];
+  
+  const activeBets = allBets.filter(bet => !bet.market.isResolved && bet.status !== 'won' && bet.status !== 'lost');
+  const resolvedBets = allBets.filter(bet => bet.market.isResolved || bet.status === 'won' || bet.status === 'lost');
+  const winningBets = resolvedBets.filter(bet => 
+    bet.bet.outcome === bet.market.winningOutcome || bet.status === 'won'
+  );
+  const losingBets = resolvedBets.filter(bet => 
+    (bet.market.winningOutcome && bet.bet.outcome !== bet.market.winningOutcome) || bet.status === 'lost'
+  );
 
-  const totalWagered = deduplicatedUserBets.reduce((total, bet) => total + parseFloat(formatEther(bet.bet.amount)), 0) + 
-                       databaseBets.reduce((total, bet) => total + parseFloat(bet.amountWei) / 1e18, 0);
-  const winRate = resolvedBets.length + resolvedDbBets.length > 0 ? 
-    (((winningBets.length + databaseBets.filter(bet => bet.status === 'won').length) / 
-      (resolvedBets.length + resolvedDbBets.length)) * 100).toFixed(1) : 0;
+  const totalWagered = allBets.reduce((total, bet) => {
+    const amount = bet.isDatabaseBet ? 
+      parseFloat(bet.bet.amount) / 1e18 : 
+      parseFloat(formatEther(bet.bet.amount));
+    return total + amount;
+  }, 0);
+  
+  const winRate = resolvedBets.length > 0 ? 
+    ((winningBets.length / resolvedBets.length) * 100).toFixed(1) : 0;
 
-  const renderBetCard = (betData) => {
+  const renderBetCard = (betData, key) => {
     // Try multiple ways to find the match
     const match = matches.find(m => 
       m.id === betData.marketId || 
@@ -265,7 +312,7 @@ const Portfolio = ({
     console.log('🎯 Rendering blockchain bet - Market:', betData.marketId, 'Outcome:', outcomeNumber, 'Match:', match);
     
     return (
-      <div key={betData.marketId} className="bet-card">
+      <div key={key || betData.marketId} className="bet-card">
         <div className="bet-header">
           <h3 className="match-name">{matchName}</h3>
           <span className={`status-badge ${betData.market.isResolved ? 'resolved' : 'active'}`}>
@@ -335,7 +382,21 @@ const Portfolio = ({
   };
 
   // Render database bet card
-  const renderDatabaseBetCard = (bet) => {
+  const renderDatabaseBetCard = (betData, key) => {
+    // Handle both old format (direct database bet) and new unified format
+    const bet = betData.isDatabaseBet ? {
+      id: betData.marketId,
+      marketId: betData.marketId,
+      outcome: betData.bet.outcome,
+      amountWei: betData.bet.amount,
+      amount_wei: betData.bet.amount,
+      placedAt: betData.bet.placedAt,
+      placed_at: betData.bet.placedAt,
+      transactionHash: betData.transactionHash,
+      transaction_hash: betData.transactionHash,
+      status: betData.status
+    } : betData;
+
     // Try multiple ways to find the match
     const match = matches.find(m => 
       m.id === bet.marketId || 
@@ -363,7 +424,7 @@ const Portfolio = ({
     };
 
     return (
-      <div key={bet.id} className="bet-card database-bet">
+      <div key={key || bet.id} className="bet-card database-bet">
         <div className="bet-header">
           <h3 className="match-name">{matchName}</h3>
           <span className={`status-badge ${bet.status}`} style={{ backgroundColor: getStatusColor(bet.status) }}>
@@ -406,31 +467,6 @@ const Portfolio = ({
     );
   };
 
-  // Aggiorna i dati delle scommesse per le partite entro 24h ogni volta che la pagina viene caricata o ogni 30s
-  useEffect(() => {
-    // Funzione per aggiornare solo le scommesse delle partite entro 24h
-    const refreshBetsForNext24h = async () => {
-      try {
-        // Prendi tutte le partite dal backend
-        const response = await fetch('http://localhost:4000/api/parimutuel/matches/next24hours');
-        const data = await response.json();
-        if (data.success && data.data && data.data.matches) {
-          // Per ogni match entro 24h, aggiorna lo stato delle scommesse dal backend
-          const matchIds = data.data.matches.map(m => m.id);
-          // Se vuoi aggiornare solo le scommesse di queste partite, puoi filtrare qui
-          await fetchDatabaseBets();
-        }
-      } catch (error) {
-        console.error('Error refreshing bets for next 24h:', error);
-      }
-    };
-
-    refreshBetsForNext24h();
-    // Aggiorna ogni 30 secondi
-    const interval = setInterval(refreshBetsForNext24h, 30000);
-    return () => clearInterval(interval);
-  }, [fetchDatabaseBets]);
-
   return (
     <div className="portfolio-page">
       <div className="container">
@@ -445,13 +481,13 @@ const Portfolio = ({
             className={`tab-btn ${activeTab === 'active' ? 'active' : ''}`}
             onClick={() => setActiveTab('active')}
           >
-            ⏳ Active Bets ({activeBets.length + pendingDbBets.length})
+            ⏳ Active Bets ({activeBets.length})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'resolved' ? 'active' : ''}`}
             onClick={() => setActiveTab('resolved')}
           >
-            ✅ Resolved Bets ({resolvedBets.length + resolvedDbBets.length})
+            ✅ Resolved Bets ({resolvedBets.length})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'statistics' ? 'active' : ''}`}
@@ -465,10 +501,13 @@ const Portfolio = ({
         <div className="tab-content">
           {activeTab === 'active' && (
             <div className="active-bets-section">
-              {(activeBets.length > 0 || pendingDbBets.length > 0) ? (
+              {activeBets.length > 0 ? (
                 <div className="bets-grid">
-                  {activeBets.map(renderBetCard)}
-                  {pendingDbBets.map(renderDatabaseBetCard)}
+                  {activeBets.map((bet, index) => 
+                    bet.isDatabaseBet ? 
+                      renderDatabaseBetCard(bet, `active-${index}`) : 
+                      renderBetCard(bet, `active-${index}`)
+                  )}
                 </div>
               ) : (
                 <div className="empty-state">
@@ -483,10 +522,13 @@ const Portfolio = ({
 
           {activeTab === 'resolved' && (
             <div className="resolved-bets-section">
-              {(resolvedBets.length > 0 || resolvedDbBets.length > 0) ? (
+              {resolvedBets.length > 0 ? (
                 <div className="bets-grid">
-                  {resolvedBets.map(renderBetCard)}
-                  {resolvedDbBets.map(renderDatabaseBetCard)}
+                  {resolvedBets.map((bet, index) => 
+                    bet.isDatabaseBet ? 
+                      renderDatabaseBetCard(bet, `resolved-${index}`) : 
+                      renderBetCard(bet, `resolved-${index}`)
+                  )}
                 </div>
               ) : (
                 <div className="empty-state">
@@ -505,7 +547,7 @@ const Portfolio = ({
                 <div className="stat-card primary">
                   <div className="stat-icon">📊</div>
                   <div className="stat-content">
-                    <div className="stat-value">{deduplicatedUserBets.length + databaseBets.length}</div>
+                    <div className="stat-value">{allBets.length}</div>
                     <div className="stat-label">Total Bets</div>
                   </div>
                 </div>
@@ -521,7 +563,7 @@ const Portfolio = ({
                 <div className="stat-card warning">
                   <div className="stat-icon">🏆</div>
                   <div className="stat-content">
-                    <div className="stat-value">{winningBets.length + databaseBets.filter(bet => bet.status === 'won').length}</div>
+                    <div className="stat-value">{winningBets.length}</div>
                     <div className="stat-label">Wins</div>
                   </div>
                 </div>
@@ -529,7 +571,7 @@ const Portfolio = ({
                 <div className="stat-card error">
                   <div className="stat-icon">❌</div>
                   <div className="stat-content">
-                    <div className="stat-value">{losingBets.length + databaseBets.filter(bet => bet.status === 'lost').length}</div>
+                    <div className="stat-value">{losingBets.length}</div>
                     <div className="stat-label">Losses</div>
                   </div>
                 </div>
@@ -548,7 +590,7 @@ const Portfolio = ({
                     <div className="metric-item">
                       <span className="metric-label">Average Bet:</span>
                       <span className="metric-value">
-                        {(deduplicatedUserBets.length + databaseBets.length) > 0 ? (totalWagered / (deduplicatedUserBets.length + databaseBets.length)).toFixed(4) : '0'} ETH
+                        {allBets.length > 0 ? (totalWagered / allBets.length).toFixed(4) : '0'} ETH
                       </span>
                     </div>
                     <div className="metric-item">
@@ -560,13 +602,13 @@ const Portfolio = ({
                     <div className="metric-item">
                       <span className="metric-label">Active Bets:</span>
                       <span className="metric-value">
-                        {activeBets.length + pendingDbBets.length}
+                        {activeBets.length}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {(deduplicatedUserBets.length + databaseBets.length) > 0 && (
+                {allBets.length > 0 && (
                   <div className="stat-section">
                     <h3>🎯 Betting Patterns</h3>
                     <div className="pattern-grid">

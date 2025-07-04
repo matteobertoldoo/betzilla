@@ -266,8 +266,11 @@ contract BetZilla {
             // Track which markets this user has bet on
             userMarketIds[msg.sender].push(marketId);
         } else {
-            // Prevent multiple bets on same market (simplification)
-            revert("BetZilla: You can only place one bet per market");
+            // Allow multiple bets: add to existing bet amount
+            Bet storage existingBet = bets[marketId][msg.sender];
+            require(existingBet.outcome == outcome, "BetZilla: Cannot bet on different outcomes for the same market");
+            existingBet.amount += msg.value;
+            // Keep the original placedAt timestamp for fee calculation
         }
 
         emit BetPlaced(marketId, msg.sender, outcome, msg.value);
