@@ -2,12 +2,22 @@ const database = require('../database');
 
 class BettingService {
   // Save user bet to database
-  async saveBet(userId, marketId, outcome, amountWei, transactionHash = null) {
+  async saveBet(userId, marketId, outcome, amountWei, transactionHash = null, status = 'confirmed') {
+    // Support object-style call for test-data scripts
+    if (typeof userId === 'object' && userId !== null) {
+      const bet = userId;
+      userId = bet.userId;
+      marketId = bet.marketId;
+      outcome = bet.outcome;
+      amountWei = bet.amountWei;
+      transactionHash = bet.transactionHash || null;
+      status = bet.status || 'confirmed';
+    }
     try {
       const result = await database.run(
         `INSERT INTO user_bets (user_id, market_id, outcome, amount_wei, transaction_hash, status) 
          VALUES (?, ?, ?, ?, ?, ?)`,
-        [userId, marketId, outcome, amountWei, transactionHash, 'pending']
+        [userId, marketId, outcome, amountWei, transactionHash, status]
       );
 
       return {

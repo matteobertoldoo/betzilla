@@ -134,6 +134,13 @@ fi
 
 cd ..
 
+# --- POPULATE DATABASE BEFORE MARKET SYNC ---
+echo "🚀 Populating matches and users..."
+node backend/scripts/populateMatches.js
+
+echo "💸 Adding parimutuel test bets..."
+node backend/scripts/addParimutuelTestData.js
+
 # Run market synchronization script from contracts
 cd contracts
 echo "🔄 Syncing/creating markets from database... can take a while (45sec)"
@@ -143,14 +150,16 @@ if [ -f scripts/createMarketsFromDatabase.js ]; then
         echo "✅ Markets synchronized successfully!"
     else
         echo "❌ Market synchronization failed. Check marketsync.log for details."
-        echo "------ marketsync.log (last 20 lines) ------"
         tail -20 ../marketsync.log
-        echo "--------------------------------------------"
         exit 1
     fi
 else
     echo "⚠️  scripts/createMarketsFromDatabase.js not found. Skipping market sync."
 fi
+
+# Place fake on-chain bets for test users
+echo "💸 Placing fake on-chain bets for test users..."
+npx hardhat run scripts/placeFakeBetsOnChain.js --network localhost
 
 cd ..
 

@@ -1,139 +1,121 @@
 const database = require('../database');
+const bettingService = require('../services/bettingService');
 
-async function addSampleMatchesNext24Hours() {
+// Helper to get a random element from an array
+const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+// Helper to generate a random bet amount in Wei (e.g., 0.01 to 1.5 ETH)
+const getRandomBetAmountWei = () => {
+  const eth = Math.random() * 1.49 + 0.01; // Random ETH between 0.01 and 1.5
+  return BigInt(Math.round(eth * 1e18)).toString();
+};
+
+async function addParimutuelTestData() {
   try {
+    console.log('🚀 Starting to add parimutuel test data (bets)...');
     await database.initialize();
-    
-    const now = new Date();
-    
-    // Matches for testing parimutuel odds
-    const matches = [
-      {
-        title: "Premier League: Manchester United vs Liverpool",
-        description: "Epic clash between two Premier League giants",
-        category: "Sports",
-        sport: "Football",
-        league: "Premier League",
-        home_team: "Manchester United",
-        away_team: "Liverpool",
-        start_time: new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours from now
-        contract_market_id: 1
-      },
-      {
-        title: "La Liga: Real Madrid vs Barcelona",
-        description: "El Clasico - The biggest rivalry in football",
-        category: "Sports", 
-        sport: "Football",
-        league: "La Liga",
-        home_team: "Real Madrid",
-        away_team: "Barcelona",
-        start_time: new Date(now.getTime() + 6 * 60 * 60 * 1000).toISOString(), // 6 hours from now
-        contract_market_id: 2
-      },
-      {
-        title: "NBA: Lakers vs Warriors",
-        description: "Western Conference rivalry",
-        category: "Sports",
-        sport: "Basketball",
-        league: "NBA",
-        home_team: "Los Angeles Lakers",
-        away_team: "Golden State Warriors", 
-        start_time: new Date(now.getTime() + 12 * 60 * 60 * 1000).toISOString(), // 12 hours from now
-        contract_market_id: 3
-      },
-      {
-        title: "Champions League: PSG vs Bayern Munich",
-        description: "Champions League knockout stage",
-        category: "Sports",
-        sport: "Football", 
-        league: "Champions League",
-        home_team: "Paris Saint-Germain",
-        away_team: "Bayern Munich",
-        start_time: new Date(now.getTime() + 18 * 60 * 60 * 1000).toISOString(), // 18 hours from now
-        contract_market_id: 4
-      },
-      {
-        title: "Serie A: Juventus vs AC Milan",
-        description: "Italian football rivalry",
-        category: "Sports",
-        sport: "Football",
-        league: "Serie A", 
-        home_team: "Juventus",
-        away_team: "AC Milan",
-        start_time: new Date(now.getTime() + 22 * 60 * 60 * 1000).toISOString(), // 22 hours from now
-        contract_market_id: 5
-      }
+
+    // Step 1: Fetch users e partite future
+    const friendUsernames = [
+      'alice_bet', 'bob_gambler', 'carol_sports', 'david_fan',
+      'eve_bettor', 'frank_lucky', 'grace_wins', 'henry_odds'
     ];
+    const users = (await database.all('SELECT id, username FROM users'))
+      .filter(u => friendUsernames.includes(u.username));
+    const now = new Date().toISOString();
+    const matches = await database.all('SELECT id, title, sport, start_time FROM matches WHERE start_time > ?', [now]);
 
-    // Insert matches
-    for (const match of matches) {
-      const result = await database.run(`
-        INSERT INTO matches (
-          title, description, category, sport, league, 
-          home_team, away_team, start_time, contract_market_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `, [
-        match.title, match.description, match.category, match.sport, match.league,
-        match.home_team, match.away_team, match.start_time, match.contract_market_id
-      ]);
-      
-      console.log(`✅ Added match: ${match.title} (ID: ${result.id})`);
-    }
-
-    // Add some sample bets for parimutuel calculation
-    const sampleBets = [
-      // Manchester United vs Liverpool (market_id: 1)
-      { market_id: 1, outcome: 1, amount_wei: "1000000000000000000", user_id: 1 }, // 1 ETH on Manchester United
-      { market_id: 1, outcome: 3, amount_wei: "500000000000000000", user_id: 2 },  // 0.5 ETH on Liverpool
-      { market_id: 1, outcome: 1, amount_wei: "750000000000000000", user_id: 3 },  // 0.75 ETH on Manchester United
-      { market_id: 1, outcome: 2, amount_wei: "250000000000000000", user_id: 4 },  // 0.25 ETH on Draw
-
-      // Real Madrid vs Barcelona (market_id: 2)
-      { market_id: 2, outcome: 1, amount_wei: "2000000000000000000", user_id: 1 }, // 2 ETH on Real Madrid
-      { market_id: 2, outcome: 3, amount_wei: "1500000000000000000", user_id: 2 }, // 1.5 ETH on Barcelona
-      { market_id: 2, outcome: 2, amount_wei: "500000000000000000", user_id: 3 },  // 0.5 ETH on Draw
-
-      // Lakers vs Warriors (market_id: 3) - No draw option for basketball
-      { market_id: 3, outcome: 1, amount_wei: "800000000000000000", user_id: 1 },  // 0.8 ETH on Lakers
-      { market_id: 3, outcome: 2, amount_wei: "1200000000000000000", user_id: 2 }, // 1.2 ETH on Warriors
+    // Forza le partite desiderate in cima alla lista
+    const priorityTitles = [
+      "Napoli vs Roma - Serie A",
+      "Juventus vs Milan - Serie A"
     ];
+    const priorityMatches = matches.filter(m => priorityTitles.includes(m.title));
+    const otherMatches = matches.filter(m => !priorityTitles.includes(m.title));
+    const matchesToBetOn = [...priorityMatches, ...otherMatches].slice(0, 15); // Le prime 15, ma con priorità alle tue
 
-    // Create a test user if it doesn't exist
-    try {
-      await database.run(`
-        INSERT OR IGNORE INTO users (id, username, email, password_hash) 
-        VALUES (1, 'testuser1', 'test1@example.com', 'hash1'),
-               (2, 'testuser2', 'test2@example.com', 'hash2'),
-               (3, 'testuser3', 'test3@example.com', 'hash3'),
-               (4, 'testuser4', 'test4@example.com', 'hash4')
-      `);
-    } catch (err) {
-      console.log('Test users already exist or error creating them:', err.message);
+    if (users.length === 0 || matches.length === 0) {
+      console.error('❌ No users or matches found. Please run `populateMatches.js` first.');
+      await database.close();
+      process.exit(1);
     }
+    console.log(`✅ Found ${users.length} users and ${matches.length} future matches.`);
 
-    // Insert sample bets
-    for (const bet of sampleBets) {
-      try {
-        const result = await database.run(`
-          INSERT INTO user_bets (user_id, market_id, outcome, amount_wei, status)
-          VALUES (?, ?, ?, ?, 'confirmed')
-        `, [bet.user_id, bet.market_id, bet.outcome, bet.amount_wei]);
-        
-        console.log(`✅ Added bet: ${bet.amount_wei} wei on outcome ${bet.outcome} for market ${bet.market_id}`);
-      } catch (err) {
-        console.log(`⚠️ Error adding bet:`, err.message);
+    // Step 2: NON cancellare le scommesse esistenti
+
+    // Step 3: Crea solo nuove scommesse per partite future
+    let betsCreatedCount = 0;
+
+    for (const match of matchesToBetOn) {
+      console.log(`\n--- Placing bets for: ${match.title} ---`);
+      const numBets = Math.floor(Math.random() * (users.length - 2)) + 2; // 2 to user.length bets per match
+      const usersWhoWillBet = [...users].sort(() => 0.5 - Math.random()).slice(0, numBets);
+
+      for (const user of usersWhoWillBet) {
+        const hasDrawOption = match.sport === 'Football' || match.sport === 'Soccer';
+        let outcome;
+        if (hasDrawOption) {
+          outcome = Math.floor(Math.random() * 3) + 1; // 1, 2, or 3
+        } else {
+          outcome = Math.random() > 0.5 ? 1 : 3; // 1 or 3 (no draw)
+        }
+        const betData = {
+          userId: user.id,
+          marketId: match.id,
+          outcome: outcome,
+          amountWei: getRandomBetAmountWei(),
+          transactionHash: `0x_test_tx_${Date.now()}_${betsCreatedCount + 1}`,
+          status: 'confirmed'
+        };
+
+        if (!(await betExists(user.id, match.id))) {
+          try {
+            await bettingService.saveBet(betData);
+            console.log(`  ✅ ${user.username} bet on outcome ${outcome} for ${(Number(betData.amountWei) / 1e18).toFixed(4)} ETH`);
+            betsCreatedCount++;
+          } catch (error) {
+            console.error(`  ❌ Failed to place bet for ${user.username}: ${error.message}`);
+          }
+        } else {
+          console.log(`  ⏩ Bet already exists for ${user.username} on match ${match.title}`);
+        }
       }
     }
 
-    console.log('\n🎉 Sample matches and bets for next 24 hours added successfully!');
-    console.log('These matches will show parimutuel odds in the frontend.\n');
+    // Step 4: Final summary
+    console.log('\n🎉 Parimutuel test data creation finished!');
+    console.log(`💸 Total bets created: ${betsCreatedCount}`);
+    
+    const betStats = await database.get('SELECT COUNT(*) as total, COUNT(DISTINCT user_id) as bettors, COUNT(DISTINCT market_id) as markets FROM user_bets');
+    console.log(`📈 Final Bet Statistics: ${betStats.total} bets from ${betStats.bettors} unique users across ${betStats.markets} markets.`);
+
+    await database.close();
+    process.exit(0);
 
   } catch (error) {
-    console.error('❌ Error adding sample data:', error);
-  } finally {
-    await database.close();
+    console.error('❌ Error adding parimutuel test data:', error);
+    process.exit(1);
   }
 }
 
-// Run the script
-addSampleMatchesNext24Hours();
+// Only run if this file is executed directly
+if (require.main === module) {
+  addParimutuelTestData();
+}
+
+module.exports = { addParimutuelTestData };
+
+async function betExists(userId, marketId) {
+  const bet = await database.get(
+    'SELECT id FROM user_bets WHERE user_id = ? AND market_id = ?',
+    [userId, marketId]
+  );
+  return !!bet;
+}
+async function betExists(userId, marketId) {
+  const bet = await database.get(
+    'SELECT id FROM user_bets WHERE user_id = ? AND market_id = ?',
+    [userId, marketId]
+  );
+  return !!bet;
+}

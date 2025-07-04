@@ -31,6 +31,7 @@ app.set('trust proxy', 1);
 // Initialize database
 const initializeDatabase = async () => {
   try {
+    console.log('🗄️ Initializing database...');
     await database.initialize();
     console.log('✅ Database initialized successfully');
   } catch (error) {
@@ -249,4 +250,4 @@ const startServer = async () => {
   }
 };
 
-startServer(); 
+startServer();

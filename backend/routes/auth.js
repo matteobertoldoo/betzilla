@@ -7,6 +7,7 @@ const {
   authenticateToken,
   rateLimit 
 } = require('../middleware/auth');
+const { ethers } = require('ethers');
 
 const router = express.Router();
 
@@ -197,6 +198,88 @@ router.put('/password', [
     res.status(500).json({
       success: false,
       message: 'Failed to change password'
+    });
+  }
+});
+
+// --- Wallet-based login endpoints ---
+
+// 1. Request nonce for wallet address
+router.post('/wallet-nonce', [
+  sanitizeInput, 
+  validateRequiredFields(['walletAddress'])
+], async (req, res) => {
+  try {
+    const { walletAddress } = req.body;
+    
+    // Validate wallet address format
+    if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid wallet address format'
+      });
+    }
+    
+    // Generate a random nonce and store it
+    const nonce = 'Sign this message to login to BetZilla: ' + Math.floor(Math.random() * 1e16);
+    await authService.setWalletNonce(walletAddress, nonce);
+    
+    res.json({ success: true, nonce });
+  } catch (error) {
+    console.error('Nonce generation error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to generate nonce' });
+  }
+});
+
+// 2. Verify signature and login/register
+router.post('/wallet-login', [
+  sanitizeInput, 
+  validateRequiredFields(['walletAddress', 'signature'])
+], async (req, res) => {
+  try {
+    const { walletAddress, signature } = req.body;
+    
+    // Validate wallet address format
+    if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid wallet address format'
+      });
+    }
+    
+    // Get nonce from storage
+    const nonce = await authService.getWalletNonce(walletAddress);
+    if (!nonce) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Nonce expired or not found. Please try again.' 
+      });
+    }
+    
+    // Verify signature
+    const recovered = ethers.verifyMessage(nonce, signature);
+    if (recovered.toLowerCase() !== walletAddress.toLowerCase()) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Signature verification failed' 
+      });
+    }
+    
+    // Login or register user
+    const result = await authService.loginWithWallet(walletAddress);
+    
+    res.json({ 
+      success: true, 
+      user: result.user, 
+      token: result.token, 
+      message: 'Wallet login successful' 
+    });
+  } catch (error) {
+    console.error('Wallet login error:', error.message);
+    // Add error.message to response for easier debugging
+    res.status(401).json({ 
+      success: false, 
+      message: error.message || 'Wallet login failed' 
     });
   }
 });

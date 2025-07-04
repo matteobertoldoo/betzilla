@@ -34,14 +34,36 @@ class Database {
       const createUsersTable = `
         CREATE TABLE IF NOT EXISTS users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          username VARCHAR(50) UNIQUE NOT NULL,
-          email VARCHAR(100) UNIQUE NOT NULL,
-          password_hash VARCHAR(255) NOT NULL,
-          wallet_address VARCHAR(42),
+          username VARCHAR(50) UNIQUE,
+          email VARCHAR(100) UNIQUE,
+          password_hash VARCHAR(255),
+          wallet_address VARCHAR(42), -- removed UNIQUE constraint and allow NULL
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           is_active BOOLEAN DEFAULT 1
         )
+      `;
+
+      // Migration to update existing table structure
+      const updateUsersTable = `
+        PRAGMA foreign_keys=off;
+        
+        CREATE TABLE users_new (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username VARCHAR(50) UNIQUE,
+          email VARCHAR(100) UNIQUE,
+          password_hash VARCHAR(255),
+          wallet_address VARCHAR(42),
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          is_active BOOLEAN DEFAULT 1
+        );
+        
+        INSERT INTO users_new SELECT * FROM users;
+        DROP TABLE users;
+        ALTER TABLE users_new RENAME TO users;
+        
+        PRAGMA foreign_keys=on;
       `;
 
       const createUserSessionsTable = `
@@ -108,8 +130,19 @@ class Database {
 
       // Execute table creation
       this.db.serialize(() => {
+        // First try to create the table
         this.db.run(createUsersTable, (err) => {
-          if (err) {
+          if (err && err.message.includes('NOT NULL')) {
+            // If there's a NOT NULL constraint issue, run migration
+            this.db.exec(updateUsersTable, (migrationErr) => {
+              if (migrationErr) {
+                console.error('Error migrating users table:', migrationErr.message);
+                reject(migrationErr);
+                return;
+              }
+              console.log('Users table migrated successfully');
+            });
+          } else if (err) {
             console.error('Error creating users table:', err.message);
             reject(err);
             return;

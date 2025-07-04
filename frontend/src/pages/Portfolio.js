@@ -109,6 +109,31 @@ const Portfolio = ({
     };
   }, [refreshAllBets]);
 
+  // Aggiorna i dati delle scommesse per le partite entro 24h ogni volta che la pagina viene caricata o ogni 30s
+  useEffect(() => {
+    // Funzione per aggiornare solo le scommesse delle partite entro 24h
+    const refreshBetsForNext24h = async () => {
+      try {
+        // Prendi tutte le partite dal backend
+        const response = await fetch('http://localhost:4000/api/parimutuel/matches/next24hours');
+        const data = await response.json();
+        if (data.success && data.data && data.data.matches) {
+          // Per ogni match entro 24h, aggiorna lo stato delle scommesse dal backend
+          const matchIds = data.data.matches.map(m => m.id);
+          // Se vuoi aggiornare solo le scommesse di queste partite, puoi filtrare qui
+          await fetchDatabaseBets();
+        }
+      } catch (error) {
+        console.error('Error refreshing bets for next 24h:', error);
+      }
+    };
+
+    refreshBetsForNext24h();
+    // Aggiorna ogni 30 secondi
+    const interval = setInterval(refreshBetsForNext24h, 30000);
+    return () => clearInterval(interval);
+  }, [fetchDatabaseBets]);
+
   const handleClaimWinnings = async (marketId) => {
     try {
       await claimWinnings(marketId);
@@ -143,21 +168,16 @@ const Portfolio = ({
     const homeTeam = match?.homeTeam || match?.home_team || 'Home Team';
     const awayTeam = match?.awayTeam || match?.away_team || 'Away Team';
     
-    console.log('🎯 Getting outcome name for:', outcome, 'Match:', homeTeam, 'vs', awayTeam);
-    
+    // Determina se il match ha il pareggio
+    const sportsWithDraw = ['Football', 'Soccer'];
+    const sport = match?.sport || '';
+    const hasDrawOption = sportsWithDraw.includes(sport);
+
     switch (outcome) {
       case 1:
         return homeTeam;
       case 2:
-        // Check if this sport has draw option
-        const sportsWithDraw = ['Football', 'Soccer'];
-        const sport = match?.sport || '';
-        if (sportsWithDraw.includes(sport)) {
-          return 'Draw';
-        } else {
-          // For sports without draw, outcome 2 is away team
-          return awayTeam;
-        }
+        return hasDrawOption ? 'Draw' : awayTeam;
       case 3:
         return awayTeam;
       default:
@@ -385,6 +405,31 @@ const Portfolio = ({
       </div>
     );
   };
+
+  // Aggiorna i dati delle scommesse per le partite entro 24h ogni volta che la pagina viene caricata o ogni 30s
+  useEffect(() => {
+    // Funzione per aggiornare solo le scommesse delle partite entro 24h
+    const refreshBetsForNext24h = async () => {
+      try {
+        // Prendi tutte le partite dal backend
+        const response = await fetch('http://localhost:4000/api/parimutuel/matches/next24hours');
+        const data = await response.json();
+        if (data.success && data.data && data.data.matches) {
+          // Per ogni match entro 24h, aggiorna lo stato delle scommesse dal backend
+          const matchIds = data.data.matches.map(m => m.id);
+          // Se vuoi aggiornare solo le scommesse di queste partite, puoi filtrare qui
+          await fetchDatabaseBets();
+        }
+      } catch (error) {
+        console.error('Error refreshing bets for next 24h:', error);
+      }
+    };
+
+    refreshBetsForNext24h();
+    // Aggiorna ogni 30 secondi
+    const interval = setInterval(refreshBetsForNext24h, 30000);
+    return () => clearInterval(interval);
+  }, [fetchDatabaseBets]);
 
   return (
     <div className="portfolio-page">

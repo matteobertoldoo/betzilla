@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const database = require('../database');
 
+const walletNonces = new Map(); // In-memory for demo, use DB in production
+
 class AuthService {
   constructor() {
     this.jwtSecret = process.env.JWT_SECRET || 'betzilla_default_secret_key_change_in_production';
@@ -274,6 +276,78 @@ class AuthService {
   isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  }
+
+  // Set/get wallet nonce (for demo, use in-memory map)
+  async setWalletNonce(walletAddress, nonce) {
+    walletNonces.set(walletAddress.toLowerCase(), { nonce, created: Date.now() });
+  }
+  async getWalletNonce(walletAddress) {
+    const entry = walletNonces.get(walletAddress.toLowerCase());
+    if (!entry) return null;
+    // Optionally: expire after 5 min
+    if (Date.now() - entry.created > 5 * 60 * 1000) {
+      walletNonces.delete(walletAddress.toLowerCase());
+      return null;
+    }
+    return entry.nonce;
+  }
+
+  // Login or register with wallet address
+  async loginWithWallet(walletAddress) {
+    try {
+      // 1. Find user by wallet address
+      let user = await database.get(
+        'SELECT * FROM users WHERE wallet_address = ? AND is_active = 1',
+        [walletAddress]
+      );
+      
+      // 2. If not found, create user
+      if (!user) {
+        const now = new Date().toISOString();
+        // Generate a temporary username from wallet address
+        const tempUsername = `wallet_${walletAddress.slice(-8)}`;
+        
+        const result = await database.run(
+          `INSERT INTO users (username, wallet_address, created_at, is_active) VALUES (?, ?, ?, 1)`,
+          [tempUsername, walletAddress, now]
+        );
+        
+        user = {
+          id: result.id,
+          username: tempUsername,
+          email: null,
+          wallet_address: walletAddress,
+          created_at: now
+        };
+      }
+      
+      // 3. Generate token
+      const token = this.generateToken({
+        userId: user.id,
+        walletAddress: walletAddress,
+        username: user.username,
+        email: user.email || null
+      });
+      
+      // 4. Store session
+      await this.createSession(user.id, token);
+      
+      // 5. Return user data
+      return {
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email || null,
+          walletAddress: user.wallet_address,
+          createdAt: user.created_at
+        },
+        token
+      };
+    } catch (error) {
+      console.error('Wallet login error:', error.message);
+      throw error;
+    }
   }
 }
 

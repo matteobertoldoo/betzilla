@@ -10,10 +10,10 @@ Stores user account information and authentication data.
 | Column | Type | Description |
 |--------|------|-------------|
 | id | INTEGER PRIMARY KEY | Unique user identifier |
-| username | VARCHAR(50) UNIQUE | User's chosen username |
-| email | VARCHAR(100) UNIQUE | User's email address |
-| password_hash | VARCHAR(255) | Hashed password using bcrypt |
-| wallet_address | VARCHAR(42) | Ethereum wallet address (optional) |
+| username | VARCHAR(50) UNIQUE, nullable | User's chosen username (nullable for wallet-only users) |
+| email | VARCHAR(100) UNIQUE, nullable | User's email address (nullable for wallet-only users) |
+| password_hash | VARCHAR(255), nullable | Hashed password using bcrypt (nullable for wallet-only users) |
+| wallet_address | VARCHAR(42), nullable | Ethereum wallet address (optional) |
 | created_at | DATETIME | Account creation timestamp |
 | updated_at | DATETIME | Last update timestamp |
 | is_active | BOOLEAN | Account status (active/inactive) |
@@ -29,6 +29,15 @@ Manages user authentication sessions and JWT tokens.
 | expires_at | DATETIME | Session expiration time |
 | created_at | DATETIME | Session creation timestamp |
 | is_active | BOOLEAN | Session status |
+
+### wallet_nonces
+Stores temporary nonces for wallet-based login.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| wallet_address | VARCHAR(42) PRIMARY KEY | The user's wallet address |
+| nonce | VARCHAR(255) | The single-use nonce for signing |
+| expires_at | DATETIME | The expiration time for the nonce |
 
 ### user_bets
 Tracks all user betting activity and outcomes.
@@ -80,6 +89,8 @@ Provides database connectivity and operations:
 - `POST /logout` - User logout
 - `PUT /wallet` - Update wallet address
 - `GET /profile` - Get user profile
+- `POST /wallet-nonce` - Get a nonce for wallet login
+- `POST /wallet-login` - Login or register with a wallet signature
 
 ### Betting (`/api/betting`)
 - `POST /bets` - Save new bet

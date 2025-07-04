@@ -97,7 +97,7 @@ const PublicHome = () => {
               <div className="step-number">1</div>
               <div className="step-content">
                 <h3>🦊 Connect Wallet</h3>
-                <p>Connect your MetaMask wallet to get started. We support all major Ethereum wallets.</p>
+                <p>Connect your MetaMask or any EVM-compatible wallet to get started. We support all major Ethereum wallets.</p>
               </div>
             </div>
             

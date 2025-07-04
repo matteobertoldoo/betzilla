@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom';
 import './Login.css';
 
 const Login = () => {
-  const { login, register, loading, error, isAuthenticated } = useAuth();
+  const { login, register, loading, error, isAuthenticated, loginWithWallet } = useAuth();
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [formData, setFormData] = useState({
     email: '',
@@ -14,45 +14,34 @@ const Login = () => {
   });
   const [formErrors, setFormErrors] = useState({});
 
-  // Redirect if already authenticated
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear field-specific error when user starts typing
+    setFormData(prev => ({ ...prev, [name]: value }));
+
     if (formErrors[name]) {
-      setFormErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
   const validateForm = () => {
     const errors = {};
 
-    // Email validation
     if (!formData.email) {
       errors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       errors.email = 'Email is invalid';
     }
 
-    // Password validation
     if (!formData.password) {
       errors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       errors.password = 'Password must be at least 6 characters';
     }
 
-    // Registration-specific validations
     if (!isLoginMode) {
       if (!formData.username) {
         errors.username = 'Username is required';
@@ -73,29 +62,24 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+
+    if (!validateForm()) return;
 
     try {
-      let result;
-      if (isLoginMode) {
-        result = await login(formData.email, formData.password);
-      } else {
-        result = await register(formData.email, formData.password, formData.username);
-      }
+      const result = isLoginMode
+        ? await login(formData.email, formData.password)
+        : await register(formData.email, formData.password, formData.username);
 
       if (!result.success) {
         setFormErrors({ submit: result.message });
       }
-    } catch (error) {
+    } catch (err) {
       setFormErrors({ submit: 'An unexpected error occurred' });
     }
   };
 
   const toggleMode = () => {
-    setIsLoginMode(!isLoginMode);
+    setIsLoginMode(prev => !prev);
     setFormData({
       email: '',
       password: '',
@@ -103,6 +87,36 @@ const Login = () => {
       confirmPassword: ''
     });
     setFormErrors({});
+  };
+
+  // --- MetaMask login logic ---
+  const handleMetaMaskLogin = async () => {
+    // For new users, email is required. We can check if we are in sign-up mode.
+    if (!isLoginMode && !formData.email) {
+      setFormErrors({ email: 'Email is required to register with MetaMask.' });
+      return;
+    }
+    // Optional: Validate email format before proceeding
+    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+      setFormErrors({ email: 'Please enter a valid email address.' });
+      return;
+    }
+
+    try {
+      if (!window.ethereum || !window.ethereum.isMetaMask) {
+        alert('MetaMask is not installed. Please install it from https://metamask.io');
+        return;
+      }
+      // Pass the email from the form to the login function
+      const result = await loginWithWallet(formData.email);
+      if (!result.success) {
+        // Display error message from backend, which might be about the email.
+        setFormErrors({ submit: result.message || 'MetaMask login failed' });
+      }
+      // The useAuth hook will handle redirection on success
+    } catch (err) {
+      setFormErrors({ submit: 'MetaMask login error: ' + (err.message || err) });
+    }
   };
 
   return (
@@ -113,10 +127,9 @@ const Login = () => {
             <h1>BetZilla</h1>
             <h2>{isLoginMode ? 'Welcome Back' : 'Join BetZilla'}</h2>
             <p>
-              {isLoginMode 
-                ? 'Sign in to your account to start betting' 
-                : 'Create your account to start your betting journey'
-              }
+              {isLoginMode
+                ? 'Sign in to your account to start betting'
+                : 'Create your account to start your betting journey'}
             </p>
           </div>
 
@@ -133,9 +146,7 @@ const Login = () => {
                   className={formErrors.username ? 'error' : ''}
                   placeholder="Enter your username"
                 />
-                {formErrors.username && (
-                  <span className="error-message">{formErrors.username}</span>
-                )}
+                {formErrors.username && <span className="error-message">{formErrors.username}</span>}
               </div>
             )}
 
@@ -150,9 +161,7 @@ const Login = () => {
                 className={formErrors.email ? 'error' : ''}
                 placeholder="Enter your email"
               />
-              {formErrors.email && (
-                <span className="error-message">{formErrors.email}</span>
-              )}
+              {formErrors.email && <span className="error-message">{formErrors.email}</span>}
             </div>
 
             <div className="form-group">
@@ -166,9 +175,7 @@ const Login = () => {
                 className={formErrors.password ? 'error' : ''}
                 placeholder="Enter your password"
               />
-              {formErrors.password && (
-                <span className="error-message">{formErrors.password}</span>
-              )}
+              {formErrors.password && <span className="error-message">{formErrors.password}</span>}
             </div>
 
             {!isLoginMode && (
@@ -183,23 +190,15 @@ const Login = () => {
                   className={formErrors.confirmPassword ? 'error' : ''}
                   placeholder="Confirm your password"
                 />
-                {formErrors.confirmPassword && (
-                  <span className="error-message">{formErrors.confirmPassword}</span>
-                )}
+                {formErrors.confirmPassword && <span className="error-message">{formErrors.confirmPassword}</span>}
               </div>
             )}
 
             {(error || formErrors.submit) && (
-              <div className="error-banner">
-                {error || formErrors.submit}
-              </div>
+              <div className="error-banner">{error || formErrors.submit}</div>
             )}
 
-            <button 
-              type="submit" 
-              className="login-button"
-              disabled={loading}
-            >
+            <button type="submit" className="login-button" disabled={loading}>
               {loading ? (
                 <span className="loading-spinner">⏳</span>
               ) : (
@@ -211,14 +210,14 @@ const Login = () => {
           <div className="login-footer">
             <p>
               {isLoginMode ? "Don't have an account? " : "Already have an account? "}
-              <button 
-                type="button" 
-                className="toggle-button"
-                onClick={toggleMode}
-              >
+              <button type="button" className="toggle-button" onClick={toggleMode}>
                 {isLoginMode ? 'Sign Up' : 'Sign In'}
               </button>
             </p>
+            <div className="divider">or</div>
+            <button type="button" className="metamask-login-btn" onClick={handleMetaMaskLogin}>
+              <span role="img" aria-label="fox">🦊</span> Sign in with MetaMask
+            </button>
           </div>
         </div>
       </div>

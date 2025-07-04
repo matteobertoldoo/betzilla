@@ -646,8 +646,8 @@ const Bet = ({
       return;
     }
 
-    // 🔍 Use synced contract market ID from database - MOVED TO TOP
-    const contractMarketId = match.contract_market_id || match.contractMarketId;
+    // Usa sempre il contract market ID per la blockchain!
+    const contractMarketId = match.contractMarketId || match.contract_market_id;
 
     setBettingLoading(prev => ({ ...prev, [matchId]: true }));
 
@@ -681,7 +681,7 @@ const Bet = ({
         return;
       }
 
-      // 🔗 Blockchain mode: use contract market ID
+      // Blockchain mode: usa contractMarketId!
       const betData = matchBetData[matchId];
       if (!betData || !betData.betAmount || betData.betAmount <= 0) {
         alert('Please enter a valid bet amount');
@@ -697,12 +697,12 @@ const Bet = ({
 
       console.log(`🎯 Placing bet: Contract Market ${contractMarketId}, Outcome ${betData.selectedOutcome}, Amount ${betData.betAmount} ETH`);
       
-      // 🚀 Place bet on-chain
+      // Qui la chiamata DEVE usare contractMarketId
       const receipt = await placeBet(contractMarketId, betData.selectedOutcome, betData.betAmount);
       
       const amountWei = (parseFloat(betData.betAmount) * 1e18).toString();
       
-      // 💾 Save to database after successful blockchain transaction
+      // Salva nel database con l'ID del database (matchId)
       if (user) {
         await saveBetToDatabase(matchId, betData.selectedOutcome, amountWei, receipt.hash);
       }
@@ -712,7 +712,14 @@ const Bet = ({
       updateBetAmount(matchId, '');
       updateSelectedOutcome(matchId, 1);
       await fetchUserBets();
-      
+
+      // AGGIUNGI QUESTO PER FORZARE IL REFRESH DELLE QUOTE PARIMUTUEL
+      if (typeof window !== 'undefined' && window.location) {
+        window.location.reload();
+      }
+      // oppure, meglio: richiama fetchParimutuelOdds() se disponibile
+      // await fetchParimutuelOdds();
+
       if (window.refreshPortfolio) {
         window.refreshPortfolio();
       }

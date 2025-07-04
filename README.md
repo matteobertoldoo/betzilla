@@ -25,6 +25,37 @@ BetZilla è una piattaforma di scommesse sportive decentralizzata costruita su b
 - **Transparent Calculations**: Odds = (Total Pool - Fee) / Amount on Outcome
 - **Live Updates**: Odds refresh every 30 seconds as new bets are placed
 
+## 🎲 Come Funziona il Sistema Parimutuel e le Fasi di Betting
+
+### Parimutuel Odds (Quote Parimutuel)
+- **Quote Dinamiche**: Le quote non sono fisse, ma calcolate in base alla distribuzione delle scommesse nel pool.
+- **Formula**: Odds = (Pool Totale - Fee) / Importo scommesso su quell'outcome.
+- **Aggiornamento Live**: Le quote vengono aggiornate in tempo reale ogni 30 secondi per le partite che iniziano entro 24 ore.
+- **Trasparenza**: Tutti possono vedere come le quote cambiano in base alle scommesse degli utenti.
+
+### Fasi di Betting
+- **Early Betting Phase (>24h)**:
+  - **Fee Ridotta**: 2% di commissione per chi scommette con più di 24 ore di anticipo.
+  - **Quote Nascoste**: Le quote non sono visibili ("Blind Betting"), per evitare manipolazioni.
+  - **Obiettivo**: Incentivare scommesse anticipate con fee più bassa.
+- **Parimutuel Phase (<24h)**:
+  - **Fee Standard**: 3% di commissione.
+  - **Quote Visibili**: Le quote parimutuel vengono mostrate e aggiornate live.
+  - **Obiettivo**: Massima trasparenza e dinamismo nelle ultime ore prima della partita.
+- **Match Started**:
+  - **Scommesse Chiuse**: Non è più possibile piazzare scommesse.
+  - **Quote Finali**: Le quote finali vengono fissate e usate per il calcolo delle vincite.
+
+### Esempio di Flusso
+1. **Scommetti in Early Phase**: Scommetti su una partita che inizia tra 2 giorni. Paghi solo il 2% di fee, ma non conosci le quote.
+2. **Scommetti in Parimutuel Phase**: Scommetti su una partita che inizia tra 6 ore. Paghi il 3% di fee e vedi le quote aggiornate in tempo reale.
+3. **Calcolo Vincite**: Quando la partita è risolta, le vincite vengono calcolate usando le quote parimutuel finali e la fee in base a quando hai piazzato la scommessa.
+
+### Vantaggi
+- **Nessuna Manipolazione**: Le quote sono determinate solo dalle scommesse degli utenti.
+- **Premio per chi scommette prima**: Fee più bassa per chi scommette in anticipo.
+- **Esperienza Trasparente**: Tutti i calcoli sono pubblici e verificabili.
+
 ## 🏗️ Architettura del Sistema
 
 ```
