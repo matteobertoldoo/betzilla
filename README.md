@@ -48,7 +48,7 @@ BetZilla is a **decentralized sports betting platform** built on Ethereum blockc
 
 **🎥 Watch BetZilla in action - Real betting with MetaMask:**
 
-[![BetZilla Demo - Live Betting](hero-image.jpg)](https://youtu.be/AFbMlGc3xXA)
+[![BetZilla Demo - Live Betting](preview-video.jpg)](https://youtu.be/AFbMlGc3xXA)
 
 *Demo video showcasing: MetaMask connection, bet placement, blockchain transactions, and real-time portfolio updates.*
 
