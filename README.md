@@ -34,12 +34,12 @@ BetZilla is a decentralized sports betting platform built on Ethereum blockchain
 ### 🔒 **Blind Betting Phase** (>24h before match)
 *Hidden odds - Early Bird Discount 2% fee*
 
-![Hidden Quotes](hidden.png)
+![Hidden Quotes](hidden.jpg)
 
 ### 👁️ **Parimutuel Phase** (<24h before match)  
 *Visible and live odds - 3% standard fee*
 
-![Discoverable Quotes](discoverable.png)
+![Discoverable Quotes](discoverable.jpg)
 
 ## 🧪 Complete Testing
 
