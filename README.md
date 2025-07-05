@@ -140,6 +140,43 @@ This script tests:
 
 ## 🎲 How It Works
 
+### Mathematical Parimutuel Model
+
+The core of BetZilla's engine uses the parimutuel model to ensure fair and transparent payouts.
+
+#### Odds Calculation
+```
+Odds_i = Total Pool / Outcome Pool_i
+```
+where:
+- **Total Pool** is the sum of all bets placed on the market
+- **Outcome Pool_i** is the total amount staked on outcome i
+
+#### Net Payout Formula
+```
+Gross Winnings = Stake × Odds_i
+Net Profit = Gross Winnings - Stake
+Fee = {
+  Net Profit × 2%  (blind phase, >24h)
+  Net Profit × 3%  (last 24h)
+}
+Final Payout = Stake + (Net Profit - Fee)
+```
+
+#### Example (10 ETH bet at 1.67 odds, 3% fee)
+```
+Gross Winnings = 10 × 1.67 = 16.7 ETH
+Net Profit = 16.7 - 10 = 6.7 ETH
+Fee (3%) = 6.7 × 0.03 = 0.201 ETH
+Final Payout = 10 + (6.7 - 0.201) = 16.499 ETH
+```
+
+#### System Equilibrium
+The model maintains balance when:
+```
+Σ(Outcome Pool_i × Odds_i) ≤ Total Pool × (1 - Fee%)
+```
+
 ### Betting Phases
 1. **Early Phase (>24h before match)**:
    - Fee: 2% (Early Bird Discount! 🐦)
@@ -274,15 +311,6 @@ lsof -i :3000,4000,8545
 tail -f hardhat.log backend.log frontend.log
 ```
 
-## 📈 Roadmap
-
-- [ ] **Mobile App**: Native iOS/Android application
-- [ ] **Multi-Sport**: Support for football, basketball, tennis, F1
-- [ ] **Layer 2**: Polygon/Arbitrum integration
-- [ ] **Oracle Integration**: Automatic result feeds
-- [ ] **DAO Governance**: Decentralized governance system
-- [ ] **DeFi Integration**: Yield farming and staking
-
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -290,12 +318,6 @@ tail -f hardhat.log backend.log frontend.log
 3. Commit changes (`git commit -m 'Add NewFeature'`)
 4. Push branch (`git push origin feature/NewFeature`)
 5. Open Pull Request
-
-## 📄 License
-
-Project released under MIT license.
-
----
 
 **⚠️ Disclaimer**: Demonstration project. Do not use for real betting without appropriate licenses and regulatory compliance.
 
