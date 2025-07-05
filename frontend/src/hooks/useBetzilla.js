@@ -403,9 +403,9 @@ export const useBetzilla = () => {
     }
 
     try {
-      // Since getCurrentFee function doesn't exist in contract, return default fee
-      // The actual fee logic is handled in the smart contract during bet placement
-      return 3; // Default 3% fee
+      // ✅ FIXED: Actually call the smart contract getCurrentFee function
+      const feePercent = await contract.getCurrentFee(marketId);
+      return Number(feePercent);
     } catch (error) {
       console.log('Error fetching current fee, using default:', error.message);
       return 3; // Default fee percentage

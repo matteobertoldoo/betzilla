@@ -226,19 +226,19 @@ async function testBetZillaComplete() {
     console.log("\n🔍 STEP 14: PREVIEWING WINNINGS");
     console.log("==============================");
     
-    // Alice's winnings from Market 1 (early bet, 2% fee)
+    // Alice's winnings from Market 1 (early bet, 2% fee ON PROFIT)
     const alicePreview1 = await betZilla.previewWinnings(1, alice.address);
     console.log(`\n👤 Alice - Market 1 (Real Madrid win, early bet):`);
     console.log(`  Gross payout: ${ethers.formatEther(alicePreview1[0])} ETH`);
-    console.log(`  Fee (2%): ${ethers.formatEther(alicePreview1[1])} ETH`);
+    console.log(`  Fee (2% on profit): ${ethers.formatEther(alicePreview1[1])} ETH`);
     console.log(`  Net payout: ${ethers.formatEther(alicePreview1[2])} ETH`);
     console.log(`  Fee percentage: ${alicePreview1[3]}%`);
     
-    // Alice's winnings from Market 2 (late bet, 3% fee)
+    // Alice's winnings from Market 2 (late bet, 3% fee ON PROFIT)
     const alicePreview2 = await betZilla.previewWinnings(2, alice.address);
     console.log(`\n👤 Alice - Market 2 (Manchester United win, late bet):`);
     console.log(`  Gross payout: ${ethers.formatEther(alicePreview2[0])} ETH`);
-    console.log(`  Fee (3%): ${ethers.formatEther(alicePreview2[1])} ETH`);
+    console.log(`  Fee (3% on profit): ${ethers.formatEther(alicePreview2[1])} ETH`);
     console.log(`  Net payout: ${ethers.formatEther(alicePreview2[2])} ETH`);
     console.log(`  Fee percentage: ${alicePreview2[3]}%`);
 
@@ -295,15 +295,52 @@ async function testBetZillaComplete() {
     console.log("\n🔍 STEP 17: FEE VERIFICATION");
     console.log("===========================");
     
-    const expectedFee1 = (alicePreview1[0] * 2n) / 100n; // 2% of gross payout
-    const expectedFee2 = (alicePreview2[0] * 3n) / 100n; // 3% of gross payout
+    // ✅ CORRECTED: Fees should be calculated on NET PROFIT, not gross payout
+    // The contract correctly calculates fees only on profit (winnings - original bet)
+    
+    // Alice Market 1: 2 ETH bet -> gets share of 3.5 ETH total pool -> profit = payout - bet
+    // Alice Market 2: 1 ETH bet -> gets share of 2.5 ETH total pool -> profit = payout - bet
+    
+    const aliceBetAmount1 = ethers.parseEther("2.0");
+    const aliceBetAmount2 = ethers.parseEther("1.0");
+    
+    // Calculate actual profit from preview data
+    const aliceGrossPayout1 = alicePreview1[0]; // Gross payout before fee
+    const aliceGrossPayout2 = alicePreview2[0]; // Gross payout before fee
+    
+    const aliceProfit1 = aliceGrossPayout1 - aliceBetAmount1; // Profit = payout - original bet
+    const aliceProfit2 = aliceGrossPayout2 - aliceBetAmount2; // Profit = payout - original bet
+    
+    const expectedFee1 = (aliceProfit1 * 2n) / 100n; // 2% of NET PROFIT (early bet)
+    const expectedFee2 = (aliceProfit2 * 3n) / 100n; // 3% of NET PROFIT (late bet)
     const totalExpectedFees = expectedFee1 + expectedFee2;
     
-    console.log(`Expected fee from Market 1 (2%): ${ethers.formatEther(expectedFee1)} ETH`);
-    console.log(`Expected fee from Market 2 (3%): ${ethers.formatEther(expectedFee2)} ETH`);
+    console.log(`\n💰 Alice Market 1 Analysis:`);
+    console.log(`  Bet amount: ${ethers.formatEther(aliceBetAmount1)} ETH`);
+    console.log(`  Gross payout: ${ethers.formatEther(aliceGrossPayout1)} ETH`);
+    console.log(`  Net profit: ${ethers.formatEther(aliceProfit1)} ETH`);
+    console.log(`  Expected fee (2% on profit): ${ethers.formatEther(expectedFee1)} ETH`);
+    
+    console.log(`\n💰 Alice Market 2 Analysis:`);
+    console.log(`  Bet amount: ${ethers.formatEther(aliceBetAmount2)} ETH`);
+    console.log(`  Gross payout: ${ethers.formatEther(aliceGrossPayout2)} ETH`);
+    console.log(`  Net profit: ${ethers.formatEther(aliceProfit2)} ETH`);
+    console.log(`  Expected fee (3% on profit): ${ethers.formatEther(expectedFee2)} ETH`);
+    
+    console.log(`\n🔍 Fee Verification:`);
     console.log(`Total expected fees: ${ethers.formatEther(totalExpectedFees)} ETH`);
     console.log(`Actual fees collected: ${ethers.formatEther(feesCollected)} ETH`);
     console.log(`Fee calculation accurate: ${feesCollected === totalExpectedFees ? '✅ YES' : '❌ NO'}`);
+    
+    // Additional verification: Check that fees match the preview data
+    const previewFee1 = alicePreview1[1]; // Fee amount from preview
+    const previewFee2 = alicePreview2[1]; // Fee amount from preview
+    const totalPreviewFees = previewFee1 + previewFee2;
+    
+    console.log(`\n🔍 Preview vs Actual Fee Verification:`);
+    console.log(`Preview total fees: ${ethers.formatEther(totalPreviewFees)} ETH`);
+    console.log(`Collected total fees: ${ethers.formatEther(feesCollected)} ETH`);
+    console.log(`Preview matches collected: ${totalPreviewFees === feesCollected ? '✅ YES' : '❌ NO'}`);
 
     // Owner withdraws platform fees
     console.log("\n🏦 STEP 18: WITHDRAWING PLATFORM FEES");
@@ -432,8 +469,8 @@ async function testBetZillaComplete() {
     console.log("✅ Betting phase functions: SUCCESS");
     
     console.log("\n🎯 KEY FINDINGS:");
-    console.log(`• Early bets (>24h) correctly charged 2% fee`);
-    console.log(`• Late bets (<24h) correctly charged 3% fee`);
+    console.log(`• Early bets (>24h) correctly charged 2% fee ON PROFIT ONLY`);
+    console.log(`• Late bets (<24h) correctly charged 3% fee ON PROFIT ONLY`);
     console.log(`• Parimutuel odds calculated correctly`);
     console.log(`• Individual fee system working perfectly`);
     console.log(`• Platform receives correct fee amounts`);
@@ -441,6 +478,7 @@ async function testBetZillaComplete() {
     console.log(`• Double claiming prevented`);
     console.log(`• All ETH properly distributed`);
     console.log(`• All helper functions working correctly`);
+    console.log(`• Fee calculation follows best practices (fees on profit, not gross)`);
     
     console.log("\n🚀 BETZILLA IS PRODUCTION READY! 🚀");
 }

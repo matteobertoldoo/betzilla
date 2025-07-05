@@ -281,6 +281,7 @@ contract BetZilla {
      * @param marketId The market to claim from
      * @notice Fee percentage depends on WHEN the bet was placed relative to match start
      * @notice Early bets (>24h before match) pay 2% fee, late bets (<24h) pay 3% fee
+     * @notice Fee is calculated ONLY on the net profit (winnings - original bet), not on total payout
      */
     function claimWinnings(uint256 marketId) external marketExists(marketId) {
         Market storage market = markets[marketId];
@@ -306,8 +307,9 @@ contract BetZilla {
         // Determine fee percentage: 2% for early bets (>24h), 3% for late bets (<24h)
         uint256 feePercent = timeBeforeMatch > 24 hours ? EARLY_FEE_PERCENT : LATE_FEE_PERCENT;
         
-        // Calculate individual fee amount and net payout
-        uint256 feeAmount = (grossPayout * feePercent) / 100;
+        // Calculate fee ONLY on net profit (winnings - original bet amount)
+        uint256 netProfit = grossPayout > bet.amount ? grossPayout - bet.amount : 0;
+        uint256 feeAmount = (netProfit * feePercent) / 100;
         uint256 netPayout = grossPayout - feeAmount;
 
         // Safety checks before transfer
@@ -385,7 +387,7 @@ contract BetZilla {
      * @param marketId The market to check
      * @param user The user's address
      * @return grossPayout Total payout before fees
-     * @return feeAmount Fee amount to be deducted
+     * @return feeAmount Fee amount to be deducted (calculated on profit only)
      * @return netPayout Final amount user receives
      * @return feePercent Fee percentage applied (2% or 3%)
      */
@@ -413,8 +415,9 @@ contract BetZilla {
             : 0; // Protection against underflow
         feePercent = timeBeforeMatch > 24 hours ? EARLY_FEE_PERCENT : LATE_FEE_PERCENT;
         
-        // Calculate fee amount and net payout
-        feeAmount = (grossPayout * feePercent) / 100;
+        // Calculate fee amount ONLY on net profit (winnings - original bet)
+        uint256 netProfit = grossPayout > bet.amount ? grossPayout - bet.amount : 0;
+        feeAmount = (netProfit * feePercent) / 100;
         netPayout = grossPayout - feeAmount;
         
         return (grossPayout, feeAmount, netPayout, feePercent);

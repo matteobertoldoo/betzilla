@@ -16,20 +16,21 @@ class ParimutuelService {
     const outcome2Total = parseFloat(bettingSummary.outcome_2_total) || 0;
     const outcome3Total = parseFloat(bettingSummary.outcome_3_total) || 0;
 
-    // Determine fee based on time until match
-    let feePercentage = 0.03; // Default 3%
+    // Determine fee based on time until match - CORRECTED: Dynamic fee calculation
+    let feePercentage = 0.03; // Default 3% for parimutuel phase (<24h)
     if (matchStartTime) {
       const now = new Date();
       const matchTime = new Date(matchStartTime);
       const hoursUntilMatch = (matchTime - now) / (1000 * 60 * 60);
       
       if (hoursUntilMatch > 24) {
-        feePercentage = 0.02; // 2% for early bets
+        feePercentage = 0.02; // 2% for early bets (>24h before match)
       } else {
-        feePercentage = 0.03; // 3% for late bets (parimutuel phase)
+        feePercentage = 0.03; // 3% for late bets (parimutuel phase <24h)
       }
     }
 
+    // Calculate net pool after fee deduction for parimutuel odds calculation
     const netPool = totalPool * (1 - feePercentage);
 
     const odds = [];
@@ -204,7 +205,10 @@ class ParimutuelService {
     }
 
     const grossPayout = betAmount * odds;
-    const feeAmount = grossPayout * 0.03; // 3% platform fee
+    
+    // Calculate fee ONLY on net profit (winnings - original bet amount)
+    const netProfit = grossPayout > betAmount ? grossPayout - betAmount : 0;
+    const feeAmount = netProfit * 0.03; // 3% fee on profit only
     const netPayout = grossPayout - feeAmount;
 
     return {

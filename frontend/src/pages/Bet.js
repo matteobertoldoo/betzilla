@@ -688,8 +688,23 @@ const Bet = ({
     // Calculate gross payout (bet amount * odds)
     const grossPayout = betAmount * odds;
     
-    // Apply platform fee (3% as defined in contract)
-    const feeAmount = grossPayout * 0.03;
+    // Calculate fee ONLY on net profit (winnings - original bet amount)
+    const netProfit = grossPayout > betAmount ? grossPayout - betAmount : 0;
+    
+    // ✅ FIXED: Dynamic fee calculation based on bet timing (like smart contract)
+    // Check when the bet was placed vs match start time
+    let feePercentage = 0.03; // Default 3% for late bets
+    
+    if (userBet.placedAt && match.startTime) {
+      const betTime = new Date(Number(userBet.placedAt) * 1000); // Convert from timestamp
+      const matchTime = new Date(match.startTime);
+      const hoursBeforeMatch = (matchTime - betTime) / (1000 * 60 * 60);
+      
+      // 2% for early bets (>24h before match), 3% for late bets (<24h)
+      feePercentage = hoursBeforeMatch > 24 ? 0.02 : 0.03;
+    }
+    
+    const feeAmount = netProfit * feePercentage;
     const netPayout = grossPayout - feeAmount;
     
     return {
@@ -699,7 +714,8 @@ const Bet = ({
       feeAmount: feeAmount / 1e18,
       netPayout: netPayout / 1e18,
       outcome: betOutcome,
-      profit: (netPayout - betAmount) / 1e18
+      profit: (netPayout - betAmount) / 1e18,
+      feePercentage: feePercentage * 100 // Return as percentage for display
     };
   };
 
@@ -1223,7 +1239,7 @@ const Bet = ({
                           >
                             <option value={1}>🏠 {match.homeTeam}</option>
                             {match.hasDrawOption && <option value={2}>🤝 Draw</option>}
-                            <option value={match.hasDrawOption ? 3 : 2}>🚀 {match.awayTeam}</option>
+                            <option value={match.hasDrawOption ? 3 : 2}>✈️ {match.awayTeam}</option>
                           </select>
                         </div>
                         

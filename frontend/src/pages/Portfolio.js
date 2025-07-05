@@ -201,6 +201,17 @@ const Portfolio = ({
     );
   }
 
+  // Helper function to calculate dynamic fee based on bet timing
+  const calculateDynamicFee = (placedAt, startTime) => {
+    if (!placedAt || !startTime) return 3; // Default 3% for late bets
+    
+    const betTime = new Date(Number(placedAt) * 1000);
+    const matchTime = new Date(startTime);
+    const hoursBeforeMatch = (matchTime - betTime) / (1000 * 60 * 60);
+    
+    return hoursBeforeMatch > 24 ? 2 : 3; // 2% for early bets (>24h), 3% for late bets (<24h)
+  };
+
   // Helper function to deduplicate bets - prefer database bets over blockchain bets
   const deduplicateBets = (blockchainBets, databaseBets) => {
     // Create a map of contract market ID to database market ID
@@ -327,7 +338,9 @@ const Portfolio = ({
           </div>
           <div className="detail-item">
             <span className="detail-label">🧾 Fee:</span>
-            <span className="detail-value">{betData.bet.feePercent || betData.feePercent || '3'}%</span>
+            <span className="detail-value">
+              {calculateDynamicFee(betData.bet.placedAt, betData.market.startTime)}%
+            </span>
           </div>
           <div className="detail-item">
             <span className="detail-label">📅 Placed:</span>
