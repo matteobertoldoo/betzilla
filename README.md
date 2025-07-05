@@ -140,6 +140,14 @@ This script tests:
 
 ## 🎲 How It Works
 
+### Current System Status
+
+**⚠️ Mock Data Usage**: Currently using simulated match data due to summer sports schedule gap. Real sports API integration and oracle-based result resolution will be implemented for live deployment.
+
+**🔧 Match Resolution**: 
+- **Current**: Manual resolution via `setResult()` function for testing
+- **Future**: Automated oracle integration for real-time match results
+
 ### Mathematical Parimutuel Model
 
 The core of BetZilla's engine uses the parimutuel model to ensure fair and transparent payouts.
@@ -276,14 +284,39 @@ cd ../frontend && npm start             # Terminal 4
 ## 🔧 Development
 
 ### Smart Contract (BetZilla.sol)
-- **placeBet()**: Bet placement with validation
-- **createMarket()**: Betting market creation
-- **resolveMarket()**: Resolution with winning outcome
-- **claimWinnings()**: Automatic winnings withdrawal
+- **placeBet()**: Bet placement with validation and outcome selection
+- **createMarket()**: Create new betting markets with description and start time
+- **closeBetting()**: Close betting and calculate final parimutuel odds
+- **setResult()**: Set match result (temporary - will be replaced by oracle)
+- **claimWinnings()**: Claim winnings with individual fee calculation
+- **claimRefund()**: Claim refunds for cancelled markets
+- **cancelMarket()**: Cancel markets (admin function)
+- **withdrawFees()**: Withdraw accumulated platform fees
+- **getEstimatedOdds()**: Get current parimutuel odds for a market
+- **getCurrentFee()**: Get current fee percentage (2% or 3%)
+- **getUserFee()**: Get specific fee for user's existing bet
+- **previewWinnings()**: Preview potential winnings with fee breakdown
+- **getMarketStatus()**: Get comprehensive market status information
+- **getBettingPhase()**: Get betting phase info (early vs parimutuel)
+- **getUserMarkets()**: Get user's betting history
+- **getMarket()**: Get complete market information
+- **getUserBet()**: Get user's bet details for specific market
 
-### Backend API
+### Current vs Future Implementation
+
+**Current (Testing Phase)**:
+- Mock sports data for demonstration
+- Manual match result setting
+- Hardhat local blockchain
+
+**Future (Production)**:
+- Live sports API integration (ESPN, The Odds API, etc.)
+- Automated oracle-based result resolution
+- Mainnet deployment with real ETH
+
+### API Backend
 - **GET /api/matches**: Available matches list
-- **GET /api/matches/:id/odds**: Live parimutuel odds
+- **GET /api/matches/:id/odds**: Live parimutuel odds  
 - **POST /api/test-bet**: Test bet placement
 - **GET /api/health**: System status
 
