@@ -9,6 +9,9 @@ package-lock.json
 yarn.lock
 */yarn.lock
 
+# Database files
+backend/database/betzilla.db
+
 # Production builds
 build/
 dist/
