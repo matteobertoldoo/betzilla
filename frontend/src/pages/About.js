@@ -100,7 +100,7 @@ const About = () => {
           <div className="team-grid">
             <div className="team-member">
               <div className="member-avatar">
-                <img src="https://media.licdn.com/dms/image/v2/D4D35AQFpbXIKmlyrBQ/profile-framedphoto-shrink_200_200/profile-framedphoto-shrink_200_200/0/1693577999751?e=1752098400&v=beta&t=aaXlQ5zca_Fn0m80rCcOktaXecaEtPk84JphqpamQIk" alt="Matteo Bertoldo" />
+                <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUvqQcilRsDA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1667072544530?e=1758153600&v=beta&t=0JOqrpz4oYc221ohnXxlG1wRy-o8wfFsJ0rXlldjYcE" alt="Matteo Bertoldo" />
               </div>
               <h3>Matteo Bertoldo</h3>
               <p className="member-role">Founder & CEO</p>
@@ -114,7 +114,7 @@ const About = () => {
                 <img src="https://media.licdn.com/dms/image/v2/D4E03AQG9TL0Wkld_ng/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1718270904593?e=1756944000&v=beta&t=-S4fYyyb1HIUASxToz8yFcCCcAQQIKGk84GEXAyL6Ms" alt="Filippo Basilico" />
               </div>
               <h3>Filippo Basilico</h3>
-              <p className="member-role">CTO</p>
+              <p className="member-role">Head of Marketing</p>
               <p className="member-bio">
                 Smart contract expert and security specialist. Former lead developer at major DeFi protocols.
               </p>
@@ -136,7 +136,7 @@ const About = () => {
                 <img src="https://media.licdn.com/dms/image/v2/D4E03AQHLvsmnJ4gNvw/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1725904945530?e=1756944000&v=beta&t=r9wDb7VSha6LiecST1Hscx7awcbds5BfP6wDZYGWe8g" alt="Mario Sguario" />
               </div>
               <h3>Mario Sguario</h3>
-              <p className="member-role">Head of Marketing</p>
+              <p className="member-role">CTO</p>
               <p className="member-bio">
                 Growth expert with deep knowledge of sports betting markets and user acquisition.
               </p>
