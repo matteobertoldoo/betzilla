@@ -116,7 +116,7 @@ const About = () => {
               <h3>Filippo Basilico</h3>
               <p className="member-role">Head of Marketing</p>
               <p className="member-bio">
-                Smart contract expert and security specialist. Former lead developer at major DeFi protocols.
+                Growth expert with deep knowledge of sports betting markets and user acquisition.
               </p>
             </div>
             
@@ -138,7 +138,7 @@ const About = () => {
               <h3>Mario Sguario</h3>
               <p className="member-role">CTO</p>
               <p className="member-bio">
-                Growth expert with deep knowledge of sports betting markets and user acquisition.
+                Smart contract expert and security specialist. Former lead developer at major DeFi protocols.
               </p>
             </div>
           </div>
